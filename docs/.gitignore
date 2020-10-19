@@ -1,0 +1,11 @@
+# Who knows what these files do. But latex generates them ¯\_(ツ)_/¯
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.log
+*.toc
+*.out
+
+# Don't store generated PDFs (at least for now)
+*.pdf

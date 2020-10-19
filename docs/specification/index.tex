@@ -1,0 +1,254 @@
+\title{%
+  \textbf{Interactive Tool for Teaching Hindley-Milner Type Inference through Visualisation}
+  \linebreak \linebreak
+  \large{CS310 Project Specification}
+}\author{
+    Adam Jones \\
+    Department of Computer Science \\
+    University of Warwick
+}
+\date{}
+
+\documentclass[12pt]{article}
+\usepackage[a4paper,left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
+
+\setlength\parindent{0em}
+\usepackage{parskip}
+\setcounter{tocdepth}{1}
+
+\usepackage{hyperref}
+
+\begin{document}
+
+\maketitle
+
+\section{Problem Statement}
+
+Static type checking identifies errors in programs at compile time, preventing runtime errors. Additionally, it allows for better tooling that improves developer productivity. For example, IDEs may use type information to suggest and perform automated refactorings.\cite{ref1}\cite{ref2} Since 2015 statically typed versions of languages (such as TypeScript, or Python’s mypy and typing modules\cite{ref3}) have become more popular, showing that programmers do appreciate these benefits.
+
+However, specifying types can be time-consuming and potentially difficult. Type inference is the ability for types to be worked out automatically, which further improves productivity by allowing programmers to get the best of types without having to explicitly specify them.
+
+Because of this, type inference is used in many of the most popular programming languages today, including Java, TypeScript, Rust and Haskell. Yet only 2 of the 24 Russell Group universities have modules on type systems, so few computer science graduates are likely to know how type inference actually works.
+
+An understanding of type inference would help computer scientists write cleaner code and debug type errors. This would be particularly useful in the context of modules teaching languages such as Haskell which perform similar type inference.
+
+Hindley-Milner is a type system for $\lambda$-calculus which allows for type inference of an entire program, without any explicitly specified types. Some programming languages, including Haskell and ML, have type systems that are directly based on Hindley-Milner.
+
+This project will deliver an interactive, web-based tool to help teach undergraduate students how Hindley-Milner type inference works. It will allow a student to type in an expression and see the steps of a type inference algorithm.
+
+\section{Objectives}
+
+\subsection{Gain a better understanding of Hindley-Milner and various type inference algorithms}
+
+The first project objective will be to get a better understanding of type systems and inference algorithms myself. This will require a lot of reading, likely directed by my project supervisor.
+
+There are many type systems beyond Hindley-Milner, although it is a well-known theoretical system. Within Hindley-Milner, there are a range of type inference methods including Algorithm W\cite{ref4}, Algorithm M\cite{ref5} and bidirectional\cite{ref6} type inference.
+
+This will contribute to the overall project by allowing me to understand and therefore implement the type inference algorithms, and for developing the background section of the final report. Additionally, in doing this I will be surveilling the existing learning resources, which can serve as inspiration for what would be most useful in my project and be used to compare against in the final report’s evaluation section.
+
+\subsection{Create a specification for a HM language}
+
+The second objective involves determining a language which my tool will accept. To be most useful, it’ll likely use Haskell-like syntax as:
+
+\begin{itemize}
+  \item HM works best with purely functional languages, as they are more similar to $\lambda$-calculus than imperative languages
+  \item Haskell is the most popular purely functional programming language\cite{ref7}
+  \item Using similar syntax to a real language will make it obvious how concepts are applied
+  \item My project supervisor and I have experience with Haskell
+\end{itemize}
+
+This objective will likely be done alongside implementing a lexer, parser and type inference algorithm; some features may be easier or harder to implement than initially expected and so the scope of the language should be flexible.
+
+\subsubsection{Extension}
+
+To take this further, I could add more features to the language. This of course depends on what features are already implemented, but may also be guided by feedback from my own user, my supervisor or user testing.
+
+\subsection{Develop a lexer and parser for this language}
+
+The first step in processing user input will be lexing and parsing the express they have entered.
+
+Lexing involves scanning the input string and exporting a sequence of tokens. Parsing will take this sequence of tokens and generate an abstract syntax tree from it. I believe this will put into practice the skills I will gain from CS325 Compiler Design, which I am taking alongside the project in term 1.
+
+Most type inference algorithms are designed to work on abstract syntax trees (ASTs), as they are a commonly used theoretical representation of programs. Hence being able to generate an AST for a given input should allow for extending the project more easily. Additionally, representing a program as an AST is easy to extend if the language needs to be changed, as new types of tree nodes can be added without having to change the whole tree structure.
+
+I plan to use TypeScript, which compiles to JavaScript, as it will allow the entire application to run in the browser. Compared to using a remote server, this should make the application faster, reduce operating costs and eliminate security vulnerabilities on the server related to accepting arbitrary code. Additionally, as a statically typed language TypeScript will give me the benefits of static typing mentioned previously.
+
+\subsection{Implement a type inference algorithm for this language}
+
+Key to the project is of course implementing the type inference algorithm. There are many such algorithms published, although I am likely to start with Algorithm W as it is the original one, as discovered by Hindley.
+
+This should accept an abstract syntax tree as generated by the parser, and should output the final type of the expression, along with some understandable output about each major step in the algorithm. This output will then be presented to the user, so they can understand how the type inference algorithm works on different expressions.
+
+\subsubsection{Extension}
+
+Additional algorithms, such as Algorithm M or bidirectional type inference could be investigated, and if time permits, implemented. This could allow students to see different approaches to inference types on the same expression. Additionally, I believe implementing these algorithms would help my understanding of them, contributing to the first objective.
+
+\subsection{Create the web application}
+
+Finally, the deliverable that users will directly interact with is the web application. This will allow them to enter an expression, and send it through the lexer, parser and type inference algorithm. The results will then be displayed back to the user, showing the steps the type inference algorithm took.
+
+The web application itself will likely be written in TypeScript, using a framework such as React or Angular. Using a framework will help with state management, should improve productivity and make testing considerably easier. Additionally, if the project is extended with more algorithms it will be possible to reuse components and be generally nicer to refactor.
+
+\subsubsection{Extension}
+
+Ideally, there would be time to test the application on real university students to try to determine whether it is an effective teaching aid. This would likely be showing them the application, explaining what it does and seeing how they use it, and testing whether they have a better understanding of type inference afterwards. Their feedback could be used to improve the application, and be valuable for the evaluation in the final report.
+
+\section{Methods}
+
+\subsection{Research process}
+
+I will maintain a list of resources and my notes on them. This will be invaluable for writing the final report’s background section, but also for referring back to refresh my memory of certain topics.
+
+Additionally, this list will contain a backlog of resources to explore. This will ensure my research stays organised and I do not miss potentially important papers.
+
+\subsection{Software development process}
+
+Development will take an agile approach, for three reasons: flexibility, early and frequent delivery and the individual nature of the project.
+
+The approach must be flexible, as the project scope may well change as I get a better understanding of the area and gain user feedback. Additionally, one of the goals of the module is to be innovative and creative\cite{ref8} and so allowing for change over time provides the freedom to do this.
+
+The approach should provide working software early and frequently, as for evaluation purposes it is better to have some kind of working software to show even if it lacks certain features, rather than only incomplete parts. Additionally, this allows for getting user feedback early, which combined with being flexible means the project can be adjusted to better serve user needs. Lastly, it will be easier for my supervisor to see the state of the software, and therefore be able to advise me on the project.
+
+As the project is an individual one, there is no coordination between developers necessary. This reduces the need to precisely plan and document how the components will integrate with each other, and the order components need to be delivered in. Therefore, waterfall or other heavily plan-based methods would not be beneficial over agile methods.
+
+Automated unit, component and integration tests will be written while developing the software. Good testing will not only catch bugs, but enable confidence in making changes as they can be made while being sure the software still functions correctly. This will support the flexible agile software development approach. Tests can also act as proof that software requirements have been met, useful for my project supervisor and final evaluation.
+
+\subsection{Write-up process}
+
+The final report is the highest weighted assessment (80\%) of the project and therefore requires attention throughout.
+
+I will frequently update my notes for the final report, adding points such as decisions taken and their reasons. Despite this, I expect writing and editing to take a significant amount of time at the end of the project.
+
+\subsection{Communication and meetings}
+
+Due to COVID-19, almost all communication and meetings will take place online. Both my supervisor and I are used to using online communication tools, so this should be fine.
+
+I will arrange regular meetings with my supervisor to keep them updated on the project and get help with any problems. The beginning and end of the project are likely to require the most guidance, as I expect understanding existing resources on type systems is likely to be difficult, and reviewing the final report is likely to involve a lot of discussion.
+
+In addition to these regular meetings, we will likely chat over Slack and occasionally have other meetings.
+
+\section{Schedule}
+
+This schedule is an idea of how work might get done over time, but may change as the project goes on. My supervisor will be kept informed of major changes to this plan, and I will provide an update in the progress report. Weeks start on Monday.
+
+\subsection{Term 1}
+
+Week 1: Flesh out the project aims and write an initial draft of the specification.
+
+Week 2: Finish the specification and research deeper into the Hindley-Milner type system and lambda calculus.
+
+Week 3: Focused reading on type systems and type inference algorithms, with particular attention to Hindley-Milner and algorithm W.
+
+Week 4: Set up initial tooling (GitHub repos, TypeScript library structures, automated backups etc.) and start implementing algorithm W.
+
+Week 5: Finish implementing a basic algorithm W.
+
+Week 6: Finish algorithm W, including extending it to report major steps taken to be visualised later. Review all the associated code, tests, documentation, CI setups and report sections created since week 4.
+
+Week 7: Focus on other modules’ coursework, including CS325 Compiler Design and CS342 Machine Learning and IB2B40 Digital Business in Modern Organisations.
+
+Week 8: Write up the progress report.
+
+Week 9: Create basic web application to start displaying steps of the type inference algorithm for some fixed example ASTs. This week I will also likely be busy with courseworks for CS342 Machine Learning, CS345 Sensor Networks and Mobile Data Communications and CS352 Project Management.
+
+Week 10: Start work on creating a language specification, and developing a lexer and parser for it. When applied to an expression in the language, these will return an AST which to be consumed by the type inference algorithm.
+
+Over the winter break, I’ll attempt to finish the lexer and parser.
+
+\subsection{Term 2}
+
+Weeks 1-3: Ensuring the whole system works together, and finishing off anything incomplete. Once complete, work will begin on extensions such as implementing another type inference algorithm or user-testing.
+
+Weeks 4: Critically evaluate the software so far, and whether it meets the objectives set out in this document, and any updated objectives as per Term 1’s progress report.
+
+Weeks 5 and 6: Write up any missing draft sections of the final report.
+
+Weeks 7 and 8: Prepare presentation.
+
+Week 9/10: Deliver presentation and continue writing up the final report.
+
+Over spring break, I’ll continue editing the final report alongside revising for summer exams.
+
+\subsection{Term 3}
+
+Week 1: Final touches on the final report.
+
+Week 2: Submit final report.
+
+\section{Resources}
+
+Git will be used for version control, as it is robust, well-used and I have experience with it. This will allow rolling back to previous working versions of the software if necessary, and act as a change log of how the project has evolved. Also, it makes diffing versions of the code easy, so my supervisor can easily determine what has changed since last view. Git is free software.
+
+GitHub will be used for git hosting, which will allow me to easily sync changes between machines, and allow sharing the code with my supervisor easily. GitHub offers these features for free.
+
+GitHub will also be used as an external backup of the code. This will ensure my work would not be lost if my personal computer was. However, a bad force push could theoretically cause data loss, so at major milestones I will also store a snapshot of the code on another service such as Amazon S3 (avoiding Azure to maximise resiliency, as GitHub runs on Azure). I expect the cloud backup to be either free or of negligible cost.
+
+GitHub may also be used for project, issue and pull request management. This will ensure issues raised don’t get forgotten, and that code can be merged in a structure manner. However, this may not be necessary and will be evaluated when actually building the system. GitHub offers these features for free.
+
+GitHub Actions will be used for continuous integration and potentially continuous deployment. This will ensure it’s clear when the build and tests fail, as they will be run on each commit. Continuous deployment will ensure the live application is kept up to date with any changes, making it easy to manually test and for my supervisor to see the current state of the system. GitHub Actions is free on public repositories, and offers 3000 free build minutes a month and 1GB of storage on private repositories. I am unlikely to use up the free build minutes.
+
+Most of the system will likely be developed in TypeScript, a programming language developed by Microsoft, for reasons explained in the objectives section. Its compiler is freely available.
+
+VS Code will likely be used to write TypeScript, as it is the most popular code editor for it and is well designed for it. Additionally, I have used VS code in the past, and it can be used to write the Latex sources for the reports. VS Code and it’s TypeScript extension are free.
+
+The web application will be available at all times to manually test and for my supervisor to see. Using a cloud platform will allow for this without having to maintain hardware. Exactly which cloud hosting provider used will be chosen later, once the project implementation is clearer. I expect this to be free or low cost.
+
+Slack, Discord or Teams will be used for chat communication. These applications make communication easy and efficient, and all have free tiers available. For meetings, the same platforms can be used, as well as tools like Google Meet or Jitsi.
+
+Draft reports will be written in Google Docs, as it’s easy to use, version-controlled and offers good reviewing features. At major milestones a backup of the document will be taken and stored on another service such as Amazon S3. This may alternatively be done in Markdown, as it can be automatically converted to Latex with Pandoc. For more control over typesetting and better mathematical notation, this will be converted to a Latex document which will be version controlled like the code.
+
+\section{Key risks}
+
+\begin{center}\begin{tabular}{ |l|l|l| }
+  \hline
+  \textbf{Description} & \textbf{Likelihood} & \textbf{Severity} \\
+  \hline
+  Illness or other circumstances affecting me & Medium & High \\
+  \hline
+  Illness or other circumstances affecting my supervisor & Medium & Medium \\
+  \hline
+  Project activities take more time than expected & Medium & High \\
+  \hline
+  Other activities take more time than expected & High & Medium \\
+  \hline
+  Temporary internet or development machine unavailability & Low & High \\
+  \hline
+  Loss of data on own machine, GitHub or Google Docs & Low & Low \\
+  \hline
+  Loss of data and all backups & Very low & Very high \\
+  \hline
+  Temporary GitHub unavailability & Medium & Very low \\
+  \hline
+  Permanent GitHub unavailability & Very low & Low \\
+  \hline
+  Temporary Slack unavailability & Medium & Low \\
+  \hline
+  Permanent Slack unavailability & Very low & Very low \\
+  \hline
+  Temporary Google Docs unavailability & Low & Low \\
+  \hline
+  Permanent Google Docs unavailability & Very low & Low \\
+  \hline
+  Temporary cloud hosting service unavailability & Low & Low \\
+  \hline
+  Unexpected financial costs for cloud services & Low & Low \\
+  \hline
+\end{tabular}\end{center}
+
+Throughout the design of this specification, careful attention has been paid to identifying and mitigating risks. I believe these residual risks are acceptable. The greatest risks are unforeseen circumstances or general overrunning which are beyond my control. However, to mitigate their impact there is some slack in the project schedule for extensions, and taking a flexible agile approach may help adjusting the project scope to accomodate for necessary changes.
+
+I will monitor throughout the project and notify my supervisor if I identify any potential risks, or if an identified risk has changed likelihood or severity.
+
+\section{Ethical and safety considerations}
+
+If time permits, user-testing may be carried out with students and other academics to get their feedback on the web application. This will not involve deception, coercion or involve vulnerable groups so does not require ethical review by the University’s Biomedical and Scientific Research Ethics Committee. Data will only be collected and held with the subject's informed, unambiguous consent.
+
+This project does not have any serious health and safety implications. HSE guidelines will be followed for the use of display screen equipment and any activities will be carried out in line with government COVID advice.
+
+I will look out for ethical or safety issues throughout the project and notify my supervisor if I identify any potential issues.
+
+\bibliography{index}
+
+\bibliographystyle{abbrvurl}
+
+\end{document}
