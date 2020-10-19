@@ -1,0 +1,27 @@
+name: docs
+
+on:
+  push:
+    paths:
+    - '.github/workflows/docs_build.yaml'
+    - 'docs/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout ${{ github.sha }}
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt install texlive-latex-extra texlive-bibtex-extra
+          sudo npm install -g gdoc2latex
+      - name: Build specification
+        run: ./build.sh specification/index
+        working-directory: docs
+      - uses: actions/upload-artifact@v2
+        with:
+          name: specification
+          path: docs/specification/index.pdf
