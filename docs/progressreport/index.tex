@@ -1,0 +1,43 @@
+\title{%
+  \textbf{Interactive Tool for Teaching Hindley-Milner Type Inference through Visualisation}
+  \linebreak \linebreak
+  \large{CS310 Progress Report}
+}\author{
+    Adam Jones \\
+    Department of Computer Science \\
+    University of Warwick
+}
+\date{}
+
+\documentclass[12pt]{article}
+\usepackage[a4paper,left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
+
+\setlength\parindent{0em}
+\usepackage{parskip}
+\setcounter{tocdepth}{1}
+
+\usepackage{hyperref}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Static type checking identifies errors in programs at compile time, preventing runtime errors. Additionally, it allows for better tooling that improves developer productivity. For example, IDEs may use type information to suggest and perform automated refactorings.\cite{ref1}\cite{ref2} Since 2015 statically typed versions of languages (such as TypeScript, or Python’s mypy and typing modules\cite{ref3}) have become more popular, showing that programmers do appreciate these benefits.
+
+However, specifying types can be time-consuming and potentially difficult. Type inference is the ability for types to be worked out automatically, which further improves productivity by allowing programmers to get the best of types without having to explicitly specify them.
+
+Because of this, type inference is used in many of the most popular programming languages today, including Java, TypeScript, Rust and Haskell. Yet only 2 of the 24 Russell Group universities have modules on type systems, so few computer science graduates are likely to know how type inference actually works.
+
+An understanding of type inference would help computer scientists write cleaner code and debug type errors. This would be particularly useful in the context of modules teaching languages such as Haskell which perform similar type inference.
+
+Hindley-Milner is a type system for $\lambda$-calculus which allows for type inference of an entire program, without any explicitly specified types. Some programming languages, including Haskell and ML, have type systems that are directly based on Hindley-Milner.
+
+This project will deliver an interactive, web-based tool to help teach undergraduate students how Hindley-Milner type inference works. It will allow a student to type in an expression and see the steps of a type inference algorithm.
+
+\bibliography{index}
+
+\bibliographystyle{abbrvurl}
+
+\end{document}
