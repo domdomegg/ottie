@@ -3,7 +3,7 @@ name: docs
 on:
   push:
     paths:
-    - '.github/workflows/docs_build.yaml'
+    - '.github/workflows/docs.yaml'
     - 'docs/**'
 
 jobs:
@@ -40,3 +40,4 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Update latex sources
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com

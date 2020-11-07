@@ -1,0 +1,35 @@
+name: algorithm-w
+
+on:
+  push:
+    paths:
+    - '.github/workflows/algorithm-w.yaml'
+    - 'algorithm-w/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node-version: [10, 12, 14]
+
+    steps:
+      - name: Checkout ${{ github.sha }}
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        working-directory: algorithm-w
+        run: npm ci
+      - name: Lint
+        working-directory: algorithm-w
+        run: npm run lint --if-present
+      - name: Build
+        working-directory: algorithm-w
+        run: npm run build --if-present
+      - name: Test
+        working-directory: algorithm-w
+        run: npm run test --if-present
