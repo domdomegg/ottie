@@ -1,123 +1,5 @@
-import { Var, App, Abs, Let, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, substitute, combine, unify } from '../src/index';
-
-// Utilities which make creating types easier
-const number = new TypeFuncApp('number');
-const string = new TypeFuncApp('string');
-const boolean = new TypeFuncApp('boolean');
-const f = (one: MonoType, two: MonoType, ...extra: MonoType[]): TypeFuncApp => {
-    if (extra.length === 0) return new TypeFuncApp('->', one, two)
-    return new TypeFuncApp('->', one, f(two, extra[0], ...extra.slice(1)))
-}
-const list = (monoType: MonoType): TypeFuncApp => new TypeFuncApp('[]', monoType);
-const tuple = (...monoTypes: MonoType[]): TypeFuncApp => {
-    if (monoTypes.length > 8) throw new Error('Tuple has too many elements, maximum of 8 but has ' + monoTypes.length)
-    return new TypeFuncApp(','.repeat(monoTypes.length - 1) as TypeFunc, ...monoTypes);
-}
-const maybe = (monoType: MonoType): TypeFuncApp => new TypeFuncApp('Maybe', monoType);
-const either = (left: MonoType, right: MonoType): TypeFuncApp => new TypeFuncApp('Either', left, right);
-// Set up some basic things so the langauge is interesting
-const standardCtx = (() => {
-    const a = new TypeVar('a');
-    const b = new TypeVar('b');
-    const c = new TypeVar('c');
-    const d = new TypeVar('d');
-    const pt = (mt: MonoType) => new PolyType([], mt);
-
-    return {
-        // Arithmetic
-        '+': pt(f(number, number, number)),
-        '*': pt(f(number, number, number)),
-        '-': pt(f(number, number, number)),
-        '/': pt(f(number, number, number)),
-        '%': pt(f(number, number, number)),
-    
-        // Booleans
-        'not': pt(f(boolean, boolean)),
-        '&&': pt(f(boolean, boolean, boolean)),
-        '||': pt(f(boolean, boolean, boolean)),
-        'True': pt(boolean),
-        'False': pt(boolean),
-    
-        // Example variables
-        'myNumber': pt(number),
-        'myString': pt(string),
-        'myBoolean': pt(boolean),
-    
-        // Lists
-        '[]': new PolyType(['a'], list(a)),
-        ':': new PolyType(['a'], f(a, list(a), list(a))),
-        'cons': new PolyType(['a'], f(a, list(a), list(a))),
-        '++': new PolyType(['a'], f(list(a), list(a), list(a))),
-        'head': new PolyType(['a'], f(list(a), a)),
-        'last': new PolyType(['a'], f(list(a), a)),
-        'tail': new PolyType(['a'], f(list(a), list(a))),
-        'init': new PolyType(['a'], f(list(a), list(a))),
-        'uncons': new PolyType(['a'], f(list(a), maybe(tuple(a, list(a))))),
-        'null': new PolyType(['a'], f(list(a), boolean)),
-        'length': new PolyType(['a'], f(list(a), number)),
-        'map': new PolyType(['a', 'b'], f(f(a, b), list(a), list(b))),
-        'reverse': new PolyType(['a'], f(list(a), list(a))),
-        'intersperse': new PolyType(['a'], f(a, list(a), list(a))),
-        'intercalate': new PolyType(['a'], f(list(a), list(list(a)), list(a))),
-        'transpose': new PolyType(['a'], f(list(list(a)), list(list((a))))),
-        'subsequences': new PolyType(['a'], f(list(a), list(list((a))))),
-        'permutations': new PolyType(['a'], f(list(a), list(list((a))))),
-        'foldl': new PolyType(['a'], f(f(b, a, b), b, list(a), b)),
-        'foldl\'': new PolyType(['a'], f(f(b, a, b), b, list(a), b)),
-        'foldl1': new PolyType(['a'], f(f(a, a, a), list(a), a)),
-        'foldl1\'': new PolyType(['a'], f(f(a, a, a), list(a), a)),
-        'foldr': new PolyType(['a'], f(f(a, b, b), b, list(a), b)),
-        'foldr1': new PolyType(['a'], f(f(a, a, a), list(a), a)),
-        'concat': new PolyType(['a'], f(list(list(a)), list(a))),
-        'concatMap': new PolyType(['a'], f(f(a, list(a)), list(a), list(b))),
-        'and': pt(f(list(boolean), boolean)),
-        'or': pt(f(list(boolean), boolean)),
-        'any': new PolyType(['a'], f(f(a, boolean), list(a), boolean)),
-        'all': new PolyType(['a'], f(f(a, boolean), list(a), boolean)),
-        'sum': pt(f(list(number), number)),
-        'product': pt(f(list(number), number)),
-        'maximum': pt(f(list(number), number)),
-        'minimum': pt(f(list(number), number)),
-        'take': new PolyType(['a'], f(number, list(a), list(a))),
-        'drop': new PolyType(['a'], f(number, list(a), list(a))),
-        'splitAt': new PolyType(['a'], f(number, list(a), tuple(list(a), list(a)))),
-        'takeWhile': new PolyType(['a'], f(f(a, boolean), list(a), list(a))),
-        'dropWhile': new PolyType(['a'], f(f(a, boolean), list(a), list(a))),
-        'elem': new PolyType(['a'], f(a, list(a), boolean)),
-        'notElem': new PolyType(['a'], f(a, list(a), boolean)),
-        'lookup': new PolyType(['a', 'b'], f(a, list(tuple(a, b)), maybe(b))),
-        'find': new PolyType(['a'], f(f(a, boolean), list(a), maybe(a))),
-        'filter': new PolyType(['a'], f(f(a, boolean), list(a), list(a))),
-        'partition': new PolyType(['a'], f(f(a, boolean), list(a), tuple(list(a), list(a)))),
-        '!!': new PolyType(['a'], f(list(a), number, a)),
-        'zip': new PolyType(['a', 'b'], f(list(a), list(b), list(tuple(a, b)))),
-        'zipWith': new PolyType(['a', 'b', 'c'], f(f(a, b, c), list(a), list(b), list(c))),
-        'unzip': new PolyType(['a', 'b'], f(list(tuple(a, b)), tuple(list(a), list(b)))),
-        'nub': new PolyType(['a'], f(list(a), list(a))),
-        'delete': new PolyType(['a'], f(a, list(a), list(a))),
-        '\\\\': new PolyType(['a'], f(list(a), list(a), list(a))),
-        'union': new PolyType(['a'], f(list(a), list(a), list(a))),
-        'intersect': new PolyType(['a'], f(list(a), list(a), list(a))),
-        'sort': new PolyType(['a'], f(list(a), list(a))),
-    
-        // Tuples
-        ',': new PolyType(['a', 'b'], f(a, b, tuple(a, b))),
-        ',,': new PolyType(['a', 'b', 'c'], f(a, b, c, tuple(a, b, c))),
-        ',,,': new PolyType(['a', 'b', 'c', 'd'], f(a, b, c, d, tuple(a, b, c, d))),
-        'fst': new PolyType(['a', 'b'], f(tuple(a, b), a)),
-        'snd': new PolyType(['a', 'b'], f(tuple(a, b), b)),
-        'curry': new PolyType(['a', 'b', 'c'], f(f(tuple(a, b), c), a, b, c)),
-        'uncurry': new PolyType(['a', 'b', 'c'], f(f(a, b, c), tuple(a, b), c)),
-    
-        // Maybe
-        'Just': new PolyType(['a'], f(a, maybe(a))),
-        'Nothing': new PolyType(['a'], maybe(a)),
-        
-        // Either
-        'Left': new PolyType(['a', 'b'], f(a, either(a, b))),
-        'Right': new PolyType(['a', 'b'], f(b, either(a, b))),
-    }
-})()
+import { Var, App, TypeVar, TypeFuncApp, Expr, combine, unify } from '../src/index';
+import { number, boolean, f, list, tuple, maybe, either, a, b } from './utilities';
 
 // Helper to make writing out the AST less painful
 // e('+', 'myNum', 'myNum')
@@ -132,46 +14,93 @@ const e = (v: string | Expr, ...args: (string | Expr)[]): Expr => {
     return new App(e(v, ...args.slice(0, args.length - 1)), e(args[args.length - 1]));
 }
 
-// Helper to infer with standard context
-const i = (expr: Expr) => expr.infer(standardCtx)[0];
+test('arithmetic expressions', () => {
+    expect(e('myNumber')).toHaveType(number);
+    expect(e('+', 'myNumber', 'myNumber')).toHaveType(number);
+    expect(e('*', e('+', 'myNumber', 'myNumber'))).toHaveType(f(number, number));
+    expect(e('+', 'myNumber')).toHaveType(f(number, number));
+    expect(e('-', 'myNumber')).toHaveType(f(number, number));
+    expect(e('+')).toHaveType(f(number, number, number));
+});
 
-test('returns expected type', () => {
-    expect(i(e('myNumber'))).toEqual(number);
-    expect(i(e('+', 'myNumber', 'myNumber'))).toEqual(number);
-    expect(i(e('+', 'myNumber'))).toEqual(f(number, number));
-    expect(i(e('+'))).toEqual(f(number, number, number));
+test('boolean expressions', () => {
+    expect(e('True')).toHaveType(boolean);
+    expect(e('True')).not.toHaveType(number);
+    expect(e('&&', 'True', 'False')).toHaveType(boolean);
+    expect(e('&&', 'True')).toHaveType(f(boolean, boolean));
+    expect(e('not', 'True')).toHaveType(boolean);
+    expect(e('not', e('not', 'True'))).toHaveType(boolean);
+});
 
-    expect(i(e('&&', 'True', 'False'))).toEqual(boolean);
-    expect(i(e('&&', 'True'))).toEqual(f(boolean, boolean));
-    expect(i(e('not', 'True'))).toEqual(boolean);
+test('lists', () => {
+    expect(e('[]')).toHaveType(list(a));
+    expect(e('cons', 'False', '[]')).toHaveType(list(boolean));
+    expect(e('++', '[]', '[]')).toHaveType(list(a));
+    expect(e('uncons', '[]')).toHaveType(maybe(tuple(a, list(a))));
+    expect(e('uncons', e('cons', 'False', e('cons', e('&&', 'True', 'True'), '[]')))).toHaveType(maybe(tuple(boolean, list(boolean))));
+    expect(e('nub', e('cons', 'myNumber', '[]'))).toHaveType(list(number));
+    expect(e('delete', 'myNumber', e('cons', 'myNumber', '[]'))).toHaveType(list(number));
+});
 
-    // The commented out ones kinda work, just haven't found a nice way to test them
-    // Probably need to write a cutom matcher which does variable renaming or capturing
-    
-    // expect(i(e('[]'))).toEqual(list(a));
-    expect(i(e('map', 'not', '[]'))).toEqual(list(boolean));
-    expect(i(e('map', 'not'))).toEqual(f(list(boolean), list(boolean)));
-    expect(i(e('map', '+', '[]'))).toEqual(list(f(number, number)));
-    // expect(i(e('++', '[]', '[]'))).toEqual(list(a));
-    // expect(i(e('uncons', '[]'))).toEqual(maybe(a));
-    expect(i(e('uncons', e('cons', 'False', e('cons', e('&&', 'True', 'True'), '[]'))))).toEqual(maybe(tuple(boolean, list(boolean))));
+test('mapping', () => {
+    expect(e('[]')).toHaveType(list(a));
+    expect(e('map', 'not', '[]')).toHaveType(list(boolean));
+    expect(e('map', 'not')).toHaveType(f(list(boolean), list(boolean)));
+    expect(e('map', 'fst')).toHaveType(f(list(tuple(a, b)), list(a)));
+    expect(e('map', '+', '[]')).toHaveType(list(f(number, number)));
+    expect(e('map', 'Just', '[]')).toHaveType(list(maybe(a)));
+    expect(e('map', 'Just', e('cons', 'myNumber', '[]'))).toHaveType(list(maybe(number)));
+});
 
-    expect(i(e('Just', 'myNumber'))).toEqual(maybe(number));
-    expect(i(e('Just', e('+', 'myNumber')))).toEqual(maybe(f(number, number)));
-    // expect(i(e('Just', 'Just'))).toEqual(maybe(f(a, maybe(a))));
+test('maybes', () => {
+    expect(e('Nothing')).toHaveType(maybe(a));
+    expect(e('Just', 'myNumber')).toHaveType(maybe(number));
+    expect(e('Just', e('+', 'myNumber'))).toHaveType(maybe(f(number, number)));
+    expect(e('Just', 'Just')).toHaveType(maybe(f(a, maybe(a))));
+});
 
-    // expect(i(e('fst'))).toEqual(f(tuple(a, b), a));
-    expect(i(e(',', 'myNumber', 'myNumber'))).toEqual(tuple(number, number));
-    expect(i(e('fst', e(',', 'myNumber', 'myNumber')))).toEqual(number);
-    expect(i(e(e('curry', 'fst'), 'myNumber', 'myNumber'))).toEqual(number);
+test('tuples', () => {
+    expect(e('fst')).toHaveType(f(tuple(a, b), a));
+    expect(e('snd')).toHaveType(f(tuple(a, b), b));
+    expect(e('fst')).not.toHaveType(f(tuple(a, b), b));
+    expect(e(',', 'myNumber', 'myNumber')).toHaveType(tuple(number, number));
+    expect(e('fst', e(',', 'myNumber', 'myNumber'))).toHaveType(number);
+    expect(e(e('curry', 'fst'), 'myNumber', 'myNumber')).toHaveType(number);
+});
 
-})
+test('eithers', () => {
+    expect(e('Left')).toHaveType(f(a, either(a, b)));
+    expect(e('Left')).not.toHaveType(f(a, either(b, a)));
+    expect(e('Right')).toHaveType(f(a, either(b, a)));
+    expect(e('Left', 'myNumber')).toHaveType(either(number, a));
+    expect(e('Right', 'myNumber')).toHaveType(either(a, number));
+    expect(e('Left', 'not')).toHaveType(either(f(boolean, boolean), a));
+});
 
-test('fails when expected', () => {
-    expect(() => i(e('+', 'myNumber', 'myBoolean'))).toThrow();
-    expect(() => i(e('&&', 'myNumber', 'myNumber'))).toThrow();
-    expect(() => i(e('map', '+', 'myNumber'))).toThrow();
-})
+test('fails to add bad types', () => {
+    expect(e('+', 'myBoolean', 'myNumber')).toHaveInvalidType();
+    expect(e('+', 'myNumber', 'myBoolean')).toHaveInvalidType();
+    expect(e('+', 'myBoolean', 'myBoolean')).toHaveInvalidType();
+    expect(e('+', '+')).toHaveInvalidType();
+});
+
+test('fails to and bad types', () => {
+    expect(e('&&', 'myBoolean', 'myNumber')).toHaveInvalidType();
+    expect(e('&&', 'myNumber', 'myBoolean')).toHaveInvalidType();
+    expect(e('&&', 'myNumber', 'myNumber')).toHaveInvalidType();
+});
+
+test('fails to map over non list', () => {
+    expect(e('map', '+', 'myNumber')).toHaveInvalidType();
+    expect(e('map', '&&', 'myNumber')).toHaveInvalidType();
+    expect(e('map', 'Just', 'myNumber')).toHaveInvalidType();
+});
+
+test('fails list operations with differnt types', () => {
+    expect(e('delete', 'myBoolean', e('cons', 'myNumber', '[]'))).toHaveInvalidType();
+    expect(e('delete', 'myNumber', e('cons', 'myBoolean', '[]'))).toHaveInvalidType();
+    expect(e('delete', 'myNumber', e('cons', e('Just', 'myNumber'), '[]'))).toHaveInvalidType();
+});
 
 test('combines substitutions correctly', () => {
     expect(combine({
@@ -216,6 +145,18 @@ test('unifies types correctly', () => {
     expect(unify(maybe(number), maybe(new TypeVar('t0'))))
         .toEqual({ t0: number });
 
+    expect(unify(new TypeVar('t0'), maybe(number)))
+        .toEqual({ t0: maybe(number) });
+
+    expect(unify(maybe(new TypeVar('t0')), maybe(number)))
+        .toEqual({ t0: number });
+
+    expect(unify(f(number, number), new TypeVar('t0')))
+        .toEqual({ t0: f(number, number) });
+
+    expect(unify(f(number, number), f(new TypeVar('t0'), new TypeVar('t1'))))
+        .toEqual({ t0: number, t1: number });
+
     expect(unify(maybe(maybe(maybe(maybe(f(number, f(number, boolean)))))), maybe(maybe(maybe(new TypeVar('t0'))))))
         .toEqual({ t0: maybe(f(number, f(number, boolean))) });
 
@@ -255,4 +196,17 @@ test('unifies types correctly', () => {
             t1: number,
             t2: number,
         });
+});
+
+test('unifying rejects un-unifyable types', () => {
+    expect(() => unify(number, boolean)).toThrow();
+    expect(() => unify(boolean, number)).toThrow();
+    expect(() => unify(maybe(number), number)).toThrow();
+    expect(() => unify(number, maybe(number))).toThrow();
+    expect(() => unify(maybe(boolean), maybe(number))).toThrow();
+    expect(() => unify(maybe(maybe(maybe(number))), maybe(maybe(number)))).toThrow();
+    expect(() => unify(maybe(maybe(maybe(number))), maybe(maybe(maybe(boolean))))).toThrow();
+    expect(() => unify(f(number, number), number)).toThrow();
+    expect(() => unify(f(number, number), f(number, boolean))).toThrow();
+    expect(() => unify(f(number, number), f(number, number, number))).toThrow();
 });

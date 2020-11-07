@@ -64,8 +64,6 @@ function unify(type1: MonoType, type2: MonoType): Substitution {
             sub = combine(sub, unify(type1.args[i].apply(sub), type2.args[i].apply(sub)));
         }
         return sub;
-
-        return combine(...type1.args.map((_,i) => unify(type1.args[i], type2.args[i])).reverse());
     }
 
     // Should be unreachable...
@@ -269,4 +267,4 @@ class PolyType {
     }
 }
 
-export { Var, App, Abs, Let, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, substitute, combine, unify };
+export { Context, Substitution, Var, App, Abs, Let, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, substitute, combine, unify };
