@@ -1,3 +1,9 @@
+class TypeInferenceError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "TypeInferenceError";
+    }
+}
 
 interface Context { [name: string]: PolyType | undefined }
 
@@ -16,12 +22,11 @@ function substitute(substitution: Substitution, arg: Context): Context {
     return mappedContext;
 }
 
+/** Combines substitutions. Applies leftmost substitution first, e.g. combine(a, b).apply(e) == e.apply(a).apply(b) */
 function combine(...substitutions: Substitution[]): Substitution {
-    // Vaguely based off:
-    // http://www.mathcs.duq.edu/simon/Fall04/notes-7-4/node4.html
     if (substitutions.length === 0) return {};
     if (substitutions.length === 1) return substitutions[0];
-    if (substitutions.length > 2) return combine(combine(substitutions[0], substitutions[1]), ...substitutions.slice(2));
+    if (substitutions.length > 2) return combine(substitutions[0], combine(...substitutions.slice(1)));
 
     const a = substitutions[0];
     const b = substitutions[1];
@@ -41,7 +46,7 @@ function combine(...substitutions: Substitution[]): Substitution {
 function unify(type1: MonoType, type2: MonoType): Substitution {
     if (type1 instanceof TypeVar) {
         if (type2.contains(type1)) {
-            throw new Error('Contains/occurs check failed with ' + JSON.stringify(type1) + ' and ' + JSON.stringify(type2));
+            throw new TypeInferenceError('Contains/occurs check failed with ' + JSON.stringify(type1) + ' and ' + JSON.stringify(type2));
         }
         return { [type1.name]: type2 }
     }
@@ -52,16 +57,16 @@ function unify(type1: MonoType, type2: MonoType): Substitution {
 
     if (type1 instanceof TypeFuncApp && type2 instanceof TypeFuncApp) {
         if (type1.constructorName !== type2.constructorName) {
-            throw new Error('Could not unify type function applications with different constructors ' + JSON.stringify(type1) + ' and ' + JSON.stringify(type2));
+            throw new TypeInferenceError('Could not unify type function applications with different constructors \'' + type1.constructorName + '\' and \'' + type2.constructorName + '\'');
         }
 
         if (type1.args.length !== type2.args.length) {
-            throw new Error('Could not unify type function applications with different argument list lengths ' + JSON.stringify(type1) + ' and ' + JSON.stringify(type2));
+            throw new TypeInferenceError('Could not unify type function applications with different argument list lengths ' + JSON.stringify(type1) + ' and ' + JSON.stringify(type2));
         }
 
         let sub: Substitution = {};
         for (let i = 0; i < type1.args.length; i++) {
-            sub = combine(sub, unify(type1.args[i].apply(sub), type2.args[i].apply(sub)));
+            sub = combine(unify(type1.args[i].apply(sub), type2.args[i].apply(sub)), sub);
         }
         return sub;
     }
@@ -86,12 +91,12 @@ function freeVars(type: MonoType | PolyType | Context): string[] {
     }
 
     if (type instanceof TypeFuncApp) {
-        return type.args.map(freeVars).reduce((acc, cur) => [...acc, ...cur]);
+        return type.args.map(freeVars).reduce((acc, cur) => [...acc, ...cur], []);
     }
 
     if (type) {
         // type: Context
-        return (Object.values(type) as PolyType[]).map(freeVars).reduce((acc, cur) => [...acc, ...cur]);
+        return (Object.values(type) as PolyType[]).map(freeVars).reduce((acc, cur) => [...acc, ...cur], []);
     }
 
     // Should be unreachable...
@@ -106,7 +111,7 @@ var typeCounter = 0;
 function freshTypeName(): string {
     return "t" + typeCounter++;
 }
-function freshType(): MonoType {
+function freshType(): TypeVar {
     return new TypeVar(freshTypeName());
 }
 
@@ -141,7 +146,7 @@ class App implements Expr {
         const t = freshType();
         const unifiedSubstitution = unify(funcType.apply(argSubstitution), new TypeFuncApp("->", argType, t))
 
-        return [t.apply(unifiedSubstitution), combine(unifiedSubstitution, argSubstitution, funcSubstitution)]
+        return [t.apply(unifiedSubstitution), combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
     }
 }
 
@@ -175,7 +180,7 @@ class Let implements Expr {
     public infer(ctx: Context): [MonoType, Substitution] {
         const [defType, defSubstitution] = this.def.infer(ctx);
         const [bodyType, bodySubstitution] = this.body.infer({ ...substitute(defSubstitution, ctx), [this.param]: generalise(substitute(defSubstitution, ctx), defType) });
-        return [bodyType, combine(bodySubstitution, defSubstitution)]
+        return [bodyType, combine(defSubstitution, bodySubstitution)]
     }
 }
 
@@ -267,4 +272,4 @@ class PolyType {
     }
 }
 
-export { Context, Substitution, Var, App, Abs, Let, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, substitute, combine, unify };
+export { TypeInferenceError, Context, Substitution, Var, App, Abs, Let, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, substitute, combine, unify };

@@ -1,4 +1,4 @@
-import { Context, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType } from '../src/index';
+import { Context, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, App, Var } from '../src/index';
 
 // Utilities which make creating types easier
 export const number = new TypeFuncApp('number');
@@ -9,7 +9,8 @@ export const f = (one: MonoType, two: MonoType, ...extra: MonoType[]): TypeFuncA
 }
 export const list = (monoType: MonoType): TypeFuncApp => new TypeFuncApp('[]', monoType);
 export const tuple = (...monoTypes: MonoType[]): TypeFuncApp => {
-    if (monoTypes.length > 8) throw new Error('Tuple has too many elements, maximum of 8 but has ' + monoTypes.length)
+    if (monoTypes.length <= 1) throw new Error('Tuple has too few elements, minimum of 2 but given ' + monoTypes.length)
+    if (monoTypes.length > 8) throw new Error('Tuple has too many elements, maximum of 8 but given ' + monoTypes.length)
     return new TypeFuncApp(','.repeat(monoTypes.length - 1) as TypeFunc, ...monoTypes);
 }
 export const maybe = (monoType: MonoType): TypeFuncApp => new TypeFuncApp('Maybe', monoType);
@@ -21,6 +22,24 @@ export const c = new TypeVar('c');
 export const d = new TypeVar('d');
 const pt = (mt: MonoType) => new PolyType([], mt);
 
+export const t0 = new TypeVar('t0');
+export const t1 = new TypeVar('t1');
+export const t2 = new TypeVar('t2');
+export const t3 = new TypeVar('t3');
+
+// Helper to make writing out the AST less painful
+// e('+', 'myNum', 'myNum')
+// will result in
+// new App(new App(v('+'), v('myNum')), new Var('myNum'))
+export const e = (v: string | Expr, ...args: (string | Expr)[]): Expr => {
+    if (typeof v === 'string') {
+        if (args.length === 0) return new Var(v);
+    } else {
+        if (args.length === 0) return v;
+    }
+    return new App(e(v, ...args.slice(0, args.length - 1)), e(args[args.length - 1]));
+}
+
 // Set up some basic things so the langauge is interesting
 export const standardCtx: Context = {
     // Arithmetic
@@ -29,6 +48,11 @@ export const standardCtx: Context = {
     '-': pt(f(number, number, number)),
     '/': pt(f(number, number, number)),
     '%': pt(f(number, number, number)),
+    'negate': pt(f(number, number)),
+    'abs': pt(f(number, number)),
+    'signum': pt(f(number, number)),
+    'even': pt(f(number, boolean)),
+    'odd': pt(f(number, boolean)),
 
     // Booleans
     'not': pt(f(boolean, boolean)),

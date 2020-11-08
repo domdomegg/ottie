@@ -1,4 +1,4 @@
-import { MonoType, Expr, TypeVar } from '../src/index';
+import { MonoType, Expr, TypeVar, TypeInferenceError } from '../src/index';
 import { standardCtx } from './utilities';
 import diff from 'jest-diff';
 
@@ -17,10 +17,13 @@ expect.extend({
         try {
             actualType = actualExpr.infer(standardCtx)[0]
         } catch (e) {
-            return {
-                message: () => `expected ${JSON.stringify(actualExpr)} to have valid type but got error ${JSON.stringify(e)}`,
-                pass: false,
+            if (e instanceof TypeInferenceError) {
+                return {
+                    message: () => `expected expression to have valid type but got error ${this.utils.printReceived(e)}`,
+                    pass: false,
+                }
             }
+            throw e;
         }
 
         const options = { comment: 'type equality', isNot: this.isNot, promise: this.promise };
@@ -47,9 +50,7 @@ expect.extend({
             `Expected: not ${this.utils.printExpected(expectedType)}\n` +
             `Received: ${this.utils.printReceived(actualType)}`
         : () => {
-            const diffString = diff(expectedType, actualType, {
-                expand: this.expand,
-            });
+            const diffString = diff(expectedType, actualType, { expand: this.expand });
             return (
                 this.utils.matcherHint('toHaveType', 'expr', 'type', options) +
                 '\n\n' +
@@ -61,18 +62,6 @@ expect.extend({
         };
 
         return { actual: actualType, message, pass };
-
-        if (this.equals(actualType, expectedType)) {
-            return {
-                message: () => `expected ${actualType.toString()} not to have type ${expectedType.toString()}`,
-                pass: true,
-            }
-        } else {
-            return {
-                message: () => `expected ${actualType.toString()} to have type ${expectedType.toString()}`,
-                pass: true,
-            }
-        }
     },
     toHaveInvalidType(actualExpr: Expr) {
         let actualType: MonoType;
@@ -80,13 +69,13 @@ expect.extend({
             actualType = actualExpr.infer(standardCtx)[0]
         } catch (e) {
             return {
-                message: () => `expected ${JSON.stringify(actualExpr)} to have valid type but got error ${JSON.stringify(e)}`,
+                message: () => `expected expression to have valid type but got error ${this.utils.printReceived(e)}`,
                 pass: true,
             }
         }
 
         return {
-            message: () => `expected ${JSON.stringify(actualExpr)} to have invalid type but got type ${actualType.toString()}`,
+            message: () => `expected expression to have invalid type but got type ${actualType.toString()}`,
             pass: false,
         }
     }

@@ -1,18 +1,5 @@
-import { Var, App, TypeVar, TypeFuncApp, Expr, combine, unify } from '../src/index';
-import { number, boolean, f, list, tuple, maybe, either, a, b } from './utilities';
-
-// Helper to make writing out the AST less painful
-// e('+', 'myNum', 'myNum')
-// will result in
-// new App(new App(v('+'), v('myNum')), new Var('myNum'))
-const e = (v: string | Expr, ...args: (string | Expr)[]): Expr => {
-    if (typeof v === 'string') {
-        if (args.length === 0) return new Var(v);
-    } else {
-        if (args.length === 0) return v;
-    }
-    return new App(e(v, ...args.slice(0, args.length - 1)), e(args[args.length - 1]));
-}
+import { Abs, TypeVar, combine, unify, Let, Var } from '../src/index';
+import { number, boolean, e, f, list, tuple, maybe, either, a, b, t0, t1, t2, t3 } from './utilities';
 
 test('arithmetic expressions', () => {
     expect(e('myNumber')).toHaveType(number);
@@ -50,6 +37,7 @@ test('mapping', () => {
     expect(e('map', '+', '[]')).toHaveType(list(f(number, number)));
     expect(e('map', 'Just', '[]')).toHaveType(list(maybe(a)));
     expect(e('map', 'Just', e('cons', 'myNumber', '[]'))).toHaveType(list(maybe(number)));
+    expect(e('map', 'not', e('map', 'fst', e('cons', e(',', 'myBoolean', 'myNumber'), '[]')))).toHaveType(list(boolean));
 });
 
 test('maybes', () => {
@@ -102,34 +90,96 @@ test('fails list operations with differnt types', () => {
     expect(e('delete', 'myNumber', e('cons', e('Just', 'myNumber'), '[]'))).toHaveInvalidType();
 });
 
+test('function definitions', () => {
+    expect(new Abs('x', e('not', 'x'))).toHaveType(f(boolean, boolean));
+    expect(new Abs('x', new Abs('y', e('+', 'x', 'y')))).toHaveType(f(number, number, number));
+    expect(new Abs('x', new Abs('y', new Abs('z', e('+', 'x', 'y'))))).toHaveType(f(number, number, a, number));
+    expect(new Abs('x', new Abs('y', new Abs('z', e('+', e('+', 'x', 'y'), 'z'))))).toHaveType(f(number, number, number, number));
+    expect(new Abs('x', e('map', 'not', 'x'))).toHaveType(f(list(boolean), list(boolean)));
+    expect(new Abs('x', e('map', 'fst', 'x'))).toHaveType(f(list(tuple(a, b)), list(a)));
+    expect(new Abs('x', e('map', 'not', e('map', 'fst', 'x')))).toHaveType(f(list(tuple(boolean, b)), list(boolean)));
+    expect(new Abs('x', e(',', 'x'))).toHaveType(f(a, f(b, tuple(a, b))));
+    expect(new Abs('x', e('map', 'not', e('map', 'fst', 'x')))).toHaveType(f(list(tuple(boolean, a)), list(boolean)));
+    expect(new Abs('x', e('map', new Abs('y', new Abs('z', e('-', 'myNumber', e('y', 'z')))), e('map', '+', 'x')))).toHaveType(f(list(number), list(f(number, number))));
+    expect(new Abs('x', e('map', '&&', e('map', 'not', 'x')))).toHaveType(f(list(boolean), list(f(boolean, boolean))));
+});
+
+test('invalid function definitions', () => {
+    expect(new Abs('x', new Abs('y', e('+', 'x', e('not', 'y'))))).toHaveInvalidType();
+    expect(new Abs('x', e('map', '+', e('map', 'not', 'x')))).toHaveInvalidType();
+});
+
+test('let bindings', () => {
+    expect(new Let('unused', e('myNumber'), e('myNumber'))).toHaveType(number);
+    expect(new Let('unused', e('myNumber'), e('myBoolean'))).toHaveType(boolean);
+
+    expect(new Let('x', e('myNumber'), e('x'))).toHaveType(number);
+    expect(new Let('x', e('map'), e('x', 'not', '[]'))).toHaveType(list(boolean));
+    expect(new Let('x', e('map'), e('x', 'not'))).toHaveType(f(list(boolean), list(boolean)));
+    expect(new Let('x', e('map'), new Let('y', e('not'), e('x', 'y', '[]')))).toHaveType(list(boolean));
+    expect(new Let('x', e('map'), new Let('y', e('not'), e('x', 'y')))).toHaveType(f(list(boolean), list(boolean)));
+
+    // NB: x is both
+    // (boolean -> boolean) -> list(boolean) -> boolean
+    // (tuple(boolean, a) -> boolean) -> list(tuple(boolean, a)) -> boolean
+    expect(new Let('x', e('map'), e('x', 'not', e('x', 'fst', e('cons', e(',', 'myBoolean', 'myNumber'), '[]'))))).toHaveType(list(boolean))
+
+    expect(new Let('id', new Abs('x', new Var('x')), e('id', 'myBoolean'))).toHaveType(boolean);
+    expect(new Let('id', new Abs('x', new Var('x')), e('id', 'myNumber'))).toHaveType(number);
+    expect(new Let('id', new Abs('x', new Var('x')), e('map', 'even', e('map', 'id', '[]')))).toHaveType(list(boolean));
+    
+    // NB: id is both
+    // boolean -> boolean
+    // number -> number
+    expect(new Let('id', new Abs('x', new Var('x')), e('map', 'id', e('map', 'even', e('map', 'id', '[]'))))).toHaveType(list(boolean));
+});
+
 test('combines substitutions correctly', () => {
-    expect(combine({
-        t0: new TypeVar('t2'),
-    }, {
-        t1: new TypeVar('t3')
-    })).toEqual({
-        t0: new TypeVar('t2'),
-        t1: new TypeVar('t3')
-    });
+    expect(combine()).toEqual({});
+    expect(combine({})).toEqual({});
+    expect(combine({ t0: t1 })).toEqual({ t0: t1 });
 
-    expect(combine({
-        t0: new TypeVar('t1'),
-    }, {
-        t1: new TypeVar('t2'),
-    })).toEqual({
-        t0: new TypeVar('t2'),
-        t1: new TypeVar('t2'),
-    });
+    expect(combine({ t0: t2 }, { t1: t3 })).toEqual({ t0: t2, t1: t3 });
+    expect(combine({ t0: number }, { t1: boolean })).toEqual({ t0: number, t1: boolean });
 
-    expect(combine({
-        t0: new TypeFuncApp('number'),
-        t1: new TypeFuncApp('number')
-    }, {
-        t0: new TypeVar('t2')
-    })).toEqual({
-        t0: new TypeFuncApp('number'),
-        t1: new TypeFuncApp('number')
-    });
+    expect(combine({ t0: t1 }, { t1: t2 })).toEqual({ t0: t2, t1: t2 });
+    expect(combine({ t1: t2 }, { t0: t1 })).toEqual({ t1: t2, t0: t1 });
+
+    expect(combine({ t0: t2 }, { t0: number, t1: number })).toEqual({ t0: t2, t1: number });
+
+    expect(combine({ t0: boolean }, { t0: number })).toEqual({ t0: boolean });
+    expect(combine({ t0: boolean, t1: boolean }, { t0: number, t1: number })).toEqual({ t0: boolean, t1: boolean });
+    expect(combine({ t0: boolean, t1: number }, { t0: number, t1: boolean })).toEqual({ t0: boolean, t1: number });
+})
+
+test('combines equivalence', () => {
+    expect(t0.apply({ t0: t1 })).toEqual(t1);
+    expect(t0.apply(combine({ t0: t1 }))).toEqual(t1);
+    
+    expect(t0.apply({ t0: t1 }).apply({ t1: t2 })).toEqual(t2);
+    expect(t0.apply(combine({ t0: t1 }, { t1: t2 }))).toEqual(t2);
+
+    expect(t0.apply({ t0: t1 }).apply({ t1: t2 }).apply({ t2: t3 })).toEqual(t3);
+    expect(t0.apply(combine({ t0: t1 }, { t1: t2 }, { t2: t3 }))).toEqual(t3);
+
+    expect(t0.apply({ t0: t1 }).apply({ t1: t2 }).apply({ t2: t3 }).apply({ t3: number })).toEqual(number);
+    expect(t0.apply(combine({ t0: t1 }, { t1: t2 }, { t2: t3 }, { t3: number }))).toEqual(number);
+
+    // NB: substitution should happen at once, so only t1/t0 gets applied
+    expect(t0.apply({ t0: t1, t1: t2 })).toEqual(t1);
+    expect(t0.apply(combine({ t0: t1, t1: t2 }))).toEqual(t1);
+    
+    // ...but applying a t2/t1 afterwards should still get applied
+    expect(t0.apply({ t0: t1, t1: t2 }).apply({ t1: t2 })).toEqual(t2);
+    expect(t0.apply(combine({ t0: t1, t1: t2 }, { t1: t2 }))).toEqual(t2);
+
+    // If we apply the number/t2 first, there are no t2s to match at that point
+    expect(t0.apply({ t2: number }).apply({ t0: t1 }).apply({ t1: t2 })).toEqual(t2);
+    expect(t0.apply(combine({ t2: number }, { t0: t1 }, { t1: t2 }))).toEqual(t2);
+
+    expect(t0.apply({})).toEqual(t0);
+    expect(t0.apply(combine())).toEqual(t0);
+    expect(t0.apply(combine({}))).toEqual(t0);
 })
 
 test('unifies types correctly', () => {
