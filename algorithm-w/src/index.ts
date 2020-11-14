@@ -32,7 +32,6 @@ function combine(...substitutions: Substitution[]): Substitution {
     const b = substitutions[1];
     let newSubstitution: Substitution = {}
     for (const key in a) {
-        // TODO: do we need to bother removing mappings of the form tx: new TypeVar('tx')
         newSubstitution[key] = (a[key] as MonoType).apply(b);
     }
     for (const key in b) {
@@ -125,7 +124,7 @@ class Var implements Expr {
     public infer(ctx: Context): [MonoType, Substitution] {
         const type = ctx[this.name];
         if (!type) {
-            throw TypeError(this.name + ' is not in scope');
+            throw new TypeInferenceError(this.name + ' is not in scope');
         }
         return [type.inst(), {}];
     }
@@ -187,9 +186,6 @@ class Let implements Expr {
 // ----------
 
 type MonoType = TypeVar | TypeFuncApp;
-function isMonoType(object: any): object is MonoType {
-    return object instanceof TypeVar || object instanceof TypeFuncApp;
-}
 
 class TypeVar {
     name: string;
@@ -258,13 +254,7 @@ class PolyType {
     }
     
     public apply(substitution: Substitution): PolyType {
-        // TODO: is this right? maybe this should never happen?
-        const substitutionKeys = new Set(Object.keys(substitution));
-        const newQuantifiedVars = this.quantifiedVars.filter(v => !substitutionKeys.has(v));
-        
-        const newMonoType = this.monoType.apply(substitution);
-
-        return new PolyType(newQuantifiedVars, newMonoType);
+        return new PolyType(this.quantifiedVars, this.monoType.apply(substitution));
     }
 
     public contains(other: TypeVar): boolean {
