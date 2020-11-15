@@ -30,7 +30,7 @@ test('displays correct result after entering \'True\'', () => {
 
 test('displays correct error after entering \'notInScope\'', () => {
     const screen = render(<Main />)
-    expect(screen.queryByText('Error: Not a valid expression: notInScope is not in scope')).not.toBeInTheDocument();
+    expect(screen.queryByText('Error: notInScope is not in scope')).not.toBeInTheDocument();
     fireEvent.change((screen.container.querySelector('textarea') as HTMLTextAreaElement), { target: { value: 'e(\'notInScope\')' }});
-    expect(screen.getByText('Error: Not a valid expression: notInScope is not in scope')).toBeInTheDocument();
+    expect(screen.getByText('Error: notInScope is not in scope')).toBeInTheDocument();
 });

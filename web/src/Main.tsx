@@ -141,6 +141,7 @@ function Main() {
   const [code, setCode] = useState('e(\'+\')');
   let result = 'Error: ';
   try {
+    // eslint-disable-next-line no-eval
     const r = eval(code);
     if (!(r instanceof Var) && !(r instanceof App) && !(r instanceof Abs) && !(r instanceof Let)) {
       throw new Error('Not a valid expression');
