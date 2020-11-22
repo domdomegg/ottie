@@ -1,28 +1,35 @@
 \title{%
   \textbf{Interactive Tool for Teaching Hindley-Milner Type Inference through Visualisation}
   \linebreak \linebreak
-  \large{CS310 Progress Report}
-}\author{
-    Adam Jones \\
-    Department of Computer Science \\
-    University of Warwick
-}
-\date{}
-
-\documentclass[12pt]{article}
+  \large{CS310 Progress Report\\~\\~Adam Jones\\~Department of Computer Science\\~University of Warwick}
+}\documentclass[12pt]{article}
 \usepackage[a4paper,left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
 
 \setlength\parindent{0em}
 \usepackage{parskip}
 \setcounter{tocdepth}{1}
 
 \usepackage{hyperref}
+\usepackage{graphicx}
+
+\usepackage{titling}
+\predate{}
+\date{}
+\postdate{}
+\preauthor{}
+\author{}
+\postauthor{}
 
 \begin{document}
 
+
 \maketitle
 
-\section{Introduction}
+\section{Introduction}\label{id:h.9brqho78gj4b}
 
 Static type checking identifies errors in programs at compile time, preventing runtime errors. Additionally, it allows for better tooling that improves developer productivity. For example, IDEs may use type information to suggest and perform automated refactorings.\cite{ref1}\cite{ref2} Since 2015 statically typed versions of languages (such as TypeScript, or Python’s mypy and typing modules\cite{ref3}) have become more popular, showing that programmers do appreciate these benefits.
 
@@ -38,7 +45,7 @@ This project will deliver an interactive, web-based tool to help teach undergrad
 
 There is good evidence that this tool will be a useful teaching resource. Module organisers from the University of Porto’s functional programming course noted “[presenting] the basis of type inference technology [...] significantly improved the way students deal with type errors because they understand the type system.”\cite{ref4} There are successful teaching tools used to visualise lambda-calculus parse trees, and it has been noted that extending these to show type inference would have pedagogical value.\cite{ref5}
 
-\section{Existing Solutions}
+\section{Existing Solutions}\label{id:h.2mwaav7jkal4}
 
 TypeTool\cite{ref6} was a tool that visualised type inference. It did this through a web application and was found to be beneficial for teaching purposes. However, it is inaccessible as the server hosting the application was taken down and the source code has not been published. Additionally, as the parsing and type inference was done server-side feedback was delayed from the user entering an expression and seeing the result.
 
@@ -46,19 +53,19 @@ Jung and Michaelson developed a visual functional programming system which visua
 
 The existence of these tools show that software for visualising functional language type systems would be useful, and that significant improvements could be made that have not been done before.
 
-\section{Objectives}
+\section{Objectives}\label{id:h.gzv15kg5v14e}
 
-\subsection{Gain a better understanding of Hindley-Milner and various type inference algorithms}
+\subsection{Gain a better understanding of Hindley-Milner and various type inference algorithms}\label{id:h.sjclwboxzqc5}
 
 The first project objective is to get a better understanding of type systems and inference algorithms myself. There are many type systems beyond Hindley-Milner, although it is a well-known theoretical system. Within Hindley-Milner, there are a range of type inference methods including Algorithm W\cite{ref8}, Algorithm M\cite{ref9} and bidirectional\cite{ref10} type inference.
 
 This contributes to the overall project by allowing me to understand and therefore implement the type inference algorithms, and for developing the background section of the final report. Additionally, in doing this I will be surveilling the existing learning resources, which can serve as inspiration for what would be most useful in my project and be used to compare against in the final report’s evaluation section.
 
-\subsubsection{Progress}
+\subsubsection{Progress}\label{id:h.sad7rs6qf8a2}
 
 As of the end of week 7, I have developed some understanding of type systems and their key features. This has involved significant amounts of reading alongside weekly discussions with my supervisor, and has been put into practice in implementing algorithm W. Additionally, I have contacted other academics for further information about their papers.
 
-\subsection{Create a specification for a HM language}
+\subsection{Create a specification for a HM language}\label{id:h.p7zsg3syeg1t}
 
 The second objective involves determining a language which my tool will accept. To be most useful, it uses Haskell-like syntax as:
 
@@ -71,15 +78,15 @@ The second objective involves determining a language which my tool will accept. 
 
 This objective will likely be done alongside implementing a lexer, parser and type inference algorithm; some features may be easier or harder to implement than initially expected and so the scope of the language should be flexible.
 
-\subsubsection{Extension}
+\subsubsection{Extension}\label{id:h.46b8loo1fuyl}
 
 To take this further, I could add more features to the language. This of course depends on what features are already implemented, but may also be guided by feedback from my own user, my supervisor or user testing.
 
-\subsubsection{Progress}
+\subsubsection{Progress}\label{id:h.x04oz9gymznj}
 
 There is now a concrete vision for the language, which includes variables, primitives, function application, function declarations and let bindings. Some other language constructs such as conditional (if) statements are specializations of other language features such as function application.
 
-\subsection{Develop a lexer and parser for this language}
+\subsection{Develop a lexer and parser for this language}\label{id:h.v6vafhv28y3i}
 
 The first step in processing user input will be lexing and parsing the express they have entered.
 
@@ -89,51 +96,59 @@ Most type inference algorithms are designed to work on ASTs, as they are a commo
 
 The lexer and parser are implemented in TypeScript, which compiles to JavaScript, as it allows the entire application to run in the browser. Compared to using a remote server, this makes the application faster, reduces operating costs and eliminates security vulnerabilities on the server related to accepting arbitrary code. Additionally, as a statically typed language TypeScript gives me the benefits of static typing mentioned previously.
 
-\subsubsection{Progress}
+\subsubsection{Progress}\label{id:h.1i4m49s3rzyf}
 
 A basic lexer and recursive descent parser that supports some language features has been developed, along with building models to represent the AST nodes. However, to fully implement the language parser-combinator libraries such as Parjs\cite{ref12} or masala-parser\cite{ref13} may be used.
 
-\subsection{Implement a type inference algorithm for this language}
+\subsection{Implement a type inference algorithm for this language}\label{id:h.el6sta7fzq4a}
 
 Key to the project is of course implementing the type inference algorithm. There are many such algorithms published, although I have started with Algorithm W as it is the original one, as discovered by Hindley.
 
 This should accept an abstract syntax tree as generated by the parser, and should output the final type of the expression, along with some understandable output about each major step in the algorithm. This output will then be presented to the user, so they can understand how the type inference algorithm works on different expressions.
 
-\subsubsection{Extension}
+\subsubsection{Extension}\label{id:h.42n2xpcle1gb}
 
 Additional algorithms, such as Algorithm M or bidirectional type inference could be investigated, and if time permits, implemented. This could allow students to see different approaches to inference types on the same expression. Additionally, I believe implementing these algorithms would help my understanding of them, contributing to the first objective.
 
-\subsubsection{Progress}
+\subsubsection{Progress}\label{id:h.t6jkfznlbe9a}
 
 Algorithm W and its dependencies (unification and substitution combination) have been successfully implemented in TypeScript and have been packaged as an npm module. To ensure correctness and enable refactoring it has a significant test suite, including custom alpha-equivalence equality test matchers. Emitting the steps the algorithm is taking has not been completed yet.
 
-TODO: screenshot of algorithm-w tests
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1.023\linewidth]{images/image1.png}
+  \caption{Tests for the algorithm-w library, using the custom toHaveType matcher}
+\end{figure}
 
-\subsection{Create the web application}
+\subsection{Create the web application}\label{id:h.cwlbt58wsbeg}
 
 Finally, the deliverable that users will directly interact with is the web application. This will allow them to enter an expression, and send it through the lexer, parser and type inference algorithm. The results will then be displayed back to the user, showing the steps the type inference algorithm took.
 
 The web application itself is written in TypeScript, using the React framework. Using React helps with state management, should improve productivity and make testing considerably easier. Additionally, if the project is extended with more algorithms it will be possible to reuse components and be generally nicer to refactor.
 
-\subsubsection{Extension}
+\subsubsection{Extension}\label{id:h.hltng6i6eh9g}
 
 Ideally, there would be time to test the application on real university students to try to determine whether it is an effective teaching aid. This would likely be showing them the application, explaining what it does and seeing how they use it, and testing whether they have a better understanding of type inference afterwards. Their feedback could be used to improve the application, and be valuable for the evaluation in the final report.
 
-\subsubsection{Progress}
+\subsubsection{Progress}\label{id:h.gmrcoirmlt2e}
 
 A basic web application that accepts the language and displays the final result of the type inference algorithm has been developed. However, the language syntax is restricted, displaying the AST has not been implemented and the steps the algorithm has taken are not displayed. These limitations arise from the parser being incomplete and the algorithm W implementation not emitting steps yet.
 
-TODO: screenshot of web app
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.837\linewidth]{images/image3.png}
+  \caption{The web application showing the final result from running algorithm W on an expression}
+\end{figure} \par}
 
-\section{Methods}
+\section{Methods}\label{id:h.em0ria5zbf4p}
 
-\subsection{Research process}
+\subsection{Research process}\label{id:h.ew85fk610kqt}
 
 I have maintained a list of resources and my notes on them. This will be invaluable for writing the final report’s background section, but also for referring back to refresh my memory of certain topics.
 
 Additionally, this list contains a backlog of resources to explore. This ensures my research stays organised and I do not miss potentially important papers.
 
-\subsection{Software development process}
+\subsection{Software development process}\label{id:h.d99ru3rx4zo}
 
 Development is taking an agile approach, for three reasons: flexibility, early and frequent delivery and the individual nature of the project.
 
@@ -145,15 +160,19 @@ As the project is an individual one, there is no coordination between developers
 
 Automated unit, component and integration tests are written while developing the software. Good testing not only catches bugs, but enables confidence in making changes as they can be made while being sure the software still functions correctly. This supports the flexible agile software development approach. Tests can also act as proof that software requirements have been met, useful for my project supervisor and final evaluation.
 
-TODO: screenshot of web tests
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1.023\linewidth]{images/image2.png}
+  \caption{An automated test for the web application, which simulatenously tests many components of the system at once.}
+\end{figure}
 
-\subsection{Write-up process}
+\subsection{Write-up process}\label{id:h.bhx39g801ds4}
 
 The final report is the highest weighted assessment (80\%) of the project and therefore requires attention throughout.
 
 I have been frequently updating my notes for the final report, adding points such as decisions taken and their reasons. Despite this, I expect writing and editing to take a significant amount of time at the end of the project.
 
-\subsection{Communication and meetings}
+\subsection{Communication and meetings}\label{id:h.k8ippxnoat7q}
 
 Due to COVID-19, it is expected that all communication and meetings will continue to take place online. Both my supervisor and I are used to using online communication tools, and this has worked well so far, with the Tier 2 restrictions in Coventry and national lockdown since the specification not negatively affecting this strategy.
 
@@ -161,15 +180,15 @@ I have had regular weekly meetings with my supervisor to keep them updated on th
 
 In addition to these regular meetings, we sometimes chat on Slack and occasionally have other meetings including group meetings with other project tutees.
 
-\section{Schedule}
+\section{Schedule}\label{id:h.7o2zxvygqpnu}
 
 The schedule is an idea of how work might get done over time, but may change as the project goes on. My supervisor will be kept informed of major changes to this plan. Weeks start on Monday.
 
-\subsection{Original schedule}
+\subsection{Original schedule}\label{id:h.7j9eipb829lw}
 
 Evaluating my progress against my original project specification, the project is ahead of schedule for building the lexer, parser and web application. Additionally, algorithm W was implemented ahead of schedule, but have not yet extended it to report major steps taken.
 
-\subsubsection{Term 1}
+\subsubsection{Term 1}\label{id:h.wrykjazjnc9}
 
 Week 1: Flesh out the project aims and write an initial draft of the specification.
 
@@ -193,7 +212,7 @@ Week 10: Start work on creating a language specification, and developing a lexer
 
 Over the winter break, I’ll attempt to finish the lexer and parser.
 
-\subsubsection{Term 2}
+\subsubsection{Term 2}\label{id:h.4jcij8mlihji}
 
 Weeks 1-3: Ensuring the whole system works together, and finishing off anything incomplete. Once complete, work will begin on extensions such as implementing another type inference algorithm or user-testing.
 
@@ -207,15 +226,15 @@ Week 9/10: Deliver presentation and continue writing up the final report.
 
 Over spring break, I’ll continue editing the final report alongside revising for summer exams.
 
-\subsubsection{Term 3}
+\subsubsection{Term 3}\label{id:h.l1bn0snl39c1}
 
 Week 1: Final touches on the final report.
 
 Week 2: Submit final report.
 
-\subsection{Revised schedule}
+\subsection{Revised schedule}\label{id:h.p9vfbpk6rnb6}
 
-\subsubsection{Term 1}
+\subsubsection{Term 1}\label{id:h.p2x8af4pn3a5}
 
 Week 9: Extend algorithm W to report steps taken. This week I will also be busy with courseworks for CS345 Sensor Networks and Mobile Data Communications and CS352 Project Management.
 
@@ -223,7 +242,7 @@ Week 10: Display the AST and steps taken in the web application. Start rewriting
 
 Over the winter break, I’ll attempt to finish the lexer and parser.
 
-\subsubsection{Term 2}
+\subsubsection{Term 2}\label{id:h.5axy8qlqt2n8}
 
 Weeks 1-3: Ensuring the whole system works together, and finishing off anything incomplete. Once complete, work will begin on extensions such as implementing another type inference algorithm or user-testing.
 
@@ -237,13 +256,13 @@ Week 9/10: Deliver presentation and continue writing up the final report.
 
 Over spring break, I’ll continue editing the final report alongside revising for summer exams.
 
-\subsubsection{Term 3}
+\subsubsection{Term 3}\label{id:h.jbcgtsb8n2zo}
 
 Week 1: Final touches on the final report.
 
 Week 2: Submit final report.
 
-\section{Resources}
+\section{Resources}\label{id:h.8b8ghk7r824a}
 
 Git is used for version control, as it is robust, well-used and I have experience with it. This allows rolling back to previous working versions of the software if necessary, and acts as a change log of how the project has evolved. Also, it makes diffing versions of the code easy, so my supervisor can easily determine what has changed since last view. Git is free software.
 
@@ -265,7 +284,7 @@ Slack is used for chat communication, making communication easy and efficient. F
 
 Draft reports have been written in Google Docs, as it’s easy to use, version-controlled and offers good reviewing features. At major milestones this is synced with the git repository, so is included in the git backup on GitHub and Google Cloud Platform. For more control over typesetting, the tool gdoc2latex\cite{ref15} was developed to convert a Google Docs document to a LaTeX document. GitHub actions automatically uses this tool to keep the Google Docs and LaTeX versions in sync within the repository.
 
-\section{Risk review}
+\section{Risk review}\label{id:h.lkcg9956g3l}
 
 \begin{center}\begin{tabular}{ |l|l|l| }
   \hline
@@ -307,7 +326,7 @@ In the project specification, careful attention was paid to identifying and miti
 
 I will continue monitoring the project and notify my supervisor if I identify any potential risks, or if an identified risk has changed likelihood or severity.
 
-\section{Ethical and safety review}
+\section{Ethical and safety review}\label{id:h.yity1y53zkk0}
 
 Since the project specification, no additional ethical or safety concerns have arisen.
 
