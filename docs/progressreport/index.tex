@@ -84,11 +84,11 @@ To take this further, I could add more features to the language. This of course 
 
 \subsubsection{Progress}\label{id:h.x04oz9gymznj}
 
-There is now a concrete vision for the language, which includes variables, primitives, function application, function declarations and let bindings. Some other language constructs such as conditional (if) statements are specializations of other language features such as function application.
+There is now a concrete vision for the language, which includes variables, primitives, function application, function declarations and let bindings. Some other language constructs such as if-else conditional statements are specializations of other language features such as function application.
 
 \subsection{Develop a lexer and parser for this language}\label{id:h.v6vafhv28y3i}
 
-The first step in processing user input will be lexing and parsing the express they have entered.
+The first step in processing user input will be lexing and parsing the expression they have entered.
 
 Lexing involves scanning the input string and exporting a sequence of tokens. Parsing takes this sequence of tokens and generates an abstract syntax tree (AST) from it. This has put into practice the skills gained from CS325 Compiler Design, which I am taking alongside the project in term 1.
 
@@ -137,7 +137,7 @@ A basic web application that accepts the language and displays the final result 
 {\centering \begin{figure}[h!]
   \centering
   \includegraphics[width=0.837\linewidth]{images/image3.png}
-  \caption{The web application showing the final result from running algorithm W on an expression}
+  \caption{The web application showing the result of running algorithm W on an expression}
 \end{figure} \par}
 
 \section{Methods}\label{id:h.em0ria5zbf4p}
@@ -174,9 +174,9 @@ I have been frequently updating my notes for the final report, adding points suc
 
 \subsection{Communication and meetings}\label{id:h.k8ippxnoat7q}
 
-Due to COVID-19, it is expected that all communication and meetings will continue to take place online. Both my supervisor and I are used to using online communication tools, and this has worked well so far, with the Tier 2 restrictions in Coventry and national lockdown since the specification not negatively affecting this strategy.
+Due to the ongoing COVID-19 pandemic, all communication and meetings will continue to take place online. Both my supervisor and I are used to using online communication tools and this has worked well so far, with the Tier 2 restrictions in Coventry and the national lockdown since the specification not having negatively affected communications.
 
-I have had regular weekly meetings with my supervisor to keep them updated on the project and get help with any problems. The beginning and end of the project are likely to require the most guidance, as I expect understanding existing resources on type systems is likely to be difficult, and reviewing the final report is likely to involve a lot of discussion.
+I have had regular weekly meetings with my supervisor to keep them updated on the project and get help with any problems. The beginning and end of the project are likely to require the most guidance, as understanding existing resources on type systems was difficult, and reviewing the final report is likely to involve a lot of discussion.
 
 In addition to these regular meetings, we sometimes chat on Slack and occasionally have other meetings including group meetings with other project tutees.
 
@@ -186,7 +186,7 @@ The schedule is an idea of how work might get done over time, but may change as 
 
 \subsection{Original schedule}\label{id:h.7j9eipb829lw}
 
-Evaluating my progress against my original project specification, the project is ahead of schedule for building the lexer, parser and web application. Additionally, algorithm W was implemented ahead of schedule, but have not yet extended it to report major steps taken.
+Evaluating my progress against my original project specification, the project is ahead of schedule for building the lexer, parser and web application. Additionally, algorithm W was implemented ahead of schedule, but it has not yet been extended to report major steps taken.
 
 \subsubsection{Term 1}\label{id:h.wrykjazjnc9}
 
@@ -236,7 +236,7 @@ Week 2: Submit final report.
 
 \subsubsection{Term 1}\label{id:h.p2x8af4pn3a5}
 
-Week 9: Extend algorithm W to report steps taken. This week I will also be busy with courseworks for CS345 Sensor Networks and Mobile Data Communications and CS352 Project Management.
+Week 9: Start extending algorithm W to report steps taken. This week I will also be busy with courseworks for CS345 Sensor Networks and Mobile Data Communications and CS352 Project Management. Additionally, disruption is likely as it may be the designated travel window for students for the winter break so I may be moving.
 
 Week 10: Display the AST and steps taken in the web application. Start rewriting lexer and parser with a parser-combinator library to return an AST.
 
@@ -264,7 +264,7 @@ Week 2: Submit final report.
 
 \section{Resources}\label{id:h.8b8ghk7r824a}
 
-Git is used for version control, as it is robust, well-used and I have experience with it. This allows rolling back to previous working versions of the software if necessary, and acts as a change log of how the project has evolved. Also, it makes diffing versions of the code easy, so my supervisor can easily determine what has changed since last view. Git is free software.
+Git is being used for version control, as it is robust, well-used and I have experience with it. This allows rolling back to previous working versions of the software if necessary, and acts as a change log of how the project has evolved. Also, it makes diffing versions of the code easy, so my supervisor can easily determine what has changed since last view. Git is free software.
 
 GitHub is being used for git hosting, which allows me to easily sync changes between machines, and allows sharing the code with my supervisor easily. GitHub offers these features for free.
 
@@ -272,17 +272,17 @@ GitHub also acts as an external backup of the code. This ensures my work would n
 
 In my project specification, GitHub was considered for project, issue and pull request management. However after evaluating the project needs this was found to be unnecessary. As a single developer I am able to understand the overall structure of the code having written it, and a simple notepad has sufficed for task tracking.
 
-GitHub Actions provides continuous integration, ensuring it’s clear when the build and tests fail as they are run on each commit. In future, continuous deployment will ensure the live application is kept up to date with any changes, making it easy to manually test and for my supervisor to see the current state of the system. GitHub Actions is free on public repositories, and offers 3000 free build minutes a month and 1GB of storage on private repositories. Having reviewed my billed usage, I fall well under this limit.
+GitHub Actions provides continuous integration, providing build and test failure visibility on each commit. In future, continuous deployment will ensure the live application is kept up to date with any changes, making it easy to manually test and for my supervisor to see the current state of the system. GitHub Actions is free on public repositories, and offers 3000 free build minutes a month and 1GB of storage on private repositories. Having reviewed my billed usage, I fall well under this limit.
 
 Most of the system is written in TypeScript, a programming language developed by Microsoft, for reasons explained in the objectives section. Its compiler is freely available.
 
 VS Code is being used to write TypeScript, as it is the most popular code editor for it and is well designed for it. Additionally, I have used VS code in the past, and it can be used to write the Latex sources for the reports. VS Code and its TypeScript extension are free.
 
-By the end of term 1, the web application will be available at all times to manually test and for my supervisor to see. Using a cloud platform will allow for this without having to maintain hardware. Exactly which cloud hosting provider used will be chosen later, once the project implementation is clearer. I expect this to be free or low cost.
+By the end of term 1, the web application will be available at all times to manually test and for my supervisor to see. Using a cloud platform will allow for this without having to maintain hardware. Exactly which cloud hosting provider used will be chosen later, but I expect this to be free or low cost.
 
-Slack is used for chat communication, making communication easy and efficient. For our regular meetings we have been using Microsoft Teams.
+My supervisor and I chat on Slack, making communication easy and efficient. For our regular meetings we have been using Microsoft Teams.
 
-Draft reports have been written in Google Docs, as it’s easy to use, version-controlled and offers good reviewing features. At major milestones this is synced with the git repository, so is included in the git backup on GitHub and Google Cloud Platform. For more control over typesetting, the tool gdoc2latex\cite{ref15} was developed to convert a Google Docs document to a LaTeX document. GitHub actions automatically uses this tool to keep the Google Docs and LaTeX versions in sync within the repository.
+Draft reports have been written in Google Docs, as it is easy to use, version-controlled and offers good reviewing features. At major milestones this is synced with the git repository, so is included in the git backup on GitHub and Google Cloud Platform. For more control over typesetting, the tool gdoc2latex\cite{ref15} was developed to convert a Google Docs document to a LaTeX document. GitHub actions automatically uses this tool to keep the Google Docs and LaTeX versions in sync within the repository.
 
 \section{Risk review}\label{id:h.lkcg9956g3l}
 
@@ -332,9 +332,9 @@ Since the project specification, no additional ethical or safety concerns have a
 
 As noted in the specification, user-testing may be carried out with students and other academics to get their feedback on the web application. This will not involve deception, coercion or involve vulnerable groups so does not require ethical review by the University’s Biomedical and Scientific Research Ethics Committee. Data will only be collected and held with the subject's informed, unambiguous consent.
 
-This project continues not to have any serious health and safety implications. HSE guidelines will be followed for the use of display screen equipment and any activities will be carried out in line with government COVID advice, including the current lockdown.
+This project continues not to have any serious health and safety implications. HSE guidelines will continue being followed for the use of display screen equipment and any activities will be carried out in line with government COVID advice.
 
-I will look out for ethical or safety issues throughout the project and notify my supervisor if I identify any potential issues.
+I will continue looking out for ethical or safety issues and notify my supervisor if I have any potential concerns.
 
 \bibliography{index}
 
