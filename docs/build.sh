@@ -37,7 +37,7 @@ fi
 # Clean old stuff
 rm -f $1.aux $1.bbl $1.blg $1.dvi $1.log $1.pdf $1.toc $1.out $1.tex $1.bib
 
-gdoc2latex --input $1.html --output $1.tex --template-start templates/template_start.tex --template-end templates/template_end.tex
+gdoc2latex --input $1.html --output $1.tex
 
 # Use cd as pdflatex and bibtex constantly amaze me at how they are so inconsistent at which directory they use
 cd $(dirname $1)

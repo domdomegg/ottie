@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install texlive-latex-extra texlive-bibtex-extra
-          sudo npm install -g gdoc2latex
+          sudo npm install -g gdoc2latex@3.0.1
 
       # Specification
       - name: Build specification
