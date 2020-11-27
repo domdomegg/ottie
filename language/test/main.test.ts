@@ -1,77 +1,79 @@
-import { Var, App, Abs, Let, Expr } from '../src/index'
-import { C, F, GenLex, TupleParser, Streams, Option, Tuple, tuple, Accept, Reject, IParser } from '@masala/parser';
+import { Var, App, Abs, Let, parse } from '../src/index'
 
-test('scratch', () => {
-    // const parser = C
-    //     .string("hello").drop()
-    //     .then(C.char(' ').rep().drop())
-    //     .then(C.letters())
-    //     .then(C.char(' ').rep().drop())
-    //     .then(C.letters())
-    //     .map(tuple => tuple.at(0))
+test('general: syntax error', () => {
+    expect(() => parse('')).toThrow()
+    expect(parse('', true).isAccepted()).toBe(false)
+})
 
-    // console.log(parser.val('hello Adam Jones'))
+test('var: valid', () => {
+    expect(parse('True')).toEqual(new Var('True'));
+    expect(parse('myIdentifier', true).isAccepted()).toBe(true);
+    expect(parse('myBooleans')).toEqual(new Var('myBooleans'));
+})
 
+test('var: syntax error', () => {
+    expect(() => parse('_')).toThrow()
+    expect(() => parse('3')).toThrow()
+    expect(() => parse('h3llo')).toThrow()
+    expect(() => parse('hell0')).toThrow()
+    expect(() => parse('+')).toThrow()
+    expect(() => parse('+3')).toThrow()
+})
 
-    // expr ::= identifier expr' # var
-    //        | ( \ identifier -> expr ) expr' # abs
-    //        | ( expr ) expr'
-    //        | ( let identifier = expr in expr ) expr' # let
+test('app: valid', () => {
+    expect(parse('not True')).toEqual(new App(new Var('not'), new Var('True')));
+    expect(parse('not (not True)')).toEqual(new App(new Var('not'), new App(new Var('not'), new Var('True'))));
+    expect(parse('(map not) myBooleans')).toEqual(new App(new App(new Var('map'), new Var('not')), new Var('myBooleans')));
+    expect(parse('map not myBooleans')).toEqual(new App(new App(new Var('map'), new Var('not')), new Var('myBooleans')));
+    expect(parse('a b c d e f')).toEqual(new App(new App(new App(new App(new App(new Var('a'), new Var('b')), new Var('c')), new Var('d')), new Var('e')), new Var('f')))
+})
 
-    // expr' ::= identifier A' | eps # app
-
-    const genlex = new GenLex();
-    const identifier = genlex.tokenize(C.letters(), 'identifier');
-    const backslash = genlex.tokenize(C.char('\\'), 'backslash');
-    const arrow = genlex.tokenize(C.string('->'), 'arrow');
-    const lparen = genlex.tokenize(C.char('('), 'lparen');
-    const rparen = genlex.tokenize(C.char(')'), 'rparen');
-    const letTok = genlex.tokenize(C.string('let'), 'let');
-    const equal = genlex.tokenize(C.char('='), 'equal');
-    const inTok = genlex.tokenize(C.string('in'), 'in');
-
-    // const expressionPrime = (): SingleParser<Tuple<Var>> => identifier.map(v => new Var(v)).then(F.lazy(expressionPrime)).opt().map(value => {
-    //     // console.log('1', value)
-    //     return value.map(v => new Var(v)).orElse(tuple());
-    //     // if (v.isPresent()) {
-
-    //     // }
-    //     // // if (!v.isPresent());
-    //     // return v.isPresent() ? v.value.at(0) : 'empty';
-    // });
-
-    const nestLeft = (v: Expr[]) => {
-        // console.log(v);
-
-        let expr: Expr = v[0];
-        for (let i = 1; i < v.length; i++) {
-            expr = new App(expr, v[i]);
-        }
-        return expr;
-    }
-
-    const app = () => identifier.map(value => new Var(value))
-        .then(expressionPrime()).array().map(nestLeft)
-
-    const abs = () => lparen.drop().then(backslash.drop()).then(identifier).then(arrow.drop()).then(F.lazy(expression)).then(rparen.drop()).map(tuple => new Abs(tuple.at(0), tuple.at(1)))
-
-    const parens = () => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single()
+test('app: syntax error', () => {
+    expect(() => parse('not let')).toThrow()
+    expect(() => parse('not in')).toThrow()
+    expect(() => parse('not =')).toThrow()
+    expect(() => parse('not ->')).toThrow()
+    expect(() => parse('not \\')).toThrow()
     
-    const letParser = () => lparen.drop().then(letTok.drop()).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).then(rparen.drop()).map(tuple => new Let(tuple.at(0), tuple.at(1), tuple.at(2)))
+    expect(() => parse('let not')).toThrow()
+    expect(() => parse('in not')).toThrow()
+    expect(() => parse('= not')).toThrow()
+    expect(() => parse('-> not')).toThrow()
+    expect(() => parse('\\ not')).toThrow()
+})
 
-    const expression = () => F.try(app())
-        .or(F.try(abs()))
-        .or(F.try(parens()))
-        .or(F.try(letParser()))
+test('abs: valid', () => {
+    expect(parse('(\\x -> x)')).toEqual(new Abs('x', new Var('x')))
+    expect(parse('(\\x -> x True)')).toEqual(new Abs('x', new App(new Var('x'), new Var('True'))))
+    expect(parse('(\\x -> x True) not')).toEqual(new App(new Abs('x', new App(new Var('x'), new Var('True'))), new Var('not')))
+    expect(parse('(\\x -> (\\y -> if x y False)) True False')).toEqual(new App(new App(new Abs('x', new Abs('y', new App(new App(new App(new Var('if'), new Var('x')), new Var('y')), new Var('False')))), new Var('True')), new Var('False')))
+})
 
-    const expressionPrime = (): TupleParser<Var> => identifier.map(v => new Var(v)).optrep();
+test('abs: syntax error', () => {
+    expect(() => parse('\\x -> x')).toThrow()
+    expect(() => parse('(\\ -> x)')).toThrow()
+    expect(() => parse('(\\\\ -> x)')).toThrow()
+    expect(() => parse('(\\\\x -> x)')).toThrow()
+    expect(() => parse('(\\x = x)')).toThrow()
+    expect(() => parse('(\\x --> x)')).toThrow()
+    expect(() => parse('(\\x -> \\x)')).toThrow()
+})
 
-    const result: IParser<Expr> = genlex.use(expression().then(F.eos().drop()).single());
+test('let: valid', () => {
+    expect(parse('(let x = True in x)')).toEqual(new Let('x', new Var('True'), new Var('x')))
+    expect(parse('(let x = myBooleans in map not x)')).toEqual(new Let('x', new Var('myBooleans'), new App(new App(new Var('map'), new Var('not')), new Var('x'))))
+    expect(parse('(let x = not in map x myBooleans)')).toEqual(new Let('x', new Var('not'), new App(new App(new Var('map'), new Var('x')), new Var('myBooleans'))))
+    expect(parse('(let x = not in map x) myBooleans')).toEqual(new App(new Let('x', new Var('not'), new App(new Var('map'), new Var('x'))), new Var('myBooleans')))
+    expect(parse('nub (let x = map not in x) myBooleans')).toEqual(new App(new App(new Var('nub'), new Let('x', new App(new Var('map'), new Var('not')), new Var('x'))), new Var('myBooleans')))
+    expect(parse('map (let x = True in (\\y -> if x y (not y))) myBooleans')).toEqual(new App(new App(new Var('map'), new Let('x', new Var('True'), new Abs('y', new App(new App(new App(new Var('if'), new Var('x')), new Var('y')), new App(new Var('not'), new Var('y')))))), new Var('myBooleans')))
+})
 
-    expect(result.parse(Streams.ofString('(\\x -> something)')).constructor.name).toBe('Accept')
-    expect(result.parse(Streams.ofString('(let x = value in something even more)')).constructor.name).toBe('Accept')
-    console.log(result.parse(Streams.ofString('(let x = value in something even more)')).value.toString())
-    // expect(result.parse(Streams.ofString('(let x = some value in something even more)')).constructor.name).toBe('Accept')
-    // expect(result.parse(Streams.ofString('(let x = some value in (\\y -> y))')).constructor.name).toBe('Accept')
-    // expect(result.parse(Streams.ofString('(let x = some value in (\\y -> y)) value')).constructor.name).toBe('Accept')
-});
+test('let: syntax error', () => {
+    expect(() => parse('let x = True in x')).toThrow()
+    expect(() => parse('(let x = True in )')).toThrow()
+    expect(() => parse('(let x = True i x)')).toThrow()
+    expect(() => parse('(let x = True in in x)')).toThrow()
+    expect(() => parse('(let x = let in x)')).toThrow()
+    expect(() => parse('(let x = = in x)')).toThrow()
+    expect(() => parse('(let x in x)')).toThrow()
+})
