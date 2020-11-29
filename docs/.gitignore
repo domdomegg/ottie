@@ -6,6 +6,7 @@
 *.log
 *.toc
 *.out
+_minted-index/
 
 # Don't store generated PDFs (at least for now)
 *.pdf

@@ -26,6 +26,8 @@
 \usepackage{minted}
 \usepackage{ragged2e}
 \usepackage{adjustbox}
+\definecolor{cs310lightgrey}{rgb}{0.95,0.95,0.95}
+\usepackage[backgroundcolor=cs310lightgrey,hidealllines=true]{mdframed}
 
 \hypersetup{
 	colorlinks=true,
@@ -33,6 +35,9 @@
 	urlcolor=black,
 	citecolor=black
 }
+
+\BeforeBeginEnvironment{minted}{\begin{mdframed}}
+\AfterEndEnvironment{minted}{\end{mdframed}}
 
 \let\parencite\citep
 

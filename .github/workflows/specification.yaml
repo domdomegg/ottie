@@ -1,10 +1,10 @@
-name: docs
+name: specification
 
 on:
   push:
     paths:
-    - '.github/workflows/docs.yaml'
-    - 'docs/**'
+    - '.github/workflows/specification.yaml'
+    - 'docs/specification/**'
 
 jobs:
   build:
@@ -21,23 +21,14 @@ jobs:
 
       # Specification
       - name: Build specification
-        run: ./build.sh specification/index
-        working-directory: docs
+        run: ./build.sh
+        working-directory: docs/specification
       - uses: actions/upload-artifact@v2
         with:
           name: specification
           path: docs/specification/index.pdf
 
-      # Progress report
-      - name: Build progress report
-        run: ./build.sh progressreport/index
-        working-directory: docs
-      - uses: actions/upload-artifact@v2
-        with:
-          name: progressreport
-          path: docs/progressreport/index.pdf
-
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: Update latex sources
+          commit_message: 'Specification: Update latex sources'
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
