@@ -1,9 +1,11 @@
 import { C, N, F, GenLex, Streams, TupleParser, SingleParser, Response } from '@masala/parser';
 
+/* AST expression nodes */
+
 type Expr = CharLiteral | NumberLiteral | Var | App | Abs | Let
 
 class CharLiteral {
-    private value: string;
+    readonly value: string;
 
     constructor(value: string) {
         this.value = value;
@@ -15,7 +17,7 @@ class CharLiteral {
 }
 
 class NumberLiteral {
-    private value: number;
+    readonly value: number;
 
     constructor(value: number) {
         this.value = value;
@@ -27,7 +29,7 @@ class NumberLiteral {
 }
 
 class Var {
-    private name: string;
+    readonly name: string;
 
     constructor(name: string) {
         this.name = name;
@@ -39,8 +41,8 @@ class Var {
 }
 
 class App {
-    private func: Expr;
-    private arg: Expr;
+    readonly func: Expr;
+    readonly arg: Expr;
 
     constructor(fun: Expr, arg: Expr) {
         this.func = fun;
@@ -53,8 +55,8 @@ class App {
 }
 
 class Abs {
-    private param: string;
-    private body: Expr;
+    readonly param: string;
+    readonly body: Expr;
 
     constructor(param: string, body: Expr) {
         this.param = param;
@@ -67,9 +69,9 @@ class Abs {
 }
 
 class Let {
-    private param: string;
-    private def: Expr;
-    private body: Expr;
+    readonly param: string;
+    readonly def: Expr;
+    readonly body: Expr;
 
     constructor(param: string, def: Expr, body: Expr) {
         this.param = param;
@@ -79,6 +81,52 @@ class Let {
 
     toString(): string {
         return '(let ' + this.param + ' = ' + this.def.toString() + ' in ' + this.body.toString() + ')'
+    }
+}
+
+/* Types */
+
+type MonoType = TypeVar | TypeFuncApp;
+
+class TypeVar {
+    readonly name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    toString(): string {
+        return this.name;
+    }
+}
+
+type TypeFunc = "->" | "[]" | "Maybe" | "Either" | "number" | "char" | "boolean" | "," | ",," | ",,," | ",,,," | ",,,,," | ",,,,,," | ",,,,,,,";
+
+class TypeFuncApp {
+    readonly constructorName: TypeFunc;
+    readonly args: MonoType[];
+
+    constructor(constructorName: TypeFunc, ...args: MonoType[]) {
+        this.constructorName = constructorName;
+        this.args = args;
+    }
+
+    toString(): string {
+        return this.constructorName + (this.args.length ? ' ' : '') + this.args.map(a => '(' + a.toString() + ')').join(' ');
+    }
+}
+
+class PolyType {
+    readonly quantifiedVars: string[];
+    readonly monoType: MonoType;
+
+    constructor(quantifiedVars: string[], monoType: MonoType) {
+        this.quantifiedVars = quantifiedVars;
+        this.monoType = monoType;
+    }
+
+    toString(): string {
+        return this.quantifiedVars.map(v => '∀' + v).join('') + ': ' + this.monoType.toString();
     }
 }
 
@@ -158,4 +206,8 @@ function parse(code: string, forResponse: boolean = false) {
     throw new ParseError('Failed to parse:\n\t' + code + '\n\t' + ' '.repeat(response.location()) + '^')
 }
 
-export { CharLiteral, NumberLiteral, Var, App, Abs, Let, Expr, parse, ParseError };
+export {
+    CharLiteral, NumberLiteral, Var, App, Abs, Let, Expr,
+    MonoType, TypeVar, TypeFunc, TypeFuncApp, PolyType,
+    parse, ParseError
+};

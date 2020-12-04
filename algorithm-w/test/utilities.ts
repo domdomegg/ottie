@@ -1,7 +1,9 @@
-import { Context, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, App, Var } from '../src/index';
+import { TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral } from 'language'
+import { Context } from '../src/index';
 
 // Utilities which make creating types easier
 export const number = new TypeFuncApp('number');
+export const char = new TypeFuncApp('char');
 export const boolean = new TypeFuncApp('boolean');
 export const f = (one: MonoType, two: MonoType, ...extra: MonoType[]): TypeFuncApp => {
     if (extra.length === 0) return new TypeFuncApp('->', one, two)

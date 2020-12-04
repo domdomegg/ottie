@@ -1,11 +1,10 @@
-name: algorithm-w
+name: language
 
 on:
   push:
     paths:
-    - '.github/workflows/algorithm-w.yaml'
+    - '.github/workflows/language.yaml'
     - 'language/**'
-    - 'algorithm-w/**'
 
 jobs:
   build:
@@ -28,22 +27,12 @@ jobs:
       - name: 'language: Install dependencies'
         working-directory: language
         run: npm ci
+      - name: 'language: Lint'
+        working-directory: language
+        run: npm run lint --if-present
       - name: 'language: Build'
         working-directory: language
         run: npm run build --if-present
-      - name: 'language: Link'
+      - name: 'language: Test'
         working-directory: language
-        run: npm link
-
-      - name: 'algorithm-w: Install dependencies'
-        working-directory: algorithm-w
-        run: npm ci
-      - name: 'algorithm-w: Lint'
-        working-directory: algorithm-w
-        run: npm run lint --if-present
-      - name: 'algorithm-w: Build'
-        working-directory: algorithm-w
-        run: npm run build --if-present
-      - name: 'algorithm-w: Test'
-        working-directory: algorithm-w
         run: npm run test --if-present

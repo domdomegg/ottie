@@ -1,8 +1,13 @@
-import { Abs, TypeVar, combine, unify, Let, Var } from '../src/index';
-import { number, boolean, e, f, list, tuple, maybe, either, a, b, t0, t1, t2, t3 } from './utilities';
+import './jest.setup'
+import { TypeVar, Var, Abs, Let, CharLiteral, NumberLiteral } from 'language'
+import { combine, unify, apply } from '../src/index';
+import { number, char, boolean, e, f, list, tuple, maybe, either, a, b, t0, t1, t2, t3 } from './utilities';
 
 test('arithmetic expressions', () => {
     expect(e('myNumber')).toHaveType(number);
+    expect(new NumberLiteral(3)).toHaveType(number);
+    expect(new CharLiteral('a')).toHaveType(char);
+    expect(e('cons', new CharLiteral('a'), '[]')).toHaveType(list(char));
     expect(e('+', 'myNumber', 'myNumber')).toHaveType(number);
     expect(e('*', e('+', 'myNumber', 'myNumber'))).toHaveType(f(number, number));
     expect(e('+', 'myNumber')).toHaveType(f(number, number));
@@ -153,33 +158,33 @@ test('combines substitutions correctly', () => {
 })
 
 test('combines equivalence', () => {
-    expect(t0.apply({ t0: t1 })).toEqual(t1);
-    expect(t0.apply(combine({ t0: t1 }))).toEqual(t1);
+    expect(apply(t0, { t0: t1 })).toEqual(t1);
+    expect(apply(t0, combine({ t0: t1 }))).toEqual(t1);
     
-    expect(t0.apply({ t0: t1 }).apply({ t1: t2 })).toEqual(t2);
-    expect(t0.apply(combine({ t0: t1 }, { t1: t2 }))).toEqual(t2);
+    expect(apply(apply(t0, { t0: t1 }), ({ t1: t2 }))).toEqual(t2);
+    expect(apply(t0, combine({ t0: t1 }, { t1: t2 }))).toEqual(t2);
 
-    expect(t0.apply({ t0: t1 }).apply({ t1: t2 }).apply({ t2: t3 })).toEqual(t3);
-    expect(t0.apply(combine({ t0: t1 }, { t1: t2 }, { t2: t3 }))).toEqual(t3);
+    expect(apply(apply(apply(t0, { t0: t1 }), { t1: t2 }), { t2: t3 })).toEqual(t3);
+    expect(apply(t0, combine({ t0: t1 }, { t1: t2 }, { t2: t3 }))).toEqual(t3);
 
-    expect(t0.apply({ t0: t1 }).apply({ t1: t2 }).apply({ t2: t3 }).apply({ t3: number })).toEqual(number);
-    expect(t0.apply(combine({ t0: t1 }, { t1: t2 }, { t2: t3 }, { t3: number }))).toEqual(number);
+    expect(apply(apply(apply(apply(t0, { t0: t1 }), { t1: t2 }), { t2: t3 }), { t3: number })).toEqual(number);
+    expect(apply(t0, combine({ t0: t1 }, { t1: t2 }, { t2: t3 }, { t3: number }))).toEqual(number);
 
     // NB: substitution should happen at once, so only t1/t0 gets applied
-    expect(t0.apply({ t0: t1, t1: t2 })).toEqual(t1);
-    expect(t0.apply(combine({ t0: t1, t1: t2 }))).toEqual(t1);
+    expect(apply(t0, { t0: t1, t1: t2 })).toEqual(t1);
+    expect(apply(t0, combine({ t0: t1, t1: t2 }))).toEqual(t1);
     
     // ...but applying a t2/t1 afterwards should still get applied
-    expect(t0.apply({ t0: t1, t1: t2 }).apply({ t1: t2 })).toEqual(t2);
-    expect(t0.apply(combine({ t0: t1, t1: t2 }, { t1: t2 }))).toEqual(t2);
+    expect(apply(apply(t0, { t0: t1, t1: t2 }), { t1: t2 })).toEqual(t2);
+    expect(apply(t0, combine({ t0: t1, t1: t2 }, { t1: t2 }))).toEqual(t2);
 
     // If we apply the number/t2 first, there are no t2s to match at that point
-    expect(t0.apply({ t2: number }).apply({ t0: t1 }).apply({ t1: t2 })).toEqual(t2);
-    expect(t0.apply(combine({ t2: number }, { t0: t1 }, { t1: t2 }))).toEqual(t2);
+    expect(apply(apply(apply(t0, { t2: number }), { t0: t1 }), { t1: t2 })).toEqual(t2);
+    expect(apply(t0, combine({ t2: number }, { t0: t1 }, { t1: t2 }))).toEqual(t2);
 
-    expect(t0.apply({})).toEqual(t0);
-    expect(t0.apply(combine())).toEqual(t0);
-    expect(t0.apply(combine({}))).toEqual(t0);
+    expect(apply(t0, {})).toEqual(t0);
+    expect(apply(t0, combine())).toEqual(t0);
+    expect(apply(t0, combine({}))).toEqual(t0);
 })
 
 test('unifies types correctly', () => {

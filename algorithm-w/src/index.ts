@@ -1,3 +1,5 @@
+import { TypeVar, TypeFuncApp, MonoType, PolyType, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral } from 'language'
+
 class TypeInferenceError extends Error {
     constructor(message: string) {
         super(message);
@@ -9,15 +11,11 @@ interface Context { [name: string]: PolyType | undefined }
 
 interface Substitution { [name: string]: MonoType | undefined }
 
-interface Expr {
-    infer(ctx: Context): [MonoType, Substitution];
-}
-
 function substitute(substitution: Substitution, arg: Context): Context {
     const context = arg;
     let mappedContext: Context = {};
     for (const key in context) {
-        mappedContext[key] = (context[key] as PolyType).apply(substitution);
+        mappedContext[key] = apply(context[key] as PolyType, substitution);
     }
     return mappedContext;
 }
@@ -32,7 +30,7 @@ function combine(...substitutions: Substitution[]): Substitution {
     const b = substitutions[1];
     let newSubstitution: Substitution = {}
     for (const key in a) {
-        newSubstitution[key] = (a[key] as MonoType).apply(b);
+        newSubstitution[key] = apply(a[key] as MonoType, b);
     }
     for (const key in b) {
         if (!(key in a)) {
@@ -44,7 +42,7 @@ function combine(...substitutions: Substitution[]): Substitution {
 
 function unify(type1: MonoType, type2: MonoType): Substitution {
     if (type1 instanceof TypeVar) {
-        if (type2.contains(type1)) {
+        if (contains(type2, type1)) {
             throw new TypeInferenceError('Contains/occurs check failed with ' + JSON.stringify(type1) + ' and ' + JSON.stringify(type2));
         }
         return { [type1.name]: type2 }
@@ -65,7 +63,7 @@ function unify(type1: MonoType, type2: MonoType): Substitution {
 
         let sub: Substitution = {};
         for (let i = 0; i < type1.args.length; i++) {
-            sub = combine(unify(type1.args[i].apply(sub), type2.args[i].apply(sub)), sub);
+            sub = combine(unify(apply(type1.args[i], sub), apply(type2.args[i], sub)), sub);
         }
         return sub;
     }
@@ -114,152 +112,107 @@ function freshType(): TypeVar {
     return new TypeVar(freshTypeName());
 }
 
-class Var implements Expr {
-    private name: string;
+// TODO: fallback to a default context instead of an empty one
+function infer(expr: Expr, ctx: Context = {}): MonoType {
+    return _infer(expr, ctx)[0];
+}
 
-    constructor(name: string) {
-        this.name = name;
+function _infer(expr: Expr, ctx: Context): [MonoType, Substitution] {
+    if (expr instanceof CharLiteral) {
+        return [inst(new PolyType([], new TypeFuncApp('char'))), {}];
     }
 
-    public infer(ctx: Context): [MonoType, Substitution] {
-        const type = ctx[this.name];
+    if (expr instanceof NumberLiteral) {
+        return [inst(new PolyType([], new TypeFuncApp('number'))), {}];
+    }
+
+    if (expr instanceof Var) {
+        const type = ctx[expr.name]
         if (!type) {
-            throw new TypeInferenceError(this.name + ' is not in scope');
+            throw new TypeInferenceError(expr.name + ' is not in scope');
         }
-        return [type.inst(), {}];
-    }
-}
-
-class App implements Expr {
-    private func: Expr;
-    private arg: Expr;
-
-    constructor(fun: Expr, arg: Expr) {
-        this.func = fun;
-        this.arg = arg;
+        return [inst(type), {}];
     }
 
-    public infer(ctx: Context): [MonoType, Substitution] {
-        const [funcType, funcSubstitution] = this.func.infer(ctx);
-        const [argType, argSubstitution] = this.arg.infer(substitute(funcSubstitution, ctx));
+    if (expr instanceof App) {
+        const [funcType, funcSubstitution] = _infer(expr.func, ctx);
+        const [argType, argSubstitution] = _infer(expr.arg, substitute(funcSubstitution, ctx));
         const t = freshType();
-        const unifiedSubstitution = unify(funcType.apply(argSubstitution), new TypeFuncApp("->", argType, t))
+        const unifiedSubstitution = unify(apply(funcType, argSubstitution), new TypeFuncApp("->", argType, t))
 
-        return [t.apply(unifiedSubstitution), combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
-    }
-}
-
-class Abs implements Expr {
-    private param: string;
-    private body: Expr;
-
-    constructor(param: string, body: Expr) {
-        this.param = param;
-        this.body = body;
+        return [apply(t, unifiedSubstitution), combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
     }
 
-    public infer(ctx: Context): [MonoType, Substitution] {
+    if (expr instanceof Abs) {
         const t = freshType();
-        const [bodyType, bodySubstitution] = this.body.infer({ ...ctx, [this.param]: new PolyType([], t) });
-        return [new TypeFuncApp("->", t, bodyType).apply(bodySubstitution), bodySubstitution]
-    }
-}
-
-class Let implements Expr {
-    private param: string;
-    private def: Expr;
-    private body: Expr;
-
-    constructor(param: string, def: Expr, body: Expr) {
-        this.param = param; // x
-        this.def = def; // e1
-        this.body = body; // e2
+        const [bodyType, bodySubstitution] = _infer(expr.body, { ...ctx, [expr.param]: new PolyType([], t) });
+        return [apply(new TypeFuncApp("->", t, bodyType), bodySubstitution), bodySubstitution]
     }
 
-    public infer(ctx: Context): [MonoType, Substitution] {
-        const [defType, defSubstitution] = this.def.infer(ctx);
-        const [bodyType, bodySubstitution] = this.body.infer({ ...substitute(defSubstitution, ctx), [this.param]: generalise(substitute(defSubstitution, ctx), defType) });
+    if (expr instanceof Let) {
+        const [defType, defSubstitution] = _infer(expr.def, ctx);
+        const [bodyType, bodySubstitution] = _infer(expr.body, { ...substitute(defSubstitution, ctx), [expr.param]: generalise(substitute(defSubstitution, ctx), defType) });
         return [bodyType, combine(defSubstitution, bodySubstitution)]
     }
+
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
 }
 
-// ----------
-
-type MonoType = TypeVar | TypeFuncApp;
-
-class TypeVar {
-    name: string;
-
-    constructor(name: string) {
-        this.name = name;
+function inst(type: PolyType): MonoType;
+function inst(type: MonoType, from: string[], to: string[]): MonoType;
+function inst(type: MonoType | PolyType, from: string[] = [], to: string[] = []): MonoType {
+    if (type instanceof TypeVar) {
+        const i = from.indexOf(type.name);
+        return (i === -1) ? type : new TypeVar(to[i]);
     }
 
-    public inst(from: string[], to: string[]): TypeVar {
-        const i = from.indexOf(this.name);
-        return (i === -1) ? this : new TypeVar(to[i]);
+    if (type instanceof TypeFuncApp) {
+        return new TypeFuncApp(type.constructorName, ...type.args.map(arg => inst(arg, from, to)));
     }
 
-    public apply(substitution: Substitution): MonoType {
-        return this.name in substitution ? (substitution[this.name] as MonoType) : this;
+    if (type instanceof PolyType) {
+        return inst(type.monoType, type.quantifiedVars, type.quantifiedVars.map(freshTypeName));
     }
 
-    public contains(other: TypeVar): boolean {
-        return this.name == other.name;
-    }
-
-    public toString(): string {
-        return this.name;
-    }
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
 }
 
-type TypeFunc = "->" | "[]" | "Maybe" | "Either" | "number" | "string" | "boolean" | "," | ",," | ",,," | ",,,," | ",,,,," | ",,,,,," | ",,,,,,,";
-
-class TypeFuncApp {
-    constructorName: TypeFunc;
-    args: MonoType[];
-
-    constructor(constructorName: TypeFunc, ...args: MonoType[]) {
-        this.constructorName = constructorName;
-        this.args = args;
+function apply(type: MonoType, substitution: Substitution): MonoType;
+function apply(type: PolyType, substitution: Substitution): PolyType;
+function apply(type: MonoType | PolyType, substitution: Substitution): MonoType | PolyType {
+    if (type instanceof TypeVar) {
+        return type.name in substitution ? (substitution[type.name] as MonoType) : type;
     }
 
-    public inst(from: string[], to: string[]): TypeFuncApp {
-        return new TypeFuncApp(this.constructorName, ...this.args.map(a => a.inst(from, to)));
+    if (type instanceof TypeFuncApp) {
+        return new TypeFuncApp(type.constructorName, ...type.args.map(arg => apply(arg, substitution)));
     }
 
-    public apply(substitution: Substitution): TypeFuncApp {
-        return new TypeFuncApp(this.constructorName, ...this.args.map(a => a.apply(substitution)));
+    if (type instanceof PolyType) {
+        return new PolyType(type.quantifiedVars, apply(type.monoType, substitution));
     }
 
-    public contains(other: TypeVar): boolean {
-        return this.args.some(a => a.contains(other));
-    }
-
-    public toString(): string {
-        return this.constructorName + (this.args.length ? ' ' : '') + this.args.map(a => '(' + a.toString() + ')').join(' ');
-    }
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
 }
 
-class PolyType {
-    quantifiedVars: string[];
-    monoType: MonoType;
-
-    constructor(quantifiedVars: string[], monoType: MonoType) {
-        this.quantifiedVars = quantifiedVars;
-        this.monoType = monoType;
+function contains(type: MonoType | PolyType, other: TypeVar): boolean {
+    if (type instanceof TypeVar) {
+        return type.name == other.name;
     }
 
-    public inst(): MonoType {
-        return this.monoType.inst(this.quantifiedVars, this.quantifiedVars.map(freshTypeName));
-    }
-    
-    public apply(substitution: Substitution): PolyType {
-        return new PolyType(this.quantifiedVars, this.monoType.apply(substitution));
+    if (type instanceof TypeFuncApp) {
+        return type.args.some(arg => contains(arg, other));
     }
 
-    public contains(other: TypeVar): boolean {
-        return this.monoType.contains(other) && !this.quantifiedVars.includes(other.name)
+    if (type instanceof PolyType) {
+        return contains(type.monoType, other) && !type.quantifiedVars.includes(other.name)
     }
+
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
 }
 
-export { TypeInferenceError, Context, Substitution, Var, App, Abs, Let, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, substitute, combine, unify };
+export { TypeInferenceError, Context, Substitution, substitute, combine, unify, infer, apply };
