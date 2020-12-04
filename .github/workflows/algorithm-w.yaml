@@ -31,9 +31,6 @@ jobs:
       - name: 'language: Build'
         working-directory: language
         run: npm run build --if-present
-      - name: 'language: Link'
-        working-directory: language
-        run: npm link
 
       - name: 'algorithm-w: Install dependencies'
         working-directory: algorithm-w
