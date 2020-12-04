@@ -1,4 +1,4 @@
-import { Var, App, Abs, Let, parse } from '../src/index'
+import { CharLiteral, NumberLiteral, Var, App, Abs, Let, parse } from '../src/index'
 
 test('general: syntax error', () => {
     expect(() => parse('')).toThrow()
@@ -9,15 +9,29 @@ test('var: valid', () => {
     expect(parse('True')).toEqual(new Var('True'));
     expect(parse('myIdentifier', true).isAccepted()).toBe(true);
     expect(parse('myBooleans')).toEqual(new Var('myBooleans'));
+    expect(parse('3')).toEqual(new NumberLiteral(3));
+    expect(parse('add 3')).toEqual(new App(new Var('add'), new NumberLiteral(3)));
+    expect(parse('"hi"')).toEqual(new App(new App(new Var(':'), new CharLiteral('h')), new App(new App(new Var(':'), new CharLiteral('i')), new Var('[]'))));
+    expect(parse('"I\'m"')).toEqual(new App(new App(new Var(':'), new CharLiteral('I')), new App(new App(new Var(':'), new CharLiteral('\'')), new App(new App(new Var(':'), new CharLiteral('m')), new Var('[]')))));
+    expect(parse('h3llo')).toEqual(new Var('h3llo'))
+    expect(parse('hell0')).toEqual(new Var('hell0'))
+    expect(parse('_')).toEqual(new Var('_'))
+    expect(parse('+')).toEqual(new Var('+'))
+    expect(parse('-')).toEqual(new Var('-'))
+    expect(parse('/')).toEqual(new Var('/'))
+    expect(parse('*')).toEqual(new Var('*'))
+    expect(parse(':')).toEqual(new Var(':'))
+    expect(parse('-3')).toEqual(new NumberLiteral(-3))
+    expect(parse('+3')).toEqual(new NumberLiteral(3))
+    expect(parse('+ 3')).toEqual(new App(new Var('+'), new NumberLiteral(3)))
+    expect(parse('3e2')).toEqual(new NumberLiteral(300))
 })
 
 test('var: syntax error', () => {
-    expect(() => parse('_')).toThrow()
-    expect(() => parse('3')).toThrow()
-    expect(() => parse('h3llo')).toThrow()
-    expect(() => parse('hell0')).toThrow()
-    expect(() => parse('+')).toThrow()
-    expect(() => parse('+3')).toThrow()
+    expect(() => parse('let')).toThrow()
+    expect(() => parse('🤔')).toThrow()
+    expect(() => parse('\'my string\'')).toThrow();
+    expect(() => parse('->')).toThrow();
 })
 
 test('app: valid', () => {

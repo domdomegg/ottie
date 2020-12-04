@@ -1,20 +1,44 @@
-import { C, F, GenLex, Streams, TupleParser, SingleParser, Response } from '@masala/parser';
+import { C, N, F, GenLex, Streams, TupleParser, SingleParser, Response } from '@masala/parser';
 
-interface Expr {}
+type Expr = CharLiteral | NumberLiteral | Var | App | Abs | Let
 
-class Var implements Expr {
+class CharLiteral {
+    private value: string;
+
+    constructor(value: string) {
+        this.value = value;
+    }
+
+    toString(): string {
+        return this.value;
+    }
+}
+
+class NumberLiteral {
+    private value: number;
+
+    constructor(value: number) {
+        this.value = value;
+    }
+
+    toString(): string {
+        return this.value.toString();
+    }
+}
+
+class Var {
     private name: string;
 
     constructor(name: string) {
         this.name = name;
     }
 
-    toString() {
+    toString(): string {
         return this.name;
     }
 }
 
-class App implements Expr {
+class App {
     private func: Expr;
     private arg: Expr;
 
@@ -23,12 +47,12 @@ class App implements Expr {
         this.arg = arg;
     }
 
-    toString() {
+    toString(): string {
         return '(' + this.func.toString() + ' ' + this.arg.toString() + ')'
     }
 }
 
-class Abs implements Expr {
+class Abs {
     private param: string;
     private body: Expr;
 
@@ -37,12 +61,12 @@ class Abs implements Expr {
         this.body = body;
     }
 
-    toString() {
+    toString(): string {
         return '(\\' + this.param + ' -> ' + this.body.toString() + ')'
     }
 }
 
-class Let implements Expr {
+class Let {
     private param: string;
     private def: Expr;
     private body: Expr;
@@ -53,7 +77,7 @@ class Let implements Expr {
         this.body = body;
     }
 
-    toString() {
+    toString(): string {
         return '(let ' + this.param + ' = ' + this.def.toString() + ' in ' + this.body.toString() + ')'
     }
 }
@@ -81,7 +105,10 @@ class ParseError extends Error {
 }
 
 const genlex = new GenLex();
-const identifier = genlex.tokenize(C.letters(), 'identifier');
+const identifier = genlex.tokenize(C.charIn('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-/%<>^:[]_').rep().map(t => t.join()), 'identifier');
+const charLiteral = genlex.tokenize(C.charLiteral(), 'char');
+const stringLiteral = genlex.tokenize(C.stringLiteral(), 'string');
+const numberLiteral = genlex.tokenize(N.number(), 'number');
 const backslash = genlex.tokenize(C.char('\\'), 'backslash');
 const arrow = genlex.tokenize(C.string('->'), 'arrow');
 const lparen = genlex.tokenize(C.char('('), 'lparen');
@@ -91,19 +118,28 @@ const equal = genlex.tokenize(C.char('='), 'equal');
 const inTok = genlex.tokenize(C.string('in'), 'in');
 
 const expression = (): SingleParser<Expr> =>
-        F.try(optApp(VAR()))
+        F.try(optApp(LEAF()))
     .or(F.try(optApp(ABS())))
-    .or(F.try(optApp(PAR())))
     .or(F.try(optApp(LET())))
+    .or(F.try(optApp(PAR())))
 
 const expressionNoApp = (): SingleParser<Expr> =>
-        F.try(VAR())
+        F.try(LEAF())
     .or(F.try(ABS()))
-    .or(F.try(PAR()))
     .or(F.try(LET()))
+    .or(F.try(PAR()))
+
+const toCharArray = (string: string) => {
+    const chars = string.split('');
+    let expr: Expr = new Var('[]');
+    while (chars.length) {
+        expr = new App(new App(new Var(':'), new CharLiteral(chars.pop() as string)), expr);
+    }
+    return expr;
+}
 
 // We have to SHOUT as var and let are restricted keywords in JavaScript
-const VAR = (): SingleParser<Var> => identifier.map(value => new Var(value))
+const LEAF = (): SingleParser<Expr> => F.try(numberLiteral.map(value => new NumberLiteral(value))).or(F.try(stringLiteral.map(toCharArray))).or(F.try(charLiteral.map(value => new CharLiteral(value)))).or(F.try(identifier.map(value => new Var(value))))
 const ABS = (): SingleParser<Abs> => lparen.drop().then(backslash.drop()).then(identifier).then(arrow.drop()).then(F.lazy(expression)).then(rparen.drop()).map(tuple => new Abs(tuple.at(0), tuple.at(1)))
 const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single()
 const LET = (): SingleParser<Let> => lparen.drop().then(letTok.drop()).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).then(rparen.drop()).map(tuple => new Let(tuple.at(0), tuple.at(1), tuple.at(2)))
@@ -122,4 +158,4 @@ function parse(code: string, forResponse: boolean = false) {
     throw new ParseError('Failed to parse:\n\t' + code + '\n\t' + ' '.repeat(response.location()) + '^')
 }
 
-export { Var, App, Abs, Let, Expr, parse, ParseError };
+export { CharLiteral, NumberLiteral, Var, App, Abs, Let, Expr, parse, ParseError };
