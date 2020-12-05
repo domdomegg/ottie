@@ -4,6 +4,7 @@ on:
   push:
     paths:
     - '.github/workflows/algorithm-w.yaml'
+    - 'language/**'
     - 'algorithm-w/**'
 
 jobs:
@@ -21,15 +22,25 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
+      - name: Use npm v7
+        run: npm i -g npm@7
+
+      - name: 'language: Install dependencies'
+        working-directory: language
+        run: npm ci
+      - name: 'language: Build'
+        working-directory: language
+        run: npm run build --if-present
+
+      - name: 'algorithm-w: Install dependencies'
         working-directory: algorithm-w
         run: npm ci
-      - name: Lint
+      - name: 'algorithm-w: Lint'
         working-directory: algorithm-w
         run: npm run lint --if-present
-      - name: Build
+      - name: 'algorithm-w: Build'
         working-directory: algorithm-w
         run: npm run build --if-present
-      - name: Test
+      - name: 'algorithm-w: Test'
         working-directory: algorithm-w
         run: npm run test --if-present

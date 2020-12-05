@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Main.css';
-import { Context, TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, Var, App, Abs, Let, TypeInferenceError } from 'algorithm-w/dist'
+import { TypeVar, TypeFunc, TypeFuncApp, MonoType, PolyType, Expr, Var, App, Abs, Let, parse, ParseError, NumberLiteral, CharLiteral } from 'language'
+import { Context, infer, TypeInferenceError } from 'algorithm-w'
 
 // Helper to make writing out the AST less painful
 // e('+', 'myNum', 'myNum')
@@ -138,18 +139,19 @@ export const standardCtx: Context = {
 }
 
 function Main() {
-  const [code, setCode] = useState('e(\'+\')');
+  const [code, setCode] = useState('map not []');
   let result = 'Error: ';
   try {
-    // eslint-disable-next-line no-eval
-    const r = eval(code);
-    if (!(r instanceof Var) && !(r instanceof App) && !(r instanceof Abs) && !(r instanceof Let)) {
+    const r = parse(code);
+    if (!(r instanceof CharLiteral) && !(r instanceof NumberLiteral) && !(r instanceof Var) && !(r instanceof App) && !(r instanceof Abs) && !(r instanceof Let)) {
       throw new Error('Not a valid expression');
     }
-    result = r.infer(standardCtx)[0].toString();
+    result = infer(r, standardCtx).toString();
   } catch (e) {
-    if (e.name === "TypeInferenceError") {
+    if (e.name === TypeInferenceError.name) {
       result += (e as TypeInferenceError).message;
+    } else if (e.name === ParseError.name) {
+      result += (e as ParseError).message;
     } else {
       result += 'Not a valid expression: ' + e.message;
     }
@@ -162,11 +164,11 @@ function Main() {
         Play with algorithm W in your browser.
       </h2>
       <h2>Samples:
-        <button onClick={() => setCode('e(\'+\')')}>+</button>
-        <button onClick={() => setCode('e(\'myNumber\')')}>myNumber</button>
-        <button onClick={() => setCode('e(\'map\', \'not\', \'[]\')')}>map not []</button>
-        <button onClick={() => setCode('e(\'fst\')')}>fst</button>
-        <button onClick={() => setCode('e(\'Just\')')}>Just</button>
+        <button onClick={() => setCode('4')}>4</button>
+        <button onClick={() => setCode('+')}>+</button>
+        <button onClick={() => setCode('map not []')}>map not []</button>
+        <button onClick={() => setCode('fst')}>fst</button>
+        <button onClick={() => setCode('Just')}>Just</button>
       </h2>
       <textarea placeholder="Enter code here..." value={code} onChange={e => setCode(e.target.value)}></textarea>
       <h2>Result</h2>

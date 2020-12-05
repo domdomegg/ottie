@@ -1,4 +1,4 @@
-import { Var, App, Abs, TypeVar, TypeFuncApp } from '../src/index';
+import { TypeVar, TypeFuncApp, Var, App, Abs } from 'language'
 import { number, boolean, e, f, list, tuple, maybe, either, a, b, c, d } from './utilities';
 
 test('function currying', () => {
