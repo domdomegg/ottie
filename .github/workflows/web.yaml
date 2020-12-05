@@ -52,3 +52,8 @@ jobs:
       - name: 'web: Test'
         working-directory: web
         run: npm run test --if-present
+      - name: 'web: Deploy'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web/build
