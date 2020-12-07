@@ -153,7 +153,7 @@ class ParseError extends Error {
 }
 
 const genlex = new GenLex();
-const identifier = genlex.tokenize(C.charIn('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-/%<>^:[]_').rep().map(t => t.join()), 'identifier');
+const identifier = genlex.tokenize(C.charIn('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-/%<>^:[]_|&,').rep().map(t => t.join()), 'identifier');
 const charLiteral = genlex.tokenize(C.charLiteral(), 'char');
 const stringLiteral = genlex.tokenize(C.stringLiteral(), 'string');
 const numberLiteral = genlex.tokenize(N.number(), 'number');
@@ -165,13 +165,18 @@ const letTok = genlex.tokenize(C.string('let'), 'let');
 const equal = genlex.tokenize(C.char('='), 'equal');
 const inTok = genlex.tokenize(C.string('in'), 'in');
 
-const expression = (): SingleParser<Expr> =>
+const expression1 = (): SingleParser<Expr> =>
+        F.try(LET_())
+    .or(F.try(ABS_()))
+    .or(F.try(expression2()))
+
+const expression2 = (): SingleParser<Expr> =>
         F.try(optApp(LEAF()))
     .or(F.try(optApp(ABS())))
     .or(F.try(optApp(LET())))
     .or(F.try(optApp(PAR())))
 
-const expressionNoApp = (): SingleParser<Expr> =>
+const expression3 = (): SingleParser<Expr> =>
         F.try(LEAF())
     .or(F.try(ABS()))
     .or(F.try(LET()))
@@ -188,15 +193,17 @@ const toCharArray = (string: string) => {
 
 // We have to SHOUT as var and let are restricted keywords in JavaScript
 const LEAF = (): SingleParser<Expr> => F.try(numberLiteral.map(value => new NumberLiteral(value))).or(F.try(stringLiteral.map(toCharArray))).or(F.try(charLiteral.map(value => new CharLiteral(value)))).or(F.try(identifier.map(value => new Var(value))))
-const ABS = (): SingleParser<Abs> => lparen.drop().then(backslash.drop()).then(identifier).then(arrow.drop()).then(F.lazy(expression)).then(rparen.drop()).map(tuple => new Abs(tuple.at(0), tuple.at(1)))
-const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single()
-const LET = (): SingleParser<Let> => lparen.drop().then(letTok.drop()).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).then(rparen.drop()).map(tuple => new Let(tuple.at(0), tuple.at(1), tuple.at(2)))
+const ABS = (): SingleParser<Abs> => lparen.drop().then(ABS_()).then(rparen.drop()).single()
+const ABS_ = (): SingleParser<Abs> => backslash.drop().then(identifier).then(arrow.drop()).then(F.lazy(expression2)).map(tuple => new Abs(tuple.at(0), tuple.at(1)))
+const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression2)).then(rparen.drop()).single()
+const LET = (): SingleParser<Abs> => lparen.drop().then(LET_()).then(rparen.drop()).single()
+const LET_ = (): SingleParser<Let> => letTok.drop().then(identifier).then(equal.drop()).then(F.lazy(expression2)).then(inTok.drop()).then(F.lazy(expression2)).map(tuple => new Let(tuple.at(0), tuple.at(1), tuple.at(2)))
 
 const optApp = (parser: SingleParser<Expr>): SingleParser<Expr> => parser.then(expressionPrime()).array().map(nestLeft);
-const expressionPrime = (): TupleParser<Expr> => F.lazy(expressionNoApp).optrep();
+const expressionPrime = (): TupleParser<Expr> => F.lazy(expression3).optrep();
 const nestLeft = (v: Expr[]) => v.reduce((prev, cur) => new App(prev, cur));
 
-const parser: SingleParser<Expr> = genlex.use(expression().then(F.eos().drop()).single());
+const parser: SingleParser<Expr> = genlex.use(expression1().then(F.eos().drop()).single());
 function parse(code: string): Expr;
 function parse(code: string, forResponse: true): Response<Expr>;
 function parse(code: string, forResponse: boolean = false) {

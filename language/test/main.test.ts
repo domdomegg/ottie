@@ -57,6 +57,7 @@ test('app: syntax error', () => {
 })
 
 test('abs: valid', () => {
+    expect(parse('\\x -> x')).toEqual(new Abs('x', new Var('x')))
     expect(parse('(\\x -> x)')).toEqual(new Abs('x', new Var('x')))
     expect(parse('(\\x -> x True)')).toEqual(new Abs('x', new App(new Var('x'), new Var('True'))))
     expect(parse('(\\x -> x True) not')).toEqual(new App(new Abs('x', new App(new Var('x'), new Var('True'))), new Var('not')))
@@ -64,7 +65,6 @@ test('abs: valid', () => {
 })
 
 test('abs: syntax error', () => {
-    expect(() => parse('\\x -> x')).toThrow()
     expect(() => parse('(\\ -> x)')).toThrow()
     expect(() => parse('(\\\\ -> x)')).toThrow()
     expect(() => parse('(\\\\x -> x)')).toThrow()
@@ -74,6 +74,7 @@ test('abs: syntax error', () => {
 })
 
 test('let: valid', () => {
+    expect(parse('let x = True in x')).toEqual(new Let('x', new Var('True'), new Var('x')))
     expect(parse('(let x = True in x)')).toEqual(new Let('x', new Var('True'), new Var('x')))
     expect(parse('(let x = myBooleans in map not x)')).toEqual(new Let('x', new Var('myBooleans'), new App(new App(new Var('map'), new Var('not')), new Var('x'))))
     expect(parse('(let x = not in map x myBooleans)')).toEqual(new Let('x', new Var('not'), new App(new App(new Var('map'), new Var('x')), new Var('myBooleans'))))
@@ -83,7 +84,6 @@ test('let: valid', () => {
 })
 
 test('let: syntax error', () => {
-    expect(() => parse('let x = True in x')).toThrow()
     expect(() => parse('(let x = True in )')).toThrow()
     expect(() => parse('(let x = True i x)')).toThrow()
     expect(() => parse('(let x = True in in x)')).toThrow()
