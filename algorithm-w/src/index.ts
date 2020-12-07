@@ -104,26 +104,21 @@ function generalise(ctx: Context, type: MonoType): PolyType {
     return new PolyType(diff(freeVars(type), freeVars(ctx)), type);
 }
 
-var typeCounter = 0;
-function freshTypeName(): string {
-    return "t" + typeCounter++;
-}
-function freshType(): TypeVar {
-    return new TypeVar(freshTypeName());
-}
-
 // TODO: fallback to a default context instead of an empty one
 function infer(expr: Expr, ctx: Context = {}): MonoType {
-    return _infer(expr, ctx)[0];
+    let typeCounter = 0;
+    const freshTypeName = (): string => "t" + typeCounter++;
+
+    return _infer(expr, ctx, freshTypeName)[0];
 }
 
-function _infer(expr: Expr, ctx: Context): [MonoType, Substitution] {
+function _infer(expr: Expr, ctx: Context, freshTypeName: () => string): [MonoType, Substitution] {
     if (expr instanceof CharLiteral) {
-        return [inst(new PolyType([], new TypeFuncApp('char'))), {}];
+        return [inst(new PolyType([], new TypeFuncApp('char')), freshTypeName), {}];
     }
 
     if (expr instanceof NumberLiteral) {
-        return [inst(new PolyType([], new TypeFuncApp('number'))), {}];
+        return [inst(new PolyType([], new TypeFuncApp('number')), freshTypeName), {}];
     }
 
     if (expr instanceof Var) {
@@ -131,27 +126,27 @@ function _infer(expr: Expr, ctx: Context): [MonoType, Substitution] {
         if (!type) {
             throw new TypeInferenceError(expr.name + ' is not in scope');
         }
-        return [inst(type), {}];
+        return [inst(type, freshTypeName), {}];
     }
 
     if (expr instanceof App) {
-        const [funcType, funcSubstitution] = _infer(expr.func, ctx);
-        const [argType, argSubstitution] = _infer(expr.arg, substitute(funcSubstitution, ctx));
-        const t = freshType();
+        const [funcType, funcSubstitution] = _infer(expr.func, ctx, freshTypeName);
+        const [argType, argSubstitution] = _infer(expr.arg, substitute(funcSubstitution, ctx), freshTypeName);
+        const t = new TypeVar(freshTypeName());
         const unifiedSubstitution = unify(apply(funcType, argSubstitution), new TypeFuncApp("->", argType, t))
 
         return [apply(t, unifiedSubstitution), combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
     }
 
     if (expr instanceof Abs) {
-        const t = freshType();
-        const [bodyType, bodySubstitution] = _infer(expr.body, { ...ctx, [expr.param]: new PolyType([], t) });
+        const t = new TypeVar(freshTypeName());
+        const [bodyType, bodySubstitution] = _infer(expr.body, { ...ctx, [expr.param]: new PolyType([], t) }, freshTypeName);
         return [apply(new TypeFuncApp("->", t, bodyType), bodySubstitution), bodySubstitution]
     }
 
     if (expr instanceof Let) {
-        const [defType, defSubstitution] = _infer(expr.def, ctx);
-        const [bodyType, bodySubstitution] = _infer(expr.body, { ...substitute(defSubstitution, ctx), [expr.param]: generalise(substitute(defSubstitution, ctx), defType) });
+        const [defType, defSubstitution] = _infer(expr.def, ctx, freshTypeName);
+        const [bodyType, bodySubstitution] = _infer(expr.body, { ...substitute(defSubstitution, ctx), [expr.param]: generalise(substitute(defSubstitution, ctx), defType) }, freshTypeName);
         return [bodyType, combine(defSubstitution, bodySubstitution)]
     }
 
@@ -159,20 +154,20 @@ function _infer(expr: Expr, ctx: Context): [MonoType, Substitution] {
     throw new Error('Internal error, this should never happen');
 }
 
-function inst(type: PolyType): MonoType;
-function inst(type: MonoType, from: string[], to: string[]): MonoType;
-function inst(type: MonoType | PolyType, from: string[] = [], to: string[] = []): MonoType {
+function inst(type: PolyType, freshTypeName: () => string): MonoType;
+function inst(type: MonoType, freshTypeName: () => string, from: string[], to: string[]): MonoType;
+function inst(type: MonoType | PolyType, freshTypeName: () => string, from: string[] = [], to: string[] = []): MonoType {
     if (type instanceof TypeVar) {
         const i = from.indexOf(type.name);
         return (i === -1) ? type : new TypeVar(to[i]);
     }
 
     if (type instanceof TypeFuncApp) {
-        return new TypeFuncApp(type.constructorName, ...type.args.map(arg => inst(arg, from, to)));
+        return new TypeFuncApp(type.constructorName, ...type.args.map(arg => inst(arg, freshTypeName, from, to)));
     }
 
     if (type instanceof PolyType) {
-        return inst(type.monoType, type.quantifiedVars, type.quantifiedVars.map(freshTypeName));
+        return inst(type.monoType, freshTypeName, type.quantifiedVars, type.quantifiedVars.map(freshTypeName));
     }
 
     // Should be unreachable...
