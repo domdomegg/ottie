@@ -140,20 +140,22 @@ export const standardCtx: Context = {
 
 function Main() {
   const [code, setCode] = useState('map not []');
-  let result = 'Error: ';
+  // Either the result or error message
+  let ast: Expr | string = 'Failed to parse';
+  let type: MonoType | string = 'Failed to infer type';
   try {
-    const r = parse(code);
-    if (!(r instanceof CharLiteral) && !(r instanceof NumberLiteral) && !(r instanceof Var) && !(r instanceof App) && !(r instanceof Abs) && !(r instanceof Let)) {
+    ast = parse(code);
+    if (!(ast instanceof CharLiteral) && !(ast instanceof NumberLiteral) && !(ast instanceof Var) && !(ast instanceof App) && !(ast instanceof Abs) && !(ast instanceof Let)) {
       throw new Error('Not a valid expression');
     }
-    result = infer(r, standardCtx).toString();
+    type = infer(ast, standardCtx);
   } catch (e) {
-    if (e.name === TypeInferenceError.name) {
-      result += (e as TypeInferenceError).message;
-    } else if (e.name === ParseError.name) {
-      result += (e as ParseError).message;
+    if (e.name === ParseError.name) {
+      ast = (e as ParseError).message;
+    } else if (e.name === TypeInferenceError.name) {
+      type = (e as TypeInferenceError).message;
     } else {
-      result += 'Not a valid expression: ' + e.message;
+      ast = 'Not a valid expression: ' + JSON.stringify(e.message);
     }
   }
 
@@ -169,10 +171,15 @@ function Main() {
         <button onClick={() => setCode('map not []')}>map not []</button>
         <button onClick={() => setCode('fst')}>fst</button>
         <button onClick={() => setCode('Just')}>Just</button>
+        <button onClick={() => setCode('let x = 3 in + x')}>let x = 3 in +</button>
       </h2>
       <textarea placeholder="Enter code here..." value={code} onChange={e => setCode(e.target.value)}></textarea>
-      <h2>Result</h2>
-      <p>{result}</p>
+
+      <h2>AST</h2>
+      <p>{ast.toString()}</p>
+
+      <h2>Type</h2>
+      <p>{type.toString()}</p>
     </>
   );
 }
