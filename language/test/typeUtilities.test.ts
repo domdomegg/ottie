@@ -1,26 +1,9 @@
-import { TypeVar, TypeFuncApp, Var, App, Abs } from 'language'
-import { number, boolean, e, f, list, tuple, maybe, either, a, b, c, d } from './utilities';
+import { TypeVar, TypeFuncApp, Var, App, Abs, typeUtils } from '../src/index';
+const { number, boolean, f, list, tuple, maybe, either, a, b, c, d } = typeUtils;
 
 test('function currying', () => {
     expect(f(number, number, number)).toEqual(f(number, f(number, number)));
     expect(f(number, f(number, number))).toEqual(f(number, number, number));
-});
-
-test('e parses variables', () => {
-    expect(e('myNumber')).toEqual(new Var('myNumber'));
-    expect(e('myBoolean')).toEqual(new Var('myBoolean'));
-    expect(e('map')).toEqual(new Var('map'));
-});
-
-test('e parses function application', () => {
-    expect(e('map', 'not')).toEqual(new App(new Var('map'), new Var('not')));
-    expect(e('map', 'not', '[]')).toEqual(new App(new App(new Var('map'), new Var('not')), new Var('[]')));
-});
-
-test('e parses nested expressions', () => {
-    expect(e('map', 'not', e('cons', 'True', '[]'))).toEqual(new App(new App(new Var('map'), new Var('not')), new App(new App(new Var('cons'), new Var('True')), new Var('[]'))));
-    expect(e(new Abs('x', e('not', 'x')))).toEqual(new Abs('x', new App(new Var('not'), new Var('x'))));
-    expect(e(new Abs('x', e('not', 'x')), 'True')).toEqual(new App(new Abs('x', new App(new Var('not'), new Var('x'))), new Var('True')));
 });
 
 test('list helper works', () => {

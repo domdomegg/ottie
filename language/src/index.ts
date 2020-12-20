@@ -130,6 +130,137 @@ class PolyType {
     }
 }
 
+interface Context { [name: string]: PolyType | undefined }
+
+/* Type utilities */
+
+
+// Utilities which make creating types easier
+const number = new TypeFuncApp('number');
+const char = new TypeFuncApp('char');
+const boolean = new TypeFuncApp('boolean');
+const f = (one: MonoType, two: MonoType, ...extra: MonoType[]): TypeFuncApp => {
+    if (extra.length === 0) return new TypeFuncApp('->', one, two)
+    return new TypeFuncApp('->', one, f(two, extra[0], ...extra.slice(1)))
+}
+const list = (monoType: MonoType): TypeFuncApp => new TypeFuncApp('[]', monoType);
+const tuple = (...monoTypes: MonoType[]): TypeFuncApp => {
+    if (monoTypes.length <= 1) throw new Error('Tuple has too few elements, minimum of 2 but given ' + monoTypes.length)
+    if (monoTypes.length > 8) throw new Error('Tuple has too many elements, maximum of 8 but given ' + monoTypes.length)
+    return new TypeFuncApp(','.repeat(monoTypes.length - 1) as TypeFunc, ...monoTypes);
+}
+const maybe = (monoType: MonoType): TypeFuncApp => new TypeFuncApp('Maybe', monoType);
+const either = (left: MonoType, right: MonoType): TypeFuncApp => new TypeFuncApp('Either', left, right);
+
+const a = new TypeVar('a');
+const b = new TypeVar('b');
+const c = new TypeVar('c');
+const d = new TypeVar('d');
+const pt = (mt: MonoType) => new PolyType([], mt);
+
+// Set up some basic things so the langauge is interesting
+const standardCtx: Context = {
+    // Arithmetic
+    '+': pt(f(number, number, number)),
+    '*': pt(f(number, number, number)),
+    '-': pt(f(number, number, number)),
+    '/': pt(f(number, number, number)),
+    '%': pt(f(number, number, number)),
+    'negate': pt(f(number, number)),
+    'abs': pt(f(number, number)),
+    'signum': pt(f(number, number)),
+    'even': pt(f(number, boolean)),
+    'odd': pt(f(number, boolean)),
+
+    // Booleans
+    'not': pt(f(boolean, boolean)),
+    '&&': pt(f(boolean, boolean, boolean)),
+    '||': pt(f(boolean, boolean, boolean)),
+    'True': pt(boolean),
+    'False': pt(boolean),
+
+    // Example variables
+    'myNumber': pt(number),
+    'myBoolean': pt(boolean),
+
+    // Lists
+    '[]': new PolyType(['a'], list(a)),
+    ':': new PolyType(['a'], f(a, list(a), list(a))),
+    'cons': new PolyType(['a'], f(a, list(a), list(a))),
+    '++': new PolyType(['a'], f(list(a), list(a), list(a))),
+    'head': new PolyType(['a'], f(list(a), a)),
+    'last': new PolyType(['a'], f(list(a), a)),
+    'tail': new PolyType(['a'], f(list(a), list(a))),
+    'init': new PolyType(['a'], f(list(a), list(a))),
+    'uncons': new PolyType(['a'], f(list(a), maybe(tuple(a, list(a))))),
+    'null': new PolyType(['a'], f(list(a), boolean)),
+    'length': new PolyType(['a'], f(list(a), number)),
+    'map': new PolyType(['a', 'b'], f(f(a, b), list(a), list(b))),
+    'reverse': new PolyType(['a'], f(list(a), list(a))),
+    'intersperse': new PolyType(['a'], f(a, list(a), list(a))),
+    'intercalate': new PolyType(['a'], f(list(a), list(list(a)), list(a))),
+    'transpose': new PolyType(['a'], f(list(list(a)), list(list((a))))),
+    'subsequences': new PolyType(['a'], f(list(a), list(list((a))))),
+    'permutations': new PolyType(['a'], f(list(a), list(list((a))))),
+    'foldl': new PolyType(['a'], f(f(b, a, b), b, list(a), b)),
+    'foldl\'': new PolyType(['a'], f(f(b, a, b), b, list(a), b)),
+    'foldl1': new PolyType(['a'], f(f(a, a, a), list(a), a)),
+    'foldl1\'': new PolyType(['a'], f(f(a, a, a), list(a), a)),
+    'foldr': new PolyType(['a'], f(f(a, b, b), b, list(a), b)),
+    'foldr1': new PolyType(['a'], f(f(a, a, a), list(a), a)),
+    'concat': new PolyType(['a'], f(list(list(a)), list(a))),
+    'concatMap': new PolyType(['a'], f(f(a, list(a)), list(a), list(b))),
+    'and': pt(f(list(boolean), boolean)),
+    'or': pt(f(list(boolean), boolean)),
+    'any': new PolyType(['a'], f(f(a, boolean), list(a), boolean)),
+    'all': new PolyType(['a'], f(f(a, boolean), list(a), boolean)),
+    'sum': pt(f(list(number), number)),
+    'product': pt(f(list(number), number)),
+    'maximum': pt(f(list(number), number)),
+    'minimum': pt(f(list(number), number)),
+    'take': new PolyType(['a'], f(number, list(a), list(a))),
+    'drop': new PolyType(['a'], f(number, list(a), list(a))),
+    'splitAt': new PolyType(['a'], f(number, list(a), tuple(list(a), list(a)))),
+    'takeWhile': new PolyType(['a'], f(f(a, boolean), list(a), list(a))),
+    'dropWhile': new PolyType(['a'], f(f(a, boolean), list(a), list(a))),
+    'elem': new PolyType(['a'], f(a, list(a), boolean)),
+    'notElem': new PolyType(['a'], f(a, list(a), boolean)),
+    'lookup': new PolyType(['a', 'b'], f(a, list(tuple(a, b)), maybe(b))),
+    'find': new PolyType(['a'], f(f(a, boolean), list(a), maybe(a))),
+    'filter': new PolyType(['a'], f(f(a, boolean), list(a), list(a))),
+    'partition': new PolyType(['a'], f(f(a, boolean), list(a), tuple(list(a), list(a)))),
+    '!!': new PolyType(['a'], f(list(a), number, a)),
+    'zip': new PolyType(['a', 'b'], f(list(a), list(b), list(tuple(a, b)))),
+    'zipWith': new PolyType(['a', 'b', 'c'], f(f(a, b, c), list(a), list(b), list(c))),
+    'unzip': new PolyType(['a', 'b'], f(list(tuple(a, b)), tuple(list(a), list(b)))),
+    'nub': new PolyType(['a'], f(list(a), list(a))),
+    'delete': new PolyType(['a'], f(a, list(a), list(a))),
+    '\\\\': new PolyType(['a'], f(list(a), list(a), list(a))),
+    'union': new PolyType(['a'], f(list(a), list(a), list(a))),
+    'intersect': new PolyType(['a'], f(list(a), list(a), list(a))),
+    'sort': new PolyType(['a'], f(list(a), list(a))),
+
+    // Tuples
+    ',': new PolyType(['a', 'b'], f(a, b, tuple(a, b))),
+    ',,': new PolyType(['a', 'b', 'c'], f(a, b, c, tuple(a, b, c))),
+    ',,,': new PolyType(['a', 'b', 'c', 'd'], f(a, b, c, d, tuple(a, b, c, d))),
+    'fst': new PolyType(['a', 'b'], f(tuple(a, b), a)),
+    'snd': new PolyType(['a', 'b'], f(tuple(a, b), b)),
+    'curry': new PolyType(['a', 'b', 'c'], f(f(tuple(a, b), c), a, b, c)),
+    'uncurry': new PolyType(['a', 'b', 'c'], f(f(a, b, c), tuple(a, b), c)),
+
+    // Maybe
+    'Just': new PolyType(['a'], f(a, maybe(a))),
+    'Nothing': new PolyType(['a'], maybe(a)),
+
+    // Either
+    'Left': new PolyType(['a', 'b'], f(a, either(a, b))),
+    'Right': new PolyType(['a', 'b'], f(b, either(a, b))),
+
+    // Id
+    'id': new PolyType(['a'], f(a, a)),
+}
+
 /* Parser */
 
 // expr ::= identifier # var
@@ -213,8 +344,10 @@ function parse(code: string, forResponse: boolean = false) {
     throw new ParseError('Failed to parse:\n\t' + code + '\n\t' + ' '.repeat(response.location()) + '^')
 }
 
+const typeUtils = { number, char, boolean, f, list, tuple, maybe, either, a, b, c, d, pt, standardCtx };
 export {
     CharLiteral, NumberLiteral, Var, App, Abs, Let, Expr,
-    MonoType, TypeVar, TypeFunc, TypeFuncApp, PolyType,
-    parse, ParseError
+    MonoType, TypeVar, TypeFunc, TypeFuncApp, PolyType, Context,
+    parse, ParseError,
+    typeUtils
 };
