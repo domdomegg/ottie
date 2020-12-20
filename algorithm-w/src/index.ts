@@ -1,4 +1,4 @@
-import { TypeVar, TypeFuncApp, MonoType, PolyType, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral } from 'language'
+import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils } from 'language'
 
 class TypeInferenceError extends Error {
     constructor(message: string) {
@@ -6,8 +6,6 @@ class TypeInferenceError extends Error {
         this.name = "TypeInferenceError";
     }
 }
-
-interface Context { [name: string]: PolyType | undefined }
 
 interface Substitution { [name: string]: MonoType | undefined }
 
@@ -104,8 +102,7 @@ function generalise(ctx: Context, type: MonoType): PolyType {
     return new PolyType(diff(freeVars(type), freeVars(ctx)), type);
 }
 
-// TODO: fallback to a default context instead of an empty one
-function infer(expr: Expr, ctx: Context = {}): MonoType {
+function infer(expr: Expr, ctx: Context = typeUtils.standardCtx): MonoType {
     let typeCounter = 0;
     const freshTypeName = (): string => "t" + typeCounter++;
 

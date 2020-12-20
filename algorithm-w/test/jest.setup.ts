@@ -1,6 +1,5 @@
 import { TypeVar, MonoType, Expr } from 'language'
 import { TypeInferenceError, infer } from '../src/index';
-import { standardCtx } from './utilities';
 import diff from 'jest-diff';
 
 declare global {
@@ -16,9 +15,9 @@ expect.extend({
     toHaveType(actualExpr: Expr, expectedType: MonoType) {
         let actualType: MonoType;
         try {
-            actualType = infer(actualExpr, standardCtx)
+            actualType = infer(actualExpr)
         } catch (e) {
-            if (e instanceof TypeInferenceError) {
+            if (e.name == TypeInferenceError.name) {
                 return {
                     message: () => `expected expression to have valid type but got error ${this.utils.printReceived(e)}`,
                     pass: false,
@@ -67,7 +66,7 @@ expect.extend({
     toHaveInvalidType(actualExpr: Expr) {
         let actualType: MonoType;
         try {
-            actualType = infer(actualExpr, standardCtx)
+            actualType = infer(actualExpr)
         } catch (e) {
             return {
                 message: () => `expected expression to have valid type but got error ${this.utils.printReceived(e)}`,
