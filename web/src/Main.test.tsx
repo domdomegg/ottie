@@ -24,13 +24,13 @@ test('displays correct result after clicking \'+\' sample', () => {
 test('displays correct result after entering \'True\'', () => {
     const screen = render(<Main />)
     expect(screen.queryByText('boolean')).not.toBeInTheDocument();
-    fireEvent.change((screen.container.querySelector('textarea') as HTMLTextAreaElement), { target: { value: 'True' }});
+    fireEvent.change((screen.container.querySelector('input') as HTMLInputElement), { target: { value: 'True' }});
     expect(screen.getByText('boolean')).toBeInTheDocument();
 });
 
 test('displays correct error after entering \'notInScope\'', () => {
     const screen = render(<Main />)
     expect(screen.queryByText('notInScope is not in scope')).not.toBeInTheDocument();
-    fireEvent.change((screen.container.querySelector('textarea') as HTMLTextAreaElement), { target: { value: 'notInScope' }});
+    fireEvent.change((screen.container.querySelector('input') as HTMLInputElement), { target: { value: 'notInScope' }});
     expect(screen.getByText('notInScope is not in scope')).toBeInTheDocument();
 });

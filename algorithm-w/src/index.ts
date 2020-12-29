@@ -1,4 +1,4 @@
-import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils } from 'language'
+import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response } from 'language'
 
 class TypeInferenceError extends Error {
     constructor(message: string) {
@@ -102,11 +102,25 @@ function generalise(ctx: Context, type: MonoType): PolyType {
     return new PolyType(diff(freeVars(type), freeVars(ctx)), type);
 }
 
-function infer(expr: Expr, ctx: Context = typeUtils.standardCtx): MonoType {
+function infer(expr: Expr): MonoType;
+function infer(expr: Expr, forResponse: true, ctx?: Context): Response<MonoType>;
+function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtils.standardCtx) {
     let typeCounter = 0;
     const freshTypeName = (): string => "t" + typeCounter++;
+    if (!forResponse) return _infer(expr, ctx, freshTypeName)[0];
 
-    return _infer(expr, ctx, freshTypeName)[0];
+    try {
+        return {
+            accepted: true,
+            value: _infer(expr, ctx, freshTypeName)[0]
+        }
+    } catch (e) {
+        return {
+            accepted: false,
+            issuePosition: { start: 0, end: 0 },
+            message: (e as Error).message
+        }
+    }
 }
 
 function _infer(expr: Expr, ctx: Context, freshTypeName: () => string): [MonoType, Substitution] {

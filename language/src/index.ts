@@ -1,4 +1,4 @@
-import { C, N, F, GenLex, Streams, TupleParser, SingleParser, Response } from '@masala/parser';
+import { C, N, F, GenLex, Streams, TupleParser, SingleParser } from '@masala/parser';
 
 /* AST expression nodes */
 
@@ -261,6 +261,22 @@ const standardCtx: Context = {
     'id': new PolyType(['a'], f(a, a)),
 }
 
+/* Utilities */
+
+interface Rejected {
+    accepted: false;
+    issuePosition: {
+        start: number;
+        end: number;
+    };
+    message: string;
+}
+interface Accepted<T> {
+    value: T;
+    accepted: true;
+}
+type Response<T> = Rejected | Accepted<T>
+
 /* Parser */
 
 // expr ::= identifier # var
@@ -339,7 +355,10 @@ function parse(code: string): Expr;
 function parse(code: string, forResponse: true): Response<Expr>;
 function parse(code: string, forResponse: boolean = false) {
     const response = parser.parse(Streams.ofString(code));
-    if (forResponse) return response;
+    if (forResponse) {
+        if (response.isAccepted()) return { accepted: true, value: response.value }
+        return { accepted: false, issuePosition: { start: response.location(), end: code.length }, message: 'Failed to parse' }
+    }
     if (response.isAccepted()) return response.value;
     throw new ParseError('Failed to parse:\n\t' + code + '\n\t' + ' '.repeat(response.location()) + '^')
 }
@@ -348,6 +367,6 @@ const typeUtils = { number, char, boolean, f, list, tuple, maybe, either, a, b, 
 export {
     CharLiteral, NumberLiteral, Var, App, Abs, Let, Expr,
     MonoType, TypeVar, TypeFunc, TypeFuncApp, PolyType, Context,
-    parse, ParseError,
+    parse, ParseError, Response, Rejected, Accepted,
     typeUtils
 };

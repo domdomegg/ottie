@@ -2,12 +2,12 @@ import { CharLiteral, NumberLiteral, Var, App, Abs, Let, parse } from '../src/in
 
 test('general: syntax error', () => {
     expect(() => parse('')).toThrow()
-    expect(parse('', true).isAccepted()).toBe(false)
+    expect(parse('', true).accepted).toBe(false)
 })
 
 test('var: valid', () => {
     expect(parse('True')).toEqual(new Var('True'));
-    expect(parse('myIdentifier', true).isAccepted()).toBe(true);
+    expect(parse('myIdentifier', true).accepted).toBe(true);
     expect(parse('myBooleans')).toEqual(new Var('myBooleans'));
     expect(parse('3')).toEqual(new NumberLiteral(3));
     expect(parse('add 3')).toEqual(new App(new Var('add'), new NumberLiteral(3)));
