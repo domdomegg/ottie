@@ -14,14 +14,14 @@ function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: 
   const parseResult = useMemo(() => {
     return parse(code, true);
   }, [code]);
-  useEffect(() => setHighlights(parseResult.accepted ? [] : [{ start: parseResult.issuePosition.start, end: parseResult.issuePosition.end || 0, className: 'error' }]), [parseResult, setHighlights]);
+  useEffect(() => setHighlights(parseResult.accepted ? [] : [{ start: parseResult.issuePosition.start, end: parseResult.issuePosition.end, className: 'highlight-error' }]), [parseResult, setHighlights]);
 
   // Infer the types, highlighting any errors
   const inferenceResult = useMemo(() => {
     if (!parseResult.accepted) return;
     return infer(parseResult.value, true);
   }, [parseResult])!;
-  useEffect(() => inferenceResult && setHighlights(inferenceResult.accepted ? [] : [{ start: inferenceResult.issuePosition.start, end: inferenceResult.issuePosition.end || 0, className: 'error' }]), [inferenceResult, setHighlights]);
+  useEffect(() => inferenceResult && setHighlights(inferenceResult.accepted ? [] : [{ start: inferenceResult.issuePosition.start, end: inferenceResult.issuePosition.end, className: 'highlight-error' }]), [inferenceResult, setHighlights]);
 
   if (!parseResult.accepted) {
     return <>
@@ -33,7 +33,7 @@ function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: 
   if (!inferenceResult.accepted) {
     return <>
       <h2>AST</h2>
-      <ASTView ast={parseResult.value} />
+      <ASTView ast={parseResult.value} hoverCallback={createHoverCallback(setHighlights, [{ start: inferenceResult.issuePosition.start, end: inferenceResult.issuePosition.end || 0, className: 'highlight-error' }])} />
 
       <h2>Type</h2>
       <p>{inferenceResult.message}</p>
@@ -42,11 +42,15 @@ function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: 
 
   return <>
     <h2>AST</h2>
-    <ASTView ast={parseResult.value} />
+    <ASTView ast={parseResult.value} hoverCallback={createHoverCallback(setHighlights, [])} />
 
     <h2>Type</h2>
     <p>{inferenceResult.value.toString()}</p>
   </>;
+}
+
+const createHoverCallback = (setHighlights: (h: Highlight[]) => void, otherHighlights: Highlight[]) => (active: boolean, p: { start: number, end: number }) => {
+  setHighlights(active ? [...otherHighlights, { start: p.start, end: p.end, className: 'highlight-white' }] : otherHighlights);
 }
 
 export default ResultView;
