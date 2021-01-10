@@ -141,6 +141,23 @@ class TypeFuncApp {
     }
 
     toString(): string {
+        if (this.constructorName == '->') {
+            const firstArgIsFunction = this.args[0] instanceof TypeFuncApp && this.args[0].constructorName == '->';
+            return (firstArgIsFunction ? '(' + this.args[0].toString() + ')' : this.args[0].toString()) + ' -> ' + this.args[1].toString();
+        }
+
+        if (this.constructorName == '[]') {
+            return '[' + this.args[0].toString() + ']'
+        }
+
+        if (this.constructorName.startsWith(',')) {
+            return '(' + this.args.join(', ') + ')'
+        }
+        
+        if (this.args.every(arg => arg instanceof TypeVar || arg.constructorName == 'number' || arg.constructorName == 'char' || arg.constructorName == 'boolean')) {
+            return this.constructorName + (this.args.length ? ' ' : '') + this.args.map(a => '' + a.toString() + '').join(' ');
+        }
+
         return this.constructorName + (this.args.length ? ' ' : '') + this.args.map(a => '(' + a.toString() + ')').join(' ');
     }
 }

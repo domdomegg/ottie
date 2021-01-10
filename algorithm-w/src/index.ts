@@ -160,7 +160,7 @@ const highlight = (expr: Expr): Map<Expr, string> => {
     return notes;
 }
 
-const str = (substitution: Substitution, except?: string): string => '[' + Object.keys(substitution).filter(k => k !== except).map(k => k + '/' + substitution[k]!.toString()).join(', ') + ']';
+const str = (substitution: Substitution, except?: string): string => '{ ' + Object.keys(substitution).filter(k => k !== except).map(k => k + ' ↦ ' + substitution[k]!.toString()).join(', ') + ' }';
 
 function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (message: string, notes: Map<Expr, string>) => void = () => {}): [MonoType, Substitution] {
     if (expr instanceof CharLiteral) {

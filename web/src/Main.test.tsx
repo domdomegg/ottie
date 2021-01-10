@@ -16,9 +16,9 @@ test('displays correct result after clicking \'4\' sample', () => {
 
 test('displays correct result after clicking \'+\' sample', () => {
     const screen = render(<Main />)
-    expect(screen.queryByText('-> (number) (-> (number) (number))')).not.toBeInTheDocument();
+    expect(screen.queryByText('number -> number -> number')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('+'));
-    expect(screen.getByText('-> (number) (-> (number) (number))')).toBeInTheDocument();
+    expect(screen.getByText('number -> number -> number')).toBeInTheDocument();
 });
 
 test('displays correct result after entering \'True\'', () => {

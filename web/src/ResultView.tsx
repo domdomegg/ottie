@@ -46,7 +46,7 @@ function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: 
     <ASTView ast={parseResult.value} hoverCallback={hoverCallback} />
 
     <h2>Type derivation</h2>
-    {inferenceResult.value.steps.map((step, i) => <><h3>Step {i+1}</h3><p>{step.message}</p><ASTView ast={step.ast} hoverCallback={hoverCallback} /></>)}
+    {inferenceResult.value.steps.map((step, i) => <div key={i} className='type-derivation-step'><h3>Step {i+1}</h3><p>{step.message}</p><ASTView ast={step.ast} hoverCallback={hoverCallback} /></div>)}
 
     <h2>Type</h2>
     <p>{inferenceResult.value.type.toString()}</p>

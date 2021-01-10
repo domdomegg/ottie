@@ -188,7 +188,6 @@ button:active {
     text-align: center;
 }
 
-/** TODO: improve display of type derivation steps */
-p {
+.type-derivation-step p {
     white-space: pre-wrap;
 }
