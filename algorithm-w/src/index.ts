@@ -70,8 +70,14 @@ function unify(type1: MonoType, type2: MonoType): Substitution {
     throw new Error('Internal error, this should never happen');
 }
 
+function unique<T>(xs: T[]): T[] {
+    const vs: T[] = [];
+    new Set(xs).forEach(x => vs.push(x));
+    return vs;
+}
+
 /** a \ b */
-function diff<T>(a: T[], b: T[]) {
+function diff<T>(a: T[], b: T[]): T[] {
     const bset = new Set(b);
     return a.filter(v => !bset.has(v));
 }
@@ -99,20 +105,33 @@ function freeVars(type: MonoType | PolyType | Context): string[] {
 }
 
 function generalise(ctx: Context, type: MonoType): PolyType {
-    return new PolyType(diff(freeVars(type), freeVars(ctx)), type);
+    return new PolyType(unique(diff(freeVars(type), freeVars(ctx))), type);
+}
+
+interface TypeResult {
+    type: MonoType; // The overall type of the expression
+    steps: { message: string, ast: Expr }[]; // An array of steps showing the derivation
 }
 
 function infer(expr: Expr): MonoType;
-function infer(expr: Expr, forResponse: true, ctx?: Context): Response<MonoType>;
+function infer(expr: Expr, forResponse: true, ctx?: Context): Response<TypeResult>;
 function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtils.standardCtx) {
     let typeCounter = 0;
     const freshTypeName = (): string => "t" + typeCounter++;
     if (!forResponse) return _infer(expr, ctx, freshTypeName)[0];
 
+    const steps: { message: string, ast: Expr }[] = [];
+    const logger = (message: string, notes: Map<Expr, string>) => {
+        steps.push({ message, ast: cloneAst(expr, notes) })
+    }
+
     try {
         return {
             accepted: true,
-            value: _infer(expr, ctx, freshTypeName)[0]
+            value: {
+                type: _infer(expr, ctx, freshTypeName, logger)[0],
+                steps
+            }
         }
     } catch (e) {
         return {
@@ -123,12 +142,34 @@ function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtil
     }
 }
 
-function _infer(expr: Expr, ctx: Context, freshTypeName: () => string): [MonoType, Substitution] {
+const cloneAst = (expr: Expr, notes: Map<Expr, string>): Expr => {
+    if (expr instanceof CharLiteral) return new CharLiteral(expr.value, expr.pos, notes.get(expr));
+    if (expr instanceof NumberLiteral) return new NumberLiteral(expr.value, expr.pos, notes.get(expr));
+    if (expr instanceof Var) return new Var(expr.name, expr.pos, notes.get(expr));
+    if (expr instanceof App) return new App(cloneAst(expr.func, notes), cloneAst(expr.arg, notes), expr.pos, notes.get(expr));
+    if (expr instanceof Abs) return new Abs(expr.param, cloneAst(expr.body, notes), expr.pos, notes.get(expr));
+    if (expr instanceof Let) return new Let(expr.param, cloneAst(expr.def, notes), cloneAst(expr.body, notes), expr.pos, notes.get(expr));
+    
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
+}
+
+const highlight = (expr: Expr): Map<Expr, string> => {
+    const notes = new Map();
+    notes.set(expr, 'highlight')
+    return notes;
+}
+
+const str = (substitution: Substitution, except?: string): string => '[' + Object.keys(substitution).filter(k => k !== except).map(k => k + '/' + substitution[k]!.toString()).join(', ') + ']';
+
+function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (message: string, notes: Map<Expr, string>) => void = () => {}): [MonoType, Substitution] {
     if (expr instanceof CharLiteral) {
+        logger('We know the primitive ' + expr.toString() + ' is a char', highlight(expr));
         return [inst(new PolyType([], new TypeFuncApp('char')), freshTypeName), {}];
     }
 
     if (expr instanceof NumberLiteral) {
+        logger('We know the primitive ' + expr.toString() + ' is a number', highlight(expr));
         return [inst(new PolyType([], new TypeFuncApp('number')), freshTypeName), {}];
     }
 
@@ -137,27 +178,54 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string): [MonoTyp
         if (!type) {
             throw new TypeInferenceError(expr.name + ' is not in scope');
         }
-        return [inst(type, freshTypeName), {}];
+        const instantiatedType = inst(type, freshTypeName);
+
+        logger('We can look up the variable ' + expr.toString() + ' and find it has type: ' + type.toString() + (type.quantifiedVars.length ? '\nWe instatiate this type with fresh type variables to get: ' + instantiatedType.toString() : ''), highlight(expr));
+        
+        return [instantiatedType, {}];
     }
 
     if (expr instanceof App) {
-        const [funcType, funcSubstitution] = _infer(expr.func, ctx, freshTypeName);
-        const [argType, argSubstitution] = _infer(expr.arg, substitute(funcSubstitution, ctx), freshTypeName);
+        const [funcType, funcSubstitution] = _infer(expr.func, ctx, freshTypeName, logger);
+        const [argType, argSubstitution] = _infer(expr.arg, substitute(funcSubstitution, ctx), freshTypeName, logger);
         const t = new TypeVar(freshTypeName());
         const unifiedSubstitution = unify(apply(funcType, argSubstitution), new TypeFuncApp("->", argType, t))
+        const exprType = apply(t, unifiedSubstitution)
 
-        return [apply(t, unifiedSubstitution), combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
+        // TODO: try and make these more similar?
+        // The problem is that the first one is much easier to read and understand, but the second is more general and covers the case where the funcType is just a Var
+        if (funcType instanceof TypeFuncApp) {
+            logger('In function application, the function must accept the expected argument type.\nBefore unification, the function has type: ' + funcType.toString() + '\n\nTherefore we unify:\nFunction accepts: ' + (funcType as TypeFuncApp).args[0].toString() + '\nArgument has type: ' + argType.toString() + '\n\nThis gives the substitution: ' + str(unifiedSubstitution, t.name) + '\nAnd the function\'s return type as: ' + exprType.toString(), highlight(expr));
+        } else {
+            logger('In function application, the function must accept the expected argument type and returns some other type.\n\nTherefore we unify:\nFunction: ' + funcType.toString() + '\nArgument to fresh type: ' + new TypeFuncApp("->", argType, t).toString() + '\n\nThis gives the substitution: ' + str(unifiedSubstitution) + '\nAnd the function\'s return type as: ' + exprType.toString(), highlight(expr));
+        }
+
+        return [exprType, combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
     }
 
     if (expr instanceof Abs) {
         const t = new TypeVar(freshTypeName());
-        const [bodyType, bodySubstitution] = _infer(expr.body, { ...ctx, [expr.param]: new PolyType([], t) }, freshTypeName);
-        return [apply(new TypeFuncApp("->", t, bodyType), bodySubstitution), bodySubstitution]
+
+        logger('Our function definition binds ' + expr.param + ' in the body to the fresh type: ' + t.toString(), highlight(expr));
+
+        const [bodyType, bodySubstitution] = _infer(expr.body, { ...ctx, [expr.param]: new PolyType([], t) }, freshTypeName, logger);
+        const type = apply(new TypeFuncApp("->", t, bodyType), bodySubstitution);
+
+        logger((bodySubstitution[t.name] ? 'We apply the substitution [' + t.name + '/' + bodySubstitution[t.name]!.toString() + '] to get the parameter\'s type: ' + type.args[0].toString() + '.\n' : '') + 'The return type is given by the function body\'s type: ' + type.args[1].toString() + '\nTherefore the overall type is: ' + type.toString(), highlight(expr));
+
+        return [type, bodySubstitution]
     }
 
     if (expr instanceof Let) {
-        const [defType, defSubstitution] = _infer(expr.def, ctx, freshTypeName);
-        const [bodyType, bodySubstitution] = _infer(expr.body, { ...substitute(defSubstitution, ctx), [expr.param]: generalise(substitute(defSubstitution, ctx), defType) }, freshTypeName);
+        const [defType, defSubstitution] = _infer(expr.def, ctx, freshTypeName, logger);
+        const generalisedDefType = generalise(substitute(defSubstitution, ctx), defType);
+
+        logger('Our let statement binds ' + expr.param + ' in the body to the type: ' + generalisedDefType.toString(), highlight(expr));
+
+        const [bodyType, bodySubstitution] = _infer(expr.body, { ...substitute(defSubstitution, ctx), [expr.param]: generalisedDefType }, freshTypeName, logger);
+
+        logger('Our let statement then takes its body\'s type: ' + bodyType.toString(), highlight(expr));
+        
         return [bodyType, combine(defSubstitution, bodySubstitution)]
     }
 
@@ -185,8 +253,7 @@ function inst(type: MonoType | PolyType, freshTypeName: () => string, from: stri
     throw new Error('Internal error, this should never happen');
 }
 
-function apply(type: MonoType, substitution: Substitution): MonoType;
-function apply(type: PolyType, substitution: Substitution): PolyType;
+function apply<T extends MonoType | PolyType>(type: T, substitution: Substitution): T;
 function apply(type: MonoType | PolyType, substitution: Substitution): MonoType | PolyType {
     if (type instanceof TypeVar) {
         return type.name in substitution ? (substitution[type.name] as MonoType) : type;

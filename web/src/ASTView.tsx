@@ -43,7 +43,7 @@ function NodeView({ node, hoverCallback }: { node: Expr, hoverCallback: HoverCal
 }
 
 function NodeWrapperView({ children, node, hoverCallback }: { children: ReactNode, node: Expr, hoverCallback: HoverCallback }) {
-    return <div className="ast-node" onMouseOver={() => hoverCallback(true, node.pos)} onMouseOut={() => hoverCallback(false, node.pos)}>{children}</div>;
+    return <div className={"ast-node " + (node.notes || '')} onMouseOver={() => hoverCallback(true, node.pos)} onMouseOut={() => hoverCallback(false, node.pos)}>{children}</div>;
 }
 
 function NodeChildView({ children, symbol }: { children: ReactNode, symbol?: string }) {

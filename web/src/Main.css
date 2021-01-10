@@ -134,6 +134,10 @@ button:active {
     height: 20px;
 }
 
+.ast-node.highlight {
+    background-color: rgba(0, 0, 255, 0.4);
+}
+
 .ast-child {
     margin-left: 20px;
     position: relative;
@@ -182,4 +186,9 @@ button:active {
     content: attr(data-symbol);
     white-space: nowrap;
     text-align: center;
+}
+
+/** TODO: improve display of type derivation steps */
+p {
+    white-space: pre-wrap;
 }

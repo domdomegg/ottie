@@ -40,12 +40,16 @@ function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: 
     </>;
   }
 
+  const hoverCallback = createHoverCallback(setHighlights, []);
   return <>
     <h2>AST</h2>
-    <ASTView ast={parseResult.value} hoverCallback={createHoverCallback(setHighlights, [])} />
+    <ASTView ast={parseResult.value} hoverCallback={hoverCallback} />
+
+    <h2>Type derivation</h2>
+    {inferenceResult.value.steps.map((step, i) => <><h3>Step {i+1}</h3><p>{step.message}</p><ASTView ast={step.ast} hoverCallback={hoverCallback} /></>)}
 
     <h2>Type</h2>
-    <p>{inferenceResult.value.toString()}</p>
+    <p>{inferenceResult.value.type.toString()}</p>
   </>;
 }
 

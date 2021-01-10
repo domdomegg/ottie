@@ -12,24 +12,28 @@ type Expr = CharLiteral | NumberLiteral | Var | App | Abs | Let
 class CharLiteral {
     readonly value: string;
     readonly pos: Position;
+    readonly notes?: string;
 
-    constructor(value: string, pos: Position) {
+    constructor(value: string, pos: Position, notes?: string) {
         this.value = value;
         this.pos = pos;
+        this.notes = notes;
     }
 
     toString(): string {
-        return this.value;
+        return "'" + this.value + "'";
     }
 }
 
 class NumberLiteral {
     readonly value: number;
     readonly pos: Position;
+    readonly notes?: string;
 
-    constructor(value: number, pos: Position) {
+    constructor(value: number, pos: Position, notes?: string) {
         this.value = value;
         this.pos = pos;
+        this.notes = notes;
     }
 
     toString(): string {
@@ -40,10 +44,12 @@ class NumberLiteral {
 class Var {
     readonly name: string;
     readonly pos: Position;
+    readonly notes?: string;
 
-    constructor(name: string, pos: Position) {
+    constructor(name: string, pos: Position, notes?: string) {
         this.name = name;
         this.pos = pos;
+        this.notes = notes;
     }
 
     toString(): string {
@@ -55,11 +61,13 @@ class App {
     readonly func: Expr;
     readonly arg: Expr;
     readonly pos: Position;
+    readonly notes?: string;
 
-    constructor(fun: Expr, arg: Expr, pos: Position) {
+    constructor(fun: Expr, arg: Expr, pos: Position, notes?: string) {
         this.func = fun;
         this.arg = arg;
         this.pos = pos;
+        this.notes = notes;
     }
 
     toString(): string {
@@ -71,11 +79,13 @@ class Abs {
     readonly param: string;
     readonly body: Expr;
     readonly pos: Position;
+    readonly notes?: string;
 
-    constructor(param: string, body: Expr, pos: Position) {
+    constructor(param: string, body: Expr, pos: Position, notes?: string) {
         this.param = param;
         this.body = body;
         this.pos = pos;
+        this.notes = notes;
     }
 
     toString(): string {
@@ -88,12 +98,14 @@ class Let {
     readonly def: Expr;
     readonly body: Expr;
     readonly pos: Position;
+    readonly notes?: string;
 
-    constructor(param: string, def: Expr, body: Expr, pos: Position) {
+    constructor(param: string, def: Expr, body: Expr, pos: Position, notes?: string) {
         this.param = param;
         this.def = def;
         this.body = body;
         this.pos = pos;
+        this.notes = notes;
     }
 
     toString(): string {
@@ -143,7 +155,7 @@ class PolyType {
     }
 
     toString(): string {
-        return this.quantifiedVars.map(v => '∀' + v).join('') + ': ' + this.monoType.toString();
+        return (this.quantifiedVars.length ? (this.quantifiedVars.map(v => '∀' + v).join('') + ': ') : '') + this.monoType.toString();
     }
 }
 
