@@ -160,16 +160,16 @@ const highlight = (expr: Expr): Map<Expr, string> => {
     return notes;
 }
 
-const str = (substitution: Substitution, except?: string): string => '{ ' + Object.keys(substitution).filter(k => k !== except).map(k => k + ' ↦ ' + substitution[k]!.toString()).join(', ') + ' }';
+const str = (substitution: Substitution, except?: string): string => ('{ ' + Object.keys(substitution).filter(k => k !== except).map(k => k + ' ↦ ' + substitution[k]!.toString()).join(', ') + ' }').replace('{  }', '{}');
 
 function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (message: string, notes: Map<Expr, string>) => void = () => {}): [MonoType, Substitution] {
     if (expr instanceof CharLiteral) {
-        logger('We know the primitive ' + expr.toString() + ' is a char', highlight(expr));
+        logger('We know the primitive `' + expr.toString() + '` is a `char`', highlight(expr));
         return [inst(new PolyType([], new TypeFuncApp('char')), freshTypeName), {}];
     }
 
     if (expr instanceof NumberLiteral) {
-        logger('We know the primitive ' + expr.toString() + ' is a number', highlight(expr));
+        logger('We know the primitive `' + expr.toString() + '` is a `number`', highlight(expr));
         return [inst(new PolyType([], new TypeFuncApp('number')), freshTypeName), {}];
     }
 
@@ -180,7 +180,7 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         }
         const instantiatedType = inst(type, freshTypeName);
 
-        logger('We can look up the variable ' + expr.toString() + ' and find it has type: ' + type.toString() + (type.quantifiedVars.length ? '\nWe instatiate this type with fresh type variables to get: ' + instantiatedType.toString() : ''), highlight(expr));
+        logger('We can look up the variable `' + expr.toString() + '` and find it has type `' + type.toString() + (type.quantifiedVars.length ? '`\nWe instatiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : ''), highlight(expr));
         
         return [instantiatedType, {}];
     }
@@ -195,9 +195,9 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         // TODO: try and make these more similar?
         // The problem is that the first one is much easier to read and understand, but the second is more general and covers the case where the funcType is just a Var
         if (funcType instanceof TypeFuncApp) {
-            logger('In function application, the function must accept the expected argument type.\nBefore unification, the function has type: ' + funcType.toString() + '\n\nTherefore we unify:\nFunction accepts: ' + (funcType as TypeFuncApp).args[0].toString() + '\nArgument has type: ' + argType.toString() + '\n\nThis gives the substitution: ' + str(unifiedSubstitution, t.name) + '\nAnd the function\'s return type as: ' + exprType.toString(), highlight(expr));
+            logger('In function application, the function must accept the expected argument type.\nBefore unification, the function has type `' + funcType.toString() + '`\n\nTherefore we unify:\nFunction accepts `' + (funcType as TypeFuncApp).args[0].toString() + '`\nArgument has type `' + argType.toString() + '`\n\nThis gives the substitution `' + str(unifiedSubstitution, t.name) + '`\nAnd the function\'s return type as `' + exprType.toString() + '`', highlight(expr));
         } else {
-            logger('In function application, the function must accept the expected argument type and returns some other type.\n\nTherefore we unify:\nFunction: ' + funcType.toString() + '\nArgument to fresh type: ' + new TypeFuncApp("->", argType, t).toString() + '\n\nThis gives the substitution: ' + str(unifiedSubstitution) + '\nAnd the function\'s return type as: ' + exprType.toString(), highlight(expr));
+            logger('In function application, the function must accept the expected argument type and returns some other type.\n\nTherefore we unify:\nFunction type `' + funcType.toString() + '`\nArgument to fresh type `' + new TypeFuncApp("->", argType, t).toString() + '`\n\nThis gives the substitution `' + str(unifiedSubstitution) + '`\nAnd the function\'s return type as `' + exprType.toString() + '`', highlight(expr));
         }
 
         return [exprType, combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
@@ -206,12 +206,12 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
     if (expr instanceof Abs) {
         const t = new TypeVar(freshTypeName());
 
-        logger('Our function definition binds ' + expr.param + ' in the body to the fresh type: ' + t.toString(), highlight(expr));
+        logger('Our function definition binds `' + expr.param + '` in the body to the fresh type `' + t.toString() + '`', highlight(expr));
 
         const [bodyType, bodySubstitution] = _infer(expr.body, { ...ctx, [expr.param]: new PolyType([], t) }, freshTypeName, logger);
         const type = apply(new TypeFuncApp("->", t, bodyType), bodySubstitution);
 
-        logger((bodySubstitution[t.name] ? 'We apply the substitution [' + t.name + '/' + bodySubstitution[t.name]!.toString() + '] to get the parameter\'s type: ' + type.args[0].toString() + '.\n' : '') + 'The return type is given by the function body\'s type: ' + type.args[1].toString() + '\nTherefore the overall type is: ' + type.toString(), highlight(expr));
+        logger((bodySubstitution[t.name] ? 'We apply the substitution `{ ' + t.name + ' ↦ ' + bodySubstitution[t.name]!.toString() + ' }` to get the parameter\'s type `' + type.args[0].toString() + '`.\n' : '') + 'The return type is given by the function body\'s type `' + type.args[1].toString() + '`\nTherefore the overall type is `' + type.toString() + '`', highlight(expr));
 
         return [type, bodySubstitution]
     }
@@ -220,11 +220,11 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         const [defType, defSubstitution] = _infer(expr.def, ctx, freshTypeName, logger);
         const generalisedDefType = generalise(substitute(defSubstitution, ctx), defType);
 
-        logger('Our let statement binds ' + expr.param + ' in the body to the type: ' + generalisedDefType.toString(), highlight(expr));
+        logger('Our let statement binds `' + expr.param + '` in the body to the type `' + generalisedDefType.toString() + '`', highlight(expr));
 
         const [bodyType, bodySubstitution] = _infer(expr.body, { ...substitute(defSubstitution, ctx), [expr.param]: generalisedDefType }, freshTypeName, logger);
 
-        logger('Our let statement then takes its body\'s type: ' + bodyType.toString(), highlight(expr));
+        logger('Our let statement then takes its body\'s type `' + bodyType.toString() + '`', highlight(expr));
         
         return [bodyType, combine(defSubstitution, bodySubstitution)]
     }

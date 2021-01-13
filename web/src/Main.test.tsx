@@ -11,26 +11,26 @@ test('displays correct result after clicking \'4\' sample', () => {
     const screen = render(<Main />)
     expect(screen.queryByText('number')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('4'));
-    expect(screen.getByText('number')).toBeInTheDocument();
+    screen.getAllByText('number');
 });
 
 test('displays correct result after clicking \'+\' sample', () => {
     const screen = render(<Main />)
     expect(screen.queryByText('number -> number -> number')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('+'));
-    expect(screen.getByText('number -> number -> number')).toBeInTheDocument();
+    screen.getAllByText('number -> number -> number');
 });
 
 test('displays correct result after entering \'True\'', () => {
     const screen = render(<Main />)
     expect(screen.queryByText('boolean')).not.toBeInTheDocument();
     fireEvent.change((screen.container.querySelector('input') as HTMLInputElement), { target: { value: 'True' }});
-    expect(screen.getByText('boolean')).toBeInTheDocument();
+    screen.getAllByText('boolean');
 });
 
 test('displays correct error after entering \'notInScope\'', () => {
     const screen = render(<Main />)
     expect(screen.queryByText('notInScope is not in scope')).not.toBeInTheDocument();
     fireEvent.change((screen.container.querySelector('input') as HTMLInputElement), { target: { value: 'notInScope' }});
-    expect(screen.getByText('notInScope is not in scope')).toBeInTheDocument();
+    screen.getAllByText('notInScope is not in scope');
 });

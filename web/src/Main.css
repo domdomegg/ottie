@@ -16,7 +16,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
-.monospace, .code-container input, .code-container p, .ast-child, .ast-node, button {
+.monospace, .code-container input, .code-container p, .ast-child, .ast-node, button, code {
     font-family: 'Fira Code', 'Consolas', monospace;
 }
 
@@ -190,4 +190,12 @@ button:active {
 
 .type-derivation-step p {
     white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+code {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 1px 3px;
+    border-radius: 2px;
+    font-size: 95%;
 }
