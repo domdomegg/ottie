@@ -309,7 +309,8 @@ const standardCtx: Context = {
 
 /* Utilities */
 
-interface Rejected {
+interface Rejected<T> {
+    value?: T;
     accepted: false;
     issuePosition: {
         start: number;
@@ -321,7 +322,7 @@ interface Accepted<T> {
     value: T;
     accepted: true;
 }
-type Response<T> = Rejected | Accepted<T>
+type Response<A, R = undefined> = Rejected<R> | Accepted<A>
 
 /* Parser */
 
@@ -421,7 +422,7 @@ const nestLeft = (v: Expr[]) => v.reduce((prev, cur) => new App(prev, cur, { sta
 const parser: SingleParser<Expr> = genlex.use(expression1().then(F.eos().drop()).single());
 function parse(code: string): Expr;
 function parse(code: string, forResponse: true): Response<Expr>;
-function parse(code: string, forResponse: boolean = false) {
+function parse(code: string, forResponse: boolean = false): Expr | Response<Expr> {
     const response = parser.parse(Streams.ofString(code));
     if (forResponse) {
         if (response.isAccepted()) return { accepted: true, value: response.value }

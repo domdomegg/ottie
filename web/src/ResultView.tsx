@@ -30,26 +30,18 @@ function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: 
     </>;
   }
 
-  if (!inferenceResult.accepted) {
-    return <>
-      <h2>AST</h2>
-      <ASTView ast={parseResult.value} hoverCallback={createHoverCallback(setHighlights, [{ start: inferenceResult.issuePosition.start, end: inferenceResult.issuePosition.end || 0, className: 'highlight-error' }])} />
-
-      <h2>Type</h2>
-      <p>{inferenceResult.message}</p>
-    </>;
-  }
-
   const hoverCallback = createHoverCallback(setHighlights, []);
   return <>
     <h2>AST</h2>
     <ASTView ast={parseResult.value} hoverCallback={hoverCallback} />
 
     <h2>Type derivation</h2>
-    {inferenceResult.value.steps.map((step, i) => <div key={i} className='type-derivation-step'><h3>Step {i+1}</h3><p>{step.message.split('`').map((s, j) => j % 2 === 0 ? s : <code key={j}>{s}</code>)}</p><ASTView ast={step.ast} hoverCallback={hoverCallback} /></div>)}
+    {inferenceResult.value!.steps.map((step, i) => <div key={i} className='type-derivation-step'><h3>Step {i+1}</h3><p>{step.message.split('`').map((s, j) => j % 2 === 0 ? s : <code key={j}>{s}</code>)}</p><ASTView ast={step.ast} hoverCallback={hoverCallback} /></div>)}
 
-    <h2>Type</h2>
-    <p><code>{inferenceResult.value.type.toString()}</code></p>
+    {inferenceResult.accepted && <>
+      <h2>Type</h2>
+      <p><code>{inferenceResult.value.type.toString()}</code></p>
+    </>}
   </>;
 }
 

@@ -1,6 +1,6 @@
 import './jest.setup'
 import { TypeVar, Var, Abs, Let, CharLiteral, NumberLiteral, typeUtils, parse } from 'language'
-import { combine, unify, apply } from '../src/index';
+import { combine, unify, apply, infer } from '../src/index';
 const { number, char, boolean, f, list, tuple, maybe, either, a, b } = typeUtils;
 const [t0, t1, t2, t3] = [0, 1, 2, 3].map(v => new TypeVar('t' + v.toString()))
 
@@ -71,6 +71,11 @@ test('eithers', () => {
     expect(parse('Left myNumber')).toHaveType(either(number, a));
     expect(parse('Right myNumber')).toHaveType(either(a, number));
     expect(parse('Left not')).toHaveType(either(f(boolean, boolean), a));
+});
+
+test('invalid vars', () => {
+    expect(() => infer(parse('thingNotInScope'))).toThrow('`thingNotInScope` is not in scope')
+    expect(() => infer(parse('fst (, x 3)'))).toThrow('`x` is not in scope')
 });
 
 test('fails to add bad types', () => {
@@ -257,14 +262,14 @@ test('unifies types correctly', () => {
 });
 
 test('unifying rejects un-unifyable types', () => {
-    expect(() => unify(number, boolean)).toThrow();
+    expect(() => unify(number, boolean)).toThrow('Could not unify types `number` and `boolean` with different constructors `number` and `boolean`');
     expect(() => unify(boolean, number)).toThrow();
-    expect(() => unify(maybe(number), number)).toThrow();
+    expect(() => unify(maybe(number), number)).toThrow('Could not unify types `Maybe number` and `number` with different constructors `Maybe` and `number`');
     expect(() => unify(number, maybe(number))).toThrow();
-    expect(() => unify(maybe(boolean), maybe(number))).toThrow();
+    expect(() => unify(maybe(boolean), maybe(number))).toThrow('Could not unify types `boolean` and `number` with different constructors `boolean` and `number`');
     expect(() => unify(maybe(maybe(maybe(number))), maybe(maybe(number)))).toThrow();
     expect(() => unify(maybe(maybe(maybe(number))), maybe(maybe(maybe(boolean))))).toThrow();
-    expect(() => unify(f(number, number), number)).toThrow();
-    expect(() => unify(f(number, number), f(number, boolean))).toThrow();
+    expect(() => unify(f(number, number), number)).toThrow('Could not unify types `number -> number` and `number` with different constructors `->` and `number`');
+    expect(() => unify(f(number, number), f(number, boolean))).toThrow('Could not unify types `number` and `boolean` with different constructors `number` and `boolean`');
     expect(() => unify(f(number, number), f(number, number, number))).toThrow();
 });

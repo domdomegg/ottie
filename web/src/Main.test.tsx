@@ -30,7 +30,9 @@ test('displays correct result after entering \'True\'', () => {
 
 test('displays correct error after entering \'notInScope\'', () => {
     const screen = render(<Main />)
-    expect(screen.queryByText('notInScope is not in scope')).not.toBeInTheDocument();
+    expect(screen.queryByText('notInScope')).not.toBeInTheDocument();
+    expect(screen.queryByText('but find it is not in scope')).not.toBeInTheDocument();
     fireEvent.change((screen.container.querySelector('input') as HTMLInputElement), { target: { value: 'notInScope' }});
-    screen.getAllByText('notInScope is not in scope');
+    screen.getAllByText('notInScope');
+    screen.getAllByText('We stop here as this is an error', { exact: false });
 });

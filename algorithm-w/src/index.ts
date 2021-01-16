@@ -1,6 +1,8 @@
 import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response } from 'language'
 
 class TypeInferenceError extends Error {
+    expr?: Expr;
+
     constructor(message: string) {
         super(message);
         this.name = "TypeInferenceError";
@@ -52,11 +54,11 @@ function unify(type1: MonoType, type2: MonoType): Substitution {
 
     if (type1 instanceof TypeFuncApp && type2 instanceof TypeFuncApp) {
         if (type1.constructorName !== type2.constructorName) {
-            throw new TypeInferenceError('Could not unify type function applications with different constructors \'' + type1.constructorName + '\' and \'' + type2.constructorName + '\'');
+            throw new TypeInferenceError('Could not unify types `' + type1.toString() + '` and `' + type2.toString() + '` with different constructors `' + type1.constructorName + '` and `' + type2.constructorName + '`');
         }
 
         if (type1.args.length !== type2.args.length) {
-            throw new TypeInferenceError('Could not unify type function applications with different argument list lengths ' + JSON.stringify(type1) + ' and ' + JSON.stringify(type2));
+            throw new TypeInferenceError('Could not unify types `' + type1.toString() + '` and `' + type2.toString() + '` with different argument list lengths `' + type1.args.length + '` and `' + type2.args.length + '`');
         }
 
         let sub: Substitution = {};
@@ -114,8 +116,8 @@ interface TypeResult {
 }
 
 function infer(expr: Expr): MonoType;
-function infer(expr: Expr, forResponse: true, ctx?: Context): Response<TypeResult>;
-function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtils.standardCtx) {
+function infer(expr: Expr, forResponse: true, ctx?: Context): Response<TypeResult, Omit<TypeResult, 'type'>>;
+function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtils.standardCtx): MonoType | Response<TypeResult, Omit<TypeResult, 'type'>> {
     let typeCounter = 0;
     const freshTypeName = (): string => "t" + typeCounter++;
     if (!forResponse) return _infer(expr, ctx, freshTypeName)[0];
@@ -136,7 +138,10 @@ function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtil
     } catch (e) {
         return {
             accepted: false,
-            issuePosition: { start: 0, end: 0 },
+            value: {
+                steps
+            },
+            issuePosition: e.name == TypeInferenceError.name ? e.expr.pos : expr.pos,
             message: (e as Error).message
         }
     }
@@ -176,7 +181,10 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
     if (expr instanceof Var) {
         const type = ctx[expr.name]
         if (!type) {
-            throw new TypeInferenceError(expr.name + ' is not in scope');
+            logger('We try to look up the variable `' + expr.toString() + '` but find it is not in scope. We stop here as this is an error.', highlight(expr));
+            const err = new TypeInferenceError('`' + expr.name + '` is not in scope');
+            err.expr = expr;
+            throw err;
         }
         const instantiatedType = inst(type, freshTypeName);
 
@@ -189,17 +197,22 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         const [funcType, funcSubstitution] = _infer(expr.func, ctx, freshTypeName, logger);
         const [argType, argSubstitution] = _infer(expr.arg, substitute(funcSubstitution, ctx), freshTypeName, logger);
         const t = new TypeVar(freshTypeName());
-        const unifiedSubstitution = unify(apply(funcType, argSubstitution), new TypeFuncApp("->", argType, t))
-        const exprType = apply(t, unifiedSubstitution)
 
-        // TODO: try and make these more similar?
-        // The problem is that the first one is much easier to read and understand, but the second is more general and covers the case where the funcType is just a Var
-        if (funcType instanceof TypeFuncApp) {
-            logger('In function application, the function must accept the expected argument type.\nBefore unification, the function has type `' + funcType.toString() + '`\n\nTherefore we unify:\nFunction accepts `' + (funcType as TypeFuncApp).args[0].toString() + '`\nArgument has type `' + argType.toString() + '`\n\nThis gives the substitution `' + str(unifiedSubstitution, t.name) + '`\nAnd the function\'s return type as `' + exprType.toString() + '`', highlight(expr));
-        } else {
-            logger('In function application, the function must accept the expected argument type and returns some other type.\n\nTherefore we unify:\nFunction type `' + funcType.toString() + '`\nArgument to fresh type `' + new TypeFuncApp("->", argType, t).toString() + '`\n\nThis gives the substitution `' + str(unifiedSubstitution) + '`\nAnd the function\'s return type as `' + exprType.toString() + '`', highlight(expr));
+        // Give an easier to read and understand message if we can, otherwise default to the more general case
+        let firstPartOfLogMessage = (funcType instanceof TypeFuncApp && funcType.constructorName == '->')
+            ? 'In function application, the function must accept the expected argument type.\nBefore unification, the function has type `' + funcType.toString() + '`\n\nTherefore we unify:\nFunction accepts `' + (funcType as TypeFuncApp).args[0].toString() + '`\nArgument has type `' + argType.toString() + '`\n\n'
+            : 'In function application, the function must accept the expected argument type and returns some other type.\n\nTherefore we unify:\nFunction type `' + funcType.toString() + '`\nArgument to fresh type `' + new TypeFuncApp("->", argType, t).toString() + '`\n\n';
+
+        let unifiedSubstitution;
+        try {
+            unifiedSubstitution = unify(apply(funcType, argSubstitution), new TypeFuncApp("->", argType, t))
+        } catch (err) {
+            logger(firstPartOfLogMessage + 'However, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
+            err.expr = expr;
+            throw err;
         }
-
+        const exprType = apply(t, unifiedSubstitution)
+        logger(firstPartOfLogMessage + 'This gives the substitution `' + str(unifiedSubstitution, t.name) + '`\nAnd the function\'s return type as `' + exprType.toString() + '`', highlight(expr));
         return [exprType, combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
     }
 
