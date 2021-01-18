@@ -33,6 +33,8 @@ expect.extend({
             if (actual instanceof TypeVar && expected instanceof TypeVar) {
                 if (actual.name in alphaEqv) {
                     return expected.name == alphaEqv[actual.name];
+                } else if (Object.values(alphaEqv).includes(expected.name)) {
+                    return false;
                 } else {
                     alphaEqv[actual.name] = expected.name;
                     return true;

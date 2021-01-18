@@ -63,7 +63,7 @@ function unify(type1: MonoType, type2: MonoType): Substitution {
 
         let sub: Substitution = {};
         for (let i = 0; i < type1.args.length; i++) {
-            sub = combine(unify(apply(type1.args[i], sub), apply(type2.args[i], sub)), sub);
+            sub = combine(sub, unify(apply(type1.args[i], sub), apply(type2.args[i], sub)));
         }
         return sub;
     }

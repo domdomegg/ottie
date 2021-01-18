@@ -1,4 +1,4 @@
-import { C, N, F, GenLex, Streams, TupleParser, SingleParser, Response as MasalaResponse } from '@domdomegg/masala-parser';
+import { C, N, F, GenLex, Streams, TupleParser, SingleParser, Response as MasalaResponse, Tuple, Option } from '@domdomegg/masala-parser';
 
 /* AST expression nodes */
 
@@ -290,6 +290,9 @@ const standardCtx: Context = {
     ',': new PolyType(['a', 'b'], f(a, b, tuple(a, b))),
     ',,': new PolyType(['a', 'b', 'c'], f(a, b, c, tuple(a, b, c))),
     ',,,': new PolyType(['a', 'b', 'c', 'd'], f(a, b, c, d, tuple(a, b, c, d))),
+    't': new PolyType(['a', 'b'], f(a, b, tuple(a, b))),
+    'tt': new PolyType(['a', 'b', 'c'], f(a, b, c, tuple(a, b, c))),
+    'ttt': new PolyType(['a', 'b', 'c', 'd'], f(a, b, c, d, tuple(a, b, c, d))),
     'fst': new PolyType(['a', 'b'], f(tuple(a, b), a)),
     'snd': new PolyType(['a', 'b'], f(tuple(a, b), b)),
     'curry': new PolyType(['a', 'b', 'c'], f(f(tuple(a, b), c), a, b, c)),
@@ -347,7 +350,9 @@ class ParseError extends Error {
 }
 
 const genlex = new GenLex();
-const identifier = genlex.tokenize(C.charIn('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-/%<>^:[]_|&,').rep().map(t => t.join()), 'identifier');
+const identifier = genlex.tokenize(C.charIn('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-/%<>^:_|&').rep().map(t => t.join()), 'identifier');
+const lbracket = genlex.tokenize(C.char('['), 'lbracket');
+const rbracket = genlex.tokenize(C.char(']'), 'rbracket');
 const charLiteral = genlex.tokenize(C.charLiteral(), 'char');
 const stringLiteral = genlex.tokenize(C.stringLiteral(), 'string');
 const numberLiteral = genlex.tokenize(N.number(), 'number');
@@ -358,6 +363,7 @@ const rparen = genlex.tokenize(C.char(')'), 'rparen');
 const letTok = genlex.tokenize(C.string('let'), 'let');
 const equal = genlex.tokenize(C.char('='), 'equal');
 const inTok = genlex.tokenize(C.string('in'), 'in');
+const comma = genlex.tokenize(C.char(','), 'comma');
 
 const expression1 = (): SingleParser<Expr> =>
         F.try(LET_())
@@ -376,7 +382,7 @@ const expression3 = (): SingleParser<Expr> =>
     .or(F.try(LET()))
     .or(F.try(PAR()))
 
-const toCharArray = (string: string, r: MasalaResponse<string>) => {
+const toCharList = (string: string, r: MasalaResponse<string>) => {
     const chars = string.split('');
     const pos = getPos(r);
     let expr: Expr = new Var('[]', { start: pos.end - 1, end: pos.end });
@@ -387,6 +393,30 @@ const toCharArray = (string: string, r: MasalaResponse<string>) => {
     expr.pos.start = pos.start;
     expr.pos.end = pos.end;
     return expr;
+}
+
+const toList = (tuple: Tuple<number | Option<Tuple<Expr>>>, r: MasalaResponse<any>): Expr => {
+    const start = tuple.at(0) as number;
+    const elements = (tuple.at(1) as Option<Tuple<Expr>>).map(t => t.array()).orElse([]);
+
+    const pos = { start, end: r.location() };
+    let expr: Expr = new Var('[]', { start: pos.end - 1, end: pos.end });
+    for (let i = elements.length - 1; i >= 0; i--) {
+        expr = new App(new App(new Var(':', elements[i].pos), elements[i], elements[i].pos), expr, { start: elements[i].pos.start, end: pos.end });
+    }
+    expr.pos.start = pos.start;
+    expr.pos.end = pos.end;
+    return expr;
+}
+
+const toTuple = (tuple: Tuple<number | Expr>, r: MasalaResponse<any>): Expr => {
+    const start = tuple.at(0) as number;
+    const elements = tuple.array().slice(1) as Expr[];
+
+    const result = nestLeft([new Var(','.repeat(elements.length - 1), { start: start, end: start + 1 }), ...elements]);
+    result.pos.start = start;
+    result.pos.end = r.location();
+    return result;
 }
 
 const getPos = <T>(r: MasalaResponse<T>): Position => {
@@ -408,7 +438,13 @@ const expandPos = <T extends Expr>(v: T, r: MasalaResponse<T>): T => {
 }
 
 // We have to SHOUT as var and let are restricted keywords in JavaScript
-const LEAF = (): SingleParser<Expr> => F.try(numberLiteral.map((value, r) => new NumberLiteral(value, getPos(r)))).or(F.try(stringLiteral.map(toCharArray))).or(F.try(charLiteral.map((value, r) => new CharLiteral(value, getPos(r))))).or(F.try(identifier.map((value, r) => new Var(value, getPos(r)))))
+const LEAF = (): SingleParser<Expr> => F
+    .try(numberLiteral.map((value, r) => new NumberLiteral(value, getPos(r))))
+    .or(F.try(stringLiteral.map(toCharList)))
+    .or(F.try(charLiteral.map((value, r) => new CharLiteral(value, getPos(r)))))
+    .or(F.try(lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).optrep())).opt()).then(rbracket.drop()).map(toList)))
+    .or(F.try(lparen.map((v, r) => r.location() - 1).then(F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).rep())).then(rparen.drop()).map(toTuple)))
+    .or(F.try(identifier.map((value, r) => new Var(value, getPos(r)))))
 const ABS = (): SingleParser<Abs> => lparen.drop().then(ABS_()).then(rparen.drop()).single().map(expandPos)
 const ABS_ = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression2)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
 const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression2)).then(rparen.drop()).single().map(expandPos)

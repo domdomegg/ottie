@@ -10,10 +10,9 @@ test('var: valid', () => {
     expect(parse('myIdentifier', true).accepted).toBe(true);
     expect(parse('myBooleans')).toEqual(new Var('myBooleans', { start: 0, end: 10 }));
     expect(parse('3')).toEqual(new NumberLiteral(3, { start: 0, end: 1 }));
+    expect(parse('23')).toEqual(new NumberLiteral(23, { start: 0, end: 2 }));
     expect(parse('add')).toEqual(new Var('add', { start: 0, end: 3 }));
     expect(parse('add 3')).toEqual(new App(new Var('add', { start: 0, end: 3 }), new NumberLiteral(3, { start: 4, end: 5 }), { start: 0, end: 5 }));
-    expect(parse('"hi"')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new CharLiteral('h', { start: 1, end: 2 }), { start: 1, end: 2 }), new App(new App(new Var(':', { start: 2, end: 3 }), new CharLiteral('i', { start: 2, end: 3 }), { start: 2, end: 3 }), new Var('[]', { start: 3, end: 4 }), { start: 2, end: 3 }), { start: 0, end: 4 }));
-    expect(parse('"I\'m"')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new CharLiteral('I', { start: 1, end: 2 }), { start: 1, end: 2 }), new App(new App(new Var(':', { start: 2, end: 3 }), new CharLiteral('\'', { start: 2, end: 3 }), { start: 2, end: 3 }), new App(new App(new Var(':', { start: 3, end: 4 }), new CharLiteral('m', { start: 3, end: 4 }), { start: 3, end: 4 }), new Var('[]', { start: 4, end: 5 }), { start: 3, end: 4 }), { start: 2, end: 4 }), { start: 0, end: 5 }));
     expect(parse('h3llo')).toEqual(new Var('h3llo', { start: 0, end: 5 }))
     expect(parse('\'h\'')).toEqual(new CharLiteral('h', { start: 0, end: 3 }))
     expect(parse('hell0')).toEqual(new Var('hell0', { start: 0, end: 5 }))
@@ -34,6 +33,35 @@ test('var: syntax error', () => {
     expect(() => parse('🤔')).toThrow()
     expect(() => parse('\'my string\'')).toThrow();
     expect(() => parse('->')).toThrow();
+})
+
+test('strings', () => {
+    expect(parse('"hi"')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new CharLiteral('h', { start: 1, end: 2 }), { start: 1, end: 2 }), new App(new App(new Var(':', { start: 2, end: 3 }), new CharLiteral('i', { start: 2, end: 3 }), { start: 2, end: 3 }), new Var('[]', { start: 3, end: 4 }), { start: 2, end: 3 }), { start: 0, end: 4 }));
+    expect(parse('"I\'m"')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new CharLiteral('I', { start: 1, end: 2 }), { start: 1, end: 2 }), new App(new App(new Var(':', { start: 2, end: 3 }), new CharLiteral('\'', { start: 2, end: 3 }), { start: 2, end: 3 }), new App(new App(new Var(':', { start: 3, end: 4 }), new CharLiteral('m', { start: 3, end: 4 }), { start: 3, end: 4 }), new Var('[]', { start: 4, end: 5 }), { start: 3, end: 4 }), { start: 2, end: 4 }), { start: 0, end: 5 }));
+})
+
+test('lists', () => {
+    expect(parse('[]')).toEqual(new Var('[]', { start: 0, end: 2 }));
+    expect(parse('[1]')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new NumberLiteral(1, { start: 1, end: 2 }), { start: 1, end: 2 }), new Var('[]', { start: 2, end: 3 }), { start: 0, end: 3 }));
+    expect(parse(': 1 []')).toEqual(new App(new App(new Var(':', { start: 0, end: 1 }), new NumberLiteral(1, { start: 2, end: 3 }), { start: 0, end: 3 }), new Var('[]', { start: 4, end: 6 }), { start: 0, end: 6 }));
+    expect(parse('[1, 2]')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new NumberLiteral(1, { start: 1, end: 2 }), { start: 1, end: 2 }), new App(new App(new Var(':', { start: 4, end: 5 }), new NumberLiteral(2, { start: 4, end: 5 }), { start: 4, end: 5 }), new Var('[]', { start: 5, end: 6 }), { start: 4, end: 6 }), { start: 0, end: 6 }));
+    expect(parse('[1, 2, 3]')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new NumberLiteral(1, { start: 1, end: 2 }), { start: 1, end: 2 }), new App(new App(new Var(':', { start: 4, end: 5 }), new NumberLiteral(2, { start: 4, end: 5 }), { start: 4, end: 5 }), new App(new App(new Var(':', { start: 7, end: 8 }), new NumberLiteral(3, { start: 7, end: 8 }), { start: 7, end: 8 }), new Var('[]', { start: 8, end: 9 }), { start: 7, end: 9 }), { start: 4, end: 9 }), { start: 0, end: 9 }));
+    expect(parse('[a, b, c]')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new Var('a', { start: 1, end: 2 }), { start: 1, end: 2 }), new App(new App(new Var(':', { start: 4, end: 5 }), new Var('b', { start: 4, end: 5 }), { start: 4, end: 5 }), new App(new App(new Var(':', { start: 7, end: 8 }), new Var('c', { start: 7, end: 8 }), { start: 7, end: 8 }), new Var('[]', { start: 8, end: 9 }), { start: 7, end: 9 }), { start: 4, end: 9 }), { start: 0, end: 9 }));
+    expect(parse('[\'h\', \'i\']')).toEqual(new App(new App(new Var(':', { start: 1, end: 4 }), new CharLiteral('h', { start: 1, end: 4 }), { start: 1, end: 4 }), new App(new App(new Var(':', { start: 6, end: 9 }), new CharLiteral('i', { start: 6, end: 9 }), { start: 6, end: 9 }), new Var('[]', { start: 9, end: 10 }), { start: 6, end: 10 }), { start: 0, end: 10 }));
+    
+    expect(parse('[not True]')).toEqual(new App(new App(new Var(':', { start: 1, end: 9 }), new App(new Var('not', { start: 1, end: 4 }), new Var('True', { start: 5, end: 9 }), { start: 1, end: 9 }), { start: 1, end: 9 }), new Var('[]', { start: 9, end: 10 }), { start: 0, end: 10 }));
+    expect(parse('[[a]]')).toEqual(new App(new App(new Var(':', { start: 1, end: 4 }), new App(new App(new Var(':', { start: 2, end: 3 }), new Var('a', { start: 2, end: 3 }), { start: 2, end: 3 }), new Var('[]', { start: 3, end: 4 }), { start: 1, end: 4 }), { start: 1, end: 4 }), new Var('[]', { start: 4, end: 5 }), { start: 0, end: 5 }));
+    expect(parse('[[[]]]')).toEqual(new App(new App(new Var(':', { start: 1, end: 5 }), new App(new App(new Var(':', { start: 2, end: 4 }), new Var('[]', { start: 2, end: 4 }), { start: 2, end: 4 }), new Var('[]', { start: 4, end: 5 }), { start: 1, end: 5 }), { start: 1, end: 5 }), new Var('[]', { start: 5, end: 6 }), { start: 0, end: 6 }));
+    
+    // This should parse, even if it doesn't typecheck
+    expect(parse('[1, a, \'a\']')).toEqual(new App(new App(new Var(':', { start: 1, end: 2 }), new NumberLiteral(1, { start: 1, end: 2 }), { start: 1, end: 2 }), new App(new App(new Var(':', { start: 4, end: 5 }), new Var('a', { start: 4, end: 5 }), { start: 4, end: 5 }), new App(new App(new Var(':', { start: 7, end: 10 }), new CharLiteral('a', { start: 7, end: 10 }), { start: 7, end: 10 }), new Var('[]', { start: 10, end: 11 }), { start: 7, end: 11 }), { start: 4, end: 11 }), { start: 0, end: 11 }));
+})
+
+test('tuples', () => {
+    expect(parse('(1, \'a\')')).toEqual(new App(new App(new Var(',', { start: 0, end: 1 }), new NumberLiteral(1, { start: 1, end: 2 }), { start: 0, end: 2 }), new CharLiteral('a', { start: 4, end: 7 }), { start: 0, end: 8 }));
+    expect(parse('(1, \'a\', a)')).toEqual(new App(new App(new App(new Var(',,', { start: 0, end: 1 }), new NumberLiteral(1, { start: 1, end: 2 }), { start: 0, end: 2 }), new CharLiteral('a', { start: 4, end: 7 }), { start: 0, end: 7 }), new Var('a', { start: 9, end: 10 }), { start: 0, end: 11 }));
+    expect(parse('(not True, 17)')).toEqual(new App(new App(new Var(',', { start: 0, end: 1 }), new App(new Var('not', { start: 1, end: 4 }), new Var('True', { start: 5, end: 9 }), { start: 1, end: 9 }), { start: 0, end: 9 }), new NumberLiteral(17, { start: 11, end: 13 }), { start: 0, end: 14 }));
+    expect(parse('t 1 \'a\'')).toEqual(new App(new App(new Var('t', { start: 0, end: 1 }), new NumberLiteral(1, { start: 2, end: 3 }), { start: 0, end: 3 }), new CharLiteral('a', { start: 4, end: 7 }), { start: 0, end: 7 }));
 })
 
 test('app: valid', () => {

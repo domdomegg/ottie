@@ -1,5 +1,5 @@
 import './jest.setup'
-import { TypeVar, Var, Abs, Let, CharLiteral, NumberLiteral, typeUtils, parse } from 'language'
+import { TypeVar, Var, Abs, Let, CharLiteral, NumberLiteral, typeUtils, parse, App } from 'language'
 import { combine, unify, apply, infer } from '../src/index';
 const { number, char, boolean, f, list, tuple, maybe, either, a, b } = typeUtils;
 const [t0, t1, t2, t3] = [0, 1, 2, 3].map(v => new TypeVar('t' + v.toString()))
@@ -45,7 +45,7 @@ test('mapping', () => {
     expect(parse('map + []')).toHaveType(list(f(number, number)));
     expect(parse('map Just []')).toHaveType(list(maybe(a)));
     expect(parse('map Just (cons myNumber [])')).toHaveType(list(maybe(number)));
-    expect(parse('map not (map fst (cons (, myBoolean myNumber) []))')).toHaveType(list(boolean));
+    expect(parse('map not (map fst (cons (myBoolean, myNumber) []))')).toHaveType(list(boolean));
 });
 
 test('maybes', () => {
@@ -59,8 +59,8 @@ test('tuples', () => {
     expect(parse('fst')).toHaveType(f(tuple(a, b), a));
     expect(parse('snd')).toHaveType(f(tuple(a, b), b));
     expect(parse('fst')).not.toHaveType(f(tuple(a, b), b));
-    expect(parse(', myNumber myNumber')).toHaveType(tuple(number, number));
-    expect(parse('fst (, myNumber myNumber)')).toHaveType(number);
+    expect(parse('(myNumber, myNumber)')).toHaveType(tuple(number, number));
+    expect(parse('fst (myNumber, myNumber)')).toHaveType(number);
     expect(parse('(curry fst) myNumber myNumber')).toHaveType(number);
 });
 
@@ -75,7 +75,7 @@ test('eithers', () => {
 
 test('invalid vars', () => {
     expect(() => infer(parse('thingNotInScope'))).toThrow('`thingNotInScope` is not in scope')
-    expect(() => infer(parse('fst (, x 3)'))).toThrow('`x` is not in scope')
+    expect(() => infer(parse('fst (x, 3)'))).toThrow('`x` is not in scope')
 });
 
 test('fails to add bad types', () => {
@@ -111,10 +111,12 @@ test('function definitions', () => {
     expect(new Abs('x', parse('map not x'), undefined!)).toHaveType(f(list(boolean), list(boolean)));
     expect(new Abs('x', parse('map fst x'), undefined!)).toHaveType(f(list(tuple(a, b)), list(a)));
     expect(new Abs('x', parse('map not (map fst x)'), undefined!)).toHaveType(f(list(tuple(boolean, b)), list(boolean)));
-    expect(new Abs('x', parse(', x'), undefined!)).toHaveType(f(a, f(b, tuple(a, b))));
+    expect(new Abs('x', parse('t x'), undefined!)).toHaveType(f(a, f(b, tuple(a, b))));
     expect(new Abs('x', parse('map not (map fst x)'), undefined!)).toHaveType(f(list(tuple(boolean, a)), list(boolean)));
     expect(parse('\\x -> map (\\y -> (\\z -> - myNumber (y z))) (map + x)')).toHaveType(f(list(number), list(f(number, number))));
     expect(new Abs('x', parse('map && (map not x)'), undefined!)).toHaveType(f(list(boolean), list(f(boolean, boolean))));
+    expect(new Var('fst', undefined!)).toHaveType(f(tuple(a, b), a))
+    expect(new Abs('x', new App(new Var('fst', undefined!), new Var('x', undefined!), undefined!), undefined!)).toHaveType(f(tuple(a, b), a))
 });
 
 test('invalid function definitions', () => {
@@ -135,7 +137,7 @@ test('let bindings', () => {
     // NB: x is both
     // (boolean -> boolean) -> list(boolean) -> boolean
     // (tuple(boolean, a) -> boolean) -> list(tuple(boolean, a)) -> boolean
-    expect(parse('let x = map in x not (x fst (cons (, myBoolean myNumber) []))')).toHaveType(list(boolean))
+    expect(parse('let x = map in x not (x fst (cons (myBoolean, myNumber) []))')).toHaveType(list(boolean))
 
     expect(new Let('id', new Abs('x', new Var('x', undefined!), undefined!), parse('id myBoolean'), undefined!)).toHaveType(boolean);
     expect(new Let('id', new Abs('x', new Var('x', undefined!), undefined!), parse('id myNumber'), undefined!)).toHaveType(number);
