@@ -36,3 +36,12 @@ test('displays correct error after entering \'notInScope\'', () => {
     screen.getAllByText('notInScope');
     screen.getAllByText('We stop here as this is an error', { exact: false });
 });
+
+test('can open and close help modal', () => {
+    const screen = render(<Main />)
+    expect(screen.queryByText('Language reference')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('help-open-button'));
+    screen.getAllByText('Language reference');
+    fireEvent.click(screen.getByText('Close'));
+    expect(screen.queryByText('Language reference')).not.toBeInTheDocument();
+});

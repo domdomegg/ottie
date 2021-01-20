@@ -40,7 +40,7 @@ function Main() {
         Play with algorithm W in your browser.
       </h2>
       <p>Type inference is the ability to determine an expression's type in a language. Hindley-Milner (HM) is a typed λ-calculus which allows for complete type inference without explicit type annotations. Haskell's type system is based on HM.</p>
-      <p>This tool allows you to enter expressions in syntax similar to Haskell and view how a type inference algorithm (algorithm W) could work out the types. A full list of built-in functions and their types is available <button className="sans-serif" onClick={() => setShowHelp(true)}>here</button>. Expressions must be given in prefix notation, i.e. <button onClick={() => setCode('+ 3 4')}>+ 3 4</button> instead of <button onClick={() => setCode('3 + 4')}>3 + 4</button>.</p>
+      <p>This tool allows you to enter expressions in syntax similar to Haskell and view how a type inference algorithm (algorithm W) could work out the types. A full list of built-in functions and their types is available <button className="sans-serif" onClick={() => setShowHelp(true)} data-testid="help-open-button">here</button>. Expressions must be given in prefix notation, i.e. <button onClick={() => setCode('+ 3 4')}>+ 3 4</button> instead of <button onClick={() => setCode('3 + 4')}>3 + 4</button>.</p>
       <h2>Samples:
         <button onClick={() => setCode('4')}>4</button>
         <button onClick={() => setCode('not')}>not</button>
