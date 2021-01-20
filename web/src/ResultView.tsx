@@ -44,7 +44,7 @@ function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: 
   return <>    
     {inferenceResult.accepted
     ? <><h2>Expression type</h2><p><code>{inferenceResult.value.type.toString()}</code></p></>
-    : <><h2>Type error</h2><p>The expression does not have valid type</p></>}
+    : <><h2>Type error</h2><p>The expression does not have a valid type</p></>}
 
     <h2>Type derivation</h2>
     {inferenceResult.value!.steps.map((step, i) => <div key={i} className='type-derivation-step'><h3>Step {i+1}</h3><p>{step.message.split('`').map((s, j) => j % 2 === 0 ? s : <code key={j}>{s}</code>)}</p><ASTView ast={step.ast} hoverCallback={hoverCallback} /></div>)}
