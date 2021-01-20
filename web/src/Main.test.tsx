@@ -14,11 +14,11 @@ test('displays correct result after clicking \'4\' sample', () => {
     screen.getAllByText('number');
 });
 
-test('displays correct result after clicking \'+\' sample', () => {
+test('displays correct result after clicking \': 23 [1]\' sample', () => {
     const screen = render(<Main />)
-    expect(screen.queryByText('number -> number -> number')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText('+'));
-    screen.getAllByText('number -> number -> number');
+    expect(screen.queryByText('[number]')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText(': 23 [1]'));
+    screen.getAllByText('[number]');
 });
 
 test('displays correct result after entering \'True\'', () => {

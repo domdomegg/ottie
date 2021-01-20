@@ -20,20 +20,25 @@ body {
     font-family: 'Fira Code', 'Consolas', monospace;
 }
 
+#main {
+    margin: 0 auto;
+    padding: 30px 30px 60px 30px;
+    max-width: 840px;
+}
+
 h1 {
-    margin-top: 5rem;
-    font-size: 72px;
+    font-size: 48px;
+    margin: 0;
 }
 
 button {
     color: white;
-    max-width: 720px;
     margin: 2px 2px;
     padding: 8px;
     border: none;
     border-radius: 4px;
     background-color: rgba(255, 255, 255, 0.3);
-    transition: 0.3s background-color ease, 0.3s box-shadow ease;
+    transition: 0.3s background-color ease, 0.3s box-shadow ease, 0.5s color ease;
     vertical-align: middle;
     outline: none;
     cursor: pointer;
@@ -44,14 +49,17 @@ button:hover {
 }
 
 button:active {
-    /* color: black; */
+    color: black;
     background-color: rgb(255, 255, 255);
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
 }
 
+p > button {
+    margin: 0;
+    padding: 4px;
+}
+
 .code-container {
-    width: 90%;
-    max-width: 720px;
     margin: 0 auto;
     height: 56px;
     border-radius: 4px;
@@ -107,11 +115,26 @@ button:active {
 }
 
 .code-container p .highlight-error {
-    border-bottom: 1.75px solid red;
+    border-bottom: 2.5px solid red;
+    background-color: rgba(255, 0, 0, 0);
+    transition: border-radius, background-color ease 0.5s;
+    padding: 4px;
+    border-radius: 0;
+}
+
+.code-container:focus-within p .highlight-error {
+    background-color: rgba(255, 0, 0, 0.15);
+    border-radius: 2px;
 }
 
 .code-container p .highlight-white {
     background-color: rgba(255, 255, 255, 0.4);
+    padding: 4px;
+    border-radius: 2px;
+}
+
+.code-container:focus-within p .highlight-white {
+    background-color: rgba(203, 59, 118, 0.15);
 }
 
 .code-container p .highlight-error:empty::after, .code-container p .highlight-white-bg:empty::after {
@@ -119,8 +142,6 @@ button:active {
 }
 
 .ast-view {
-    width: 90%;
-    max-width: 720px;
     margin: 0 auto;
 }
 
@@ -135,7 +156,7 @@ button:active {
 }
 
 .ast-node.highlight {
-    background-color: rgba(0, 0, 255, 0.4);
+    background-color: rgba(0, 0, 255, 0.5);
 }
 
 .ast-child {
@@ -198,4 +219,67 @@ code {
     padding: 1px 3px;
     border-radius: 2px;
     font-size: 95%;
+}
+
+@media only screen and (min-width: 900px) {
+    .md-only {
+        display: none;
+    }
+
+    h1 {
+        font-size: 72px;
+        margin: 0.67em 0 0 0;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .md-only {
+        display: none;
+    }
+}
+
+.modal {
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    color: black;
+    text-align: left;
+    margin: 6% auto;
+    padding: 20px;
+    box-shadow: 0px 4px 40px 0px rgba(0, 0, 0, 0.2);
+    width: 85%;
+    border-radius: 8px;
+}
+
+.modal-content button {
+    color: white;
+    background-color: rgba(203, 59, 118, 0.7);
+    transition: 0.3s background-color ease, 0.3s box-shadow ease, 0.5s color ease;
+    float: right;
+}
+
+.modal-content button:hover {
+    background-color: rgba(203, 59, 118, 0.5);
+}
+
+.modal-content button:active {
+    background-color:rgba(203, 59, 118, 0.9);
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h2 {
+    margin-top: 0.1em;
+}
+
+.modal-content li {
+    margin: 6px 0
 }

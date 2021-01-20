@@ -25,23 +25,29 @@ function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: 
 
   if (!parseResult.accepted) {
     return <>
-      <h2>AST</h2>
+      <h2>Parse error</h2>
       <p>{parseResult.message}</p>
     </>;
   }
 
-  const hoverCallback = createHoverCallback(setHighlights, []);
-  return <>
-    <h2>AST</h2>
-    <ASTView ast={parseResult.value} hoverCallback={hoverCallback} />
+  const hoverCallback = createHoverCallback(setHighlights, inferenceResult.accepted ? [] : [{ start: inferenceResult.issuePosition.start, end: inferenceResult.issuePosition.end, className: 'highlight-error' }]);
+  if (inferenceResult.value!.steps.length === 0) {
+    <>
+      <h2>Type-inference error</h2>
+      <p>Something went wrong trying to infer types</p>
+
+      <h2>AST</h2>
+      <ASTView ast={parseResult.value} hoverCallback={hoverCallback} />
+    </>
+  }
+
+  return <>    
+    {inferenceResult.accepted
+    ? <><h2>Expression type</h2><p><code>{inferenceResult.value.type.toString()}</code></p></>
+    : <><h2>Type error</h2><p>The expression does not have valid type</p></>}
 
     <h2>Type derivation</h2>
     {inferenceResult.value!.steps.map((step, i) => <div key={i} className='type-derivation-step'><h3>Step {i+1}</h3><p>{step.message.split('`').map((s, j) => j % 2 === 0 ? s : <code key={j}>{s}</code>)}</p><ASTView ast={step.ast} hoverCallback={hoverCallback} /></div>)}
-
-    {inferenceResult.accepted && <>
-      <h2>Type</h2>
-      <p><code>{inferenceResult.value.type.toString()}</code></p>
-    </>}
   </>;
 }
 
