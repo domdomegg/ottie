@@ -1,4 +1,4 @@
-import { C, N, F, GenLex, Streams, TupleParser, SingleParser, Response as MasalaResponse, Tuple, Option } from '@domdomegg/masala-parser';
+import { C, N, F, GenLex, Streams, TupleParser, SingleParser, Response as MasalaResponse, Tuple, Option, Reject } from '@domdomegg/masala-parser';
 
 /* AST expression nodes */
 
@@ -281,7 +281,6 @@ const standardCtx: Context = {
     'unzip': new PolyType(['a', 'b'], f(list(tuple(a, b)), tuple(list(a), list(b)))),
     'nub': new PolyType(['a'], f(list(a), list(a))),
     'delete': new PolyType(['a'], f(a, list(a), list(a))),
-    '\\\\': new PolyType(['a'], f(list(a), list(a), list(a))),
     'union': new PolyType(['a'], f(list(a), list(a), list(a))),
     'intersect': new PolyType(['a'], f(list(a), list(a), list(a))),
     'sort': new PolyType(['a'], f(list(a), list(a))),
@@ -350,19 +349,19 @@ class ParseError extends Error {
 }
 
 const genlex = new GenLex();
-const identifier = genlex.tokenize(C.charIn('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-/%<>^:_|&').rep().map(t => t.join()), 'identifier');
-const lbracket = genlex.tokenize(C.char('['), 'lbracket');
-const rbracket = genlex.tokenize(C.char(']'), 'rbracket');
+const identifier = genlex.tokenize(C.charIn('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-/%<>^:_|&!\'').rep().map(t => t.join()), 'identifier');
+const letTok = genlex.tokenize(C.string('let '), 'let');
+const inTok = genlex.tokenize(C.string('in '), 'in');
 const charLiteral = genlex.tokenize(C.charLiteral(), 'char');
 const stringLiteral = genlex.tokenize(C.stringLiteral(), 'string');
 const numberLiteral = genlex.tokenize(N.number(), 'number');
+const lbracket = genlex.tokenize(C.char('['), 'lbracket');
+const rbracket = genlex.tokenize(C.char(']'), 'rbracket');
 const backslash = genlex.tokenize(C.char('\\'), 'backslash');
 const arrow = genlex.tokenize(C.string('->'), 'arrow');
 const lparen = genlex.tokenize(C.char('('), 'lparen');
 const rparen = genlex.tokenize(C.char(')'), 'rparen');
-const letTok = genlex.tokenize(C.string('let'), 'let');
 const equal = genlex.tokenize(C.char('='), 'equal');
-const inTok = genlex.tokenize(C.string('in'), 'in');
 const comma = genlex.tokenize(C.char(','), 'comma');
 
 const expression1 = (): SingleParser<Expr> =>
@@ -395,11 +394,12 @@ const toCharList = (string: string, r: MasalaResponse<string>) => {
     return expr;
 }
 
-const toList = (tuple: Tuple<number | Option<Tuple<Expr>>>, r: MasalaResponse<any>): Expr => {
-    const start = tuple.at(0) as number;
+const toList = (tuple: Tuple<number | Option<Tuple<Expr>>>): Expr => {
+    const start = tuple.first() as number;
+    const end = tuple.last() as number;
     const elements = (tuple.at(1) as Option<Tuple<Expr>>).map(t => t.array()).orElse([]);
 
-    const pos = { start, end: r.location() };
+    const pos = { start, end };
     let expr: Expr = new Var('[]', { start: pos.end - 1, end: pos.end });
     for (let i = elements.length - 1; i >= 0; i--) {
         expr = new App(new App(new Var(':', elements[i].pos), elements[i], elements[i].pos), expr, { start: elements[i].pos.start, end: pos.end });
@@ -409,13 +409,14 @@ const toList = (tuple: Tuple<number | Option<Tuple<Expr>>>, r: MasalaResponse<an
     return expr;
 }
 
-const toTuple = (tuple: Tuple<number | Expr>, r: MasalaResponse<any>): Expr => {
-    const start = tuple.at(0) as number;
-    const elements = tuple.array().slice(1) as Expr[];
+const toTuple = (tuple: Tuple<number | Expr[]>): Expr => {
+    const start = tuple.first() as number;
+    const end = tuple.last() as number;
+    const elements = tuple.at(1) as Expr[];
 
     const result = nestLeft([new Var(','.repeat(elements.length - 1), { start: start, end: start + 1 }), ...elements]);
     result.pos.start = start;
-    result.pos.end = r.location();
+    result.pos.end = end;
     return result;
 }
 
@@ -442,8 +443,8 @@ const LEAF = (): SingleParser<Expr> => F
     .try(numberLiteral.map((value, r) => new NumberLiteral(value, getPos(r))))
     .or(F.try(stringLiteral.map(toCharList)))
     .or(F.try(charLiteral.map((value, r) => new CharLiteral(value, getPos(r)))))
-    .or(F.try(lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).optrep())).opt()).then(rbracket.drop()).map(toList)))
-    .or(F.try(lparen.map((v, r) => r.location() - 1).then(F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).rep())).then(rparen.drop()).map(toTuple)))
+    .or(F.try(lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).optrep())).opt()).then(rbracket.map((s, r) => getPos(r).end)).map(toList)))
+    .or(F.try(lparen.map((v, r) => r.location() - 1).then((F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).rep())).array()).then(rparen.map((s, r) => getPos(r).end)).map(toTuple)))
     .or(F.try(identifier.map((value, r) => new Var(value, getPos(r)))))
 const ABS = (): SingleParser<Abs> => lparen.drop().then(ABS_()).then(rparen.drop()).single().map(expandPos)
 const ABS_ = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression2)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
@@ -455,10 +456,33 @@ const optApp = (parser: SingleParser<Expr>): SingleParser<Expr> => parser.then(e
 const expressionPrime = (): TupleParser<Expr> => F.lazy(expression3).optrep();
 const nestLeft = (v: Expr[]) => v.reduce((prev, cur) => new App(prev, cur, { start: prev.pos.start, end: cur.pos.end }));
 
+const specialCases = (code: string): undefined | Rejected<undefined> => {
+    if (code == 'let' || code.endsWith(' let')) {
+        return {
+            accepted: false,
+            issuePosition: { start: code.length - 3, end: code.length },
+            message: 'Failed to parse'
+        };
+    }
+    if (code == 'in' || code.endsWith(' in')) {
+        return {
+            accepted: false,
+            issuePosition: { start: code.length - 2, end: code.length },
+            message: 'Failed to parse'
+        };
+    }
+}
+
 const parser: SingleParser<Expr> = genlex.use(expression1().then(F.eos().drop()).single());
 function parse(code: string): Expr;
 function parse(code: string, forResponse: true): Response<Expr>;
 function parse(code: string, forResponse: boolean = false): Expr | Response<Expr> {
+    const specialCase = specialCases(code);
+    if (specialCase) {
+        if (forResponse) return specialCase;
+        throw new ParseError('Failed to parse:\n\t' + code + '\n\t' + ' '.repeat(specialCase.issuePosition.start) + '^')
+    }
+
     const response = parser.parse(Streams.ofString(code));
     if (forResponse) {
         if (response.isAccepted()) return { accepted: true, value: response.value }
