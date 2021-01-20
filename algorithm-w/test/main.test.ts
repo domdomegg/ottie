@@ -264,14 +264,14 @@ test('unifies types correctly', () => {
 });
 
 test('unifying rejects un-unifyable types', () => {
-    expect(() => unify(number, boolean)).toThrow('Could not unify types `number` and `boolean` with different constructors `number` and `boolean`');
+    expect(() => unify(number, boolean)).toThrow('Could not unify types `Int` and `Bool` with different constructors `Int` and `Bool`');
     expect(() => unify(boolean, number)).toThrow();
-    expect(() => unify(maybe(number), number)).toThrow('Could not unify types `Maybe number` and `number` with different constructors `Maybe` and `number`');
+    expect(() => unify(maybe(number), number)).toThrow('Could not unify types `Maybe Int` and `Int` with different constructors `Maybe` and `Int`');
     expect(() => unify(number, maybe(number))).toThrow();
-    expect(() => unify(maybe(boolean), maybe(number))).toThrow('Could not unify types `boolean` and `number` with different constructors `boolean` and `number`');
+    expect(() => unify(maybe(boolean), maybe(number))).toThrow('Could not unify types `Bool` and `Int` with different constructors `Bool` and `Int`');
     expect(() => unify(maybe(maybe(maybe(number))), maybe(maybe(number)))).toThrow();
     expect(() => unify(maybe(maybe(maybe(number))), maybe(maybe(maybe(boolean))))).toThrow();
-    expect(() => unify(f(number, number), number)).toThrow('Could not unify types `number -> number` and `number` with different constructors `->` and `number`');
-    expect(() => unify(f(number, number), f(number, boolean))).toThrow('Could not unify types `number` and `boolean` with different constructors `number` and `boolean`');
+    expect(() => unify(f(number, number), number)).toThrow('Could not unify types `Int -> Int` and `Int` with different constructors `->` and `Int`');
+    expect(() => unify(f(number, number), f(number, boolean))).toThrow('Could not unify types `Int` and `Bool` with different constructors `Int` and `Bool`');
     expect(() => unify(f(number, number), f(number, number, number))).toThrow();
 });

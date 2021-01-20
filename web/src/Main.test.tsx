@@ -9,23 +9,23 @@ test('has a title', () => {
 
 test('displays correct result after clicking \'4\' sample', () => {
     const screen = render(<Main />)
-    expect(screen.queryByText('number')).not.toBeInTheDocument();
+    expect(screen.queryByText('Int')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('4'));
-    screen.getAllByText('number');
+    screen.getAllByText('Int');
 });
 
 test('displays correct result after clicking \': 23 [1]\' sample', () => {
     const screen = render(<Main />)
-    expect(screen.queryByText('[number]')).not.toBeInTheDocument();
+    expect(screen.queryByText('[Int]')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText(': 23 [1]'));
-    screen.getAllByText('[number]');
+    screen.getAllByText('[Int]');
 });
 
 test('displays correct result after entering \'True\'', () => {
     const screen = render(<Main />)
-    expect(screen.queryByText('boolean')).not.toBeInTheDocument();
+    expect(screen.queryByText('Bool')).not.toBeInTheDocument();
     fireEvent.change((screen.container.querySelector('input') as HTMLInputElement), { target: { value: 'True' }});
-    screen.getAllByText('boolean');
+    screen.getAllByText('Bool');
 });
 
 test('displays correct error after entering \'notInScope\'', () => {

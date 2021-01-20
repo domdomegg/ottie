@@ -129,7 +129,7 @@ class TypeVar {
     }
 }
 
-type TypeFunc = "->" | "[]" | "Maybe" | "Either" | "number" | "char" | "boolean" | "," | ",," | ",,," | ",,,," | ",,,,," | ",,,,,," | ",,,,,,,";
+type TypeFunc = "->" | "[]" | "Maybe" | "Either" | "Int" | "Char" | "Bool" | "," | ",," | ",,," | ",,,," | ",,,,," | ",,,,,," | ",,,,,,,";
 
 class TypeFuncApp {
     readonly constructorName: TypeFunc;
@@ -154,7 +154,7 @@ class TypeFuncApp {
             return '(' + this.args.join(', ') + ')'
         }
         
-        if (this.args.every(arg => arg instanceof TypeVar || arg.constructorName == 'number' || arg.constructorName == 'char' || arg.constructorName == 'boolean')) {
+        if (this.args.every(arg => arg instanceof TypeVar || arg.constructorName == 'Int' || arg.constructorName == 'Char' || arg.constructorName == 'Bool')) {
             return this.constructorName + (this.args.length ? ' ' : '') + this.args.map(a => '' + a.toString() + '').join(' ');
         }
 
@@ -182,9 +182,9 @@ interface Context { [name: string]: PolyType | undefined }
 
 
 // Utilities which make creating types easier
-const number = new TypeFuncApp('number');
-const char = new TypeFuncApp('char');
-const boolean = new TypeFuncApp('boolean');
+const number = new TypeFuncApp('Int');
+const char = new TypeFuncApp('Char');
+const boolean = new TypeFuncApp('Bool');
 const f = (one: MonoType, two: MonoType, ...extra: MonoType[]): TypeFuncApp => {
     if (extra.length === 0) return new TypeFuncApp('->', one, two)
     return new TypeFuncApp('->', one, f(two, extra[0], ...extra.slice(1)))
@@ -354,7 +354,8 @@ const letTok = genlex.tokenize(C.string('let '), 'let');
 const inTok = genlex.tokenize(C.string('in '), 'in');
 const charLiteral = genlex.tokenize(C.charLiteral(), 'char');
 const stringLiteral = genlex.tokenize(C.stringLiteral(), 'string');
-const numberLiteral = genlex.tokenize(N.number(), 'number');
+// const numberLiteral = genlex.tokenize(N.number(), 'number');
+const numberLiteral = genlex.tokenize(N.integer(), 'number');
 const lbracket = genlex.tokenize(C.char('['), 'lbracket');
 const rbracket = genlex.tokenize(C.char(']'), 'rbracket');
 const backslash = genlex.tokenize(C.char('\\'), 'backslash');

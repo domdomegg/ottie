@@ -169,13 +169,13 @@ const str = (substitution: Substitution, except?: string): string => ('{ ' + Obj
 
 function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (message: string, notes: Map<Expr, string>) => void = () => {}): [MonoType, Substitution] {
     if (expr instanceof CharLiteral) {
-        logger('We know the primitive `' + expr.toString() + '` is a `char`', highlight(expr));
-        return [inst(new PolyType([], new TypeFuncApp('char')), freshTypeName), {}];
+        logger('We know the primitive `' + expr.toString() + '` is a `Char`', highlight(expr));
+        return [inst(new PolyType([], new TypeFuncApp('Char')), freshTypeName), {}];
     }
 
     if (expr instanceof NumberLiteral) {
-        logger('We know the primitive `' + expr.toString() + '` is a `number`', highlight(expr));
-        return [inst(new PolyType([], new TypeFuncApp('number')), freshTypeName), {}];
+        logger('We know the primitive `' + expr.toString() + '` is an `Int`', highlight(expr));
+        return [inst(new PolyType([], new TypeFuncApp('Int')), freshTypeName), {}];
     }
 
     if (expr instanceof Var) {

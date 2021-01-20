@@ -8,7 +8,7 @@ test('function currying', () => {
 
 test('list helper works', () => {
     expect(list(a)).toEqual(new TypeFuncApp('[]', new TypeVar('a')));
-    expect(list(number)).toEqual(new TypeFuncApp('[]', new TypeFuncApp('number')));
+    expect(list(number)).toEqual(new TypeFuncApp('[]', new TypeFuncApp('Int')));
 })
 
 test('tuple helper works', () => {
@@ -25,11 +25,11 @@ test('tuple helper works', () => {
 
 test('maybe helper works', () => {
     expect(maybe(a)).toEqual(new TypeFuncApp('Maybe', new TypeVar('a')));
-    expect(maybe(number)).toEqual(new TypeFuncApp('Maybe', new TypeFuncApp('number')));
+    expect(maybe(number)).toEqual(new TypeFuncApp('Maybe', new TypeFuncApp('Int')));
 })
 
 test('either helper works', () => {
     expect(either(a, b)).toEqual(new TypeFuncApp('Either', new TypeVar('a'), new TypeVar('b')));
-    expect(either(a, number)).toEqual(new TypeFuncApp('Either', new TypeVar('a'), new TypeFuncApp('number')));
-    expect(either(boolean, number)).toEqual(new TypeFuncApp('Either', new TypeFuncApp('boolean'), new TypeFuncApp('number')));
+    expect(either(a, number)).toEqual(new TypeFuncApp('Either', new TypeVar('a'), new TypeFuncApp('Int')));
+    expect(either(boolean, number)).toEqual(new TypeFuncApp('Either', new TypeFuncApp('Bool'), new TypeFuncApp('Int')));
 })

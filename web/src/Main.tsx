@@ -17,6 +17,17 @@ function Main() {
           <button className="sans-serif" onClick={() => setShowHelp(false)}>Close</button>
           <h2>Language reference</h2>
           <p>The language is similar in syntax to Haskell. All functions are applied in prefix notation, i.e. <code>+ 3 4</code> instead of <code>3 + 4</code>.</p>
+          <p>The type constructors available are:</p>
+          <ul>
+            <li><code>Int</code></li>
+            <li><code>Char</code></li>
+            <li><code>Bool</code></li>
+            <li><code>-{'>'}</code> for functions</li>
+            <li><code>[]</code> for lists</li>
+            <li><code>,</code>, <code>,,</code>, <code>,,,</code> etc. for tuples</li>
+            <li><code>Maybe</code></li>
+            <li><code>Either</code></li>
+          </ul>
           <p>The available set of built-in functions and their types are:</p>
           <ul>
             {Object.entries(typeUtils.standardCtx).filter(([name]) => name[0] !== ',').map(([name, type]) => <li key={name}><code>{name} :: {type?.toString()}</code></li>)}
