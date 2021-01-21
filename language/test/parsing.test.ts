@@ -99,6 +99,8 @@ test('app: syntax error', () => {
 
 test('abs: valid', () => {
     expect(parse('\\x -> x')).toEqual(new Abs('x', new Var('x', { start: 6, end: 7 }), { start: 0, end: 7 }))
+    expect(parse('\\x -> (\\y -> x y)')).toEqual(new Abs('x', new Abs('y', new App(new Var('x', { start: 13, end: 14 }), new Var('y', { start: 15, end: 16 }), { start: 13, end: 16 }), { start: 6, end: 17 }), { start: 0, end: 17 }))
+    expect(parse('\\x -> \\y -> x y')).toEqual(new Abs('x', new Abs('y', new App(new Var('x', { start: 12, end: 13 }), new Var('y', { start: 14, end: 15 }), { start: 12, end: 15 }), { start: 6, end: 15 }), { start: 0, end: 15 }))
     expect(parse('(\\x -> x)')).toEqual(new Abs('x', new Var('x', { start: 7, end: 8 }), { start: 0, end: 9 }))
     expect(parse('(\\x -> x True)')).toEqual(new Abs('x', new App(new Var('x', { start: 7, end: 8 }), new Var('True', { start: 9, end: 13 }), { start: 7, end: 13 }), { start: 0, end: 14 }))
     expect(parse('(\\x -> x True) not')).toEqual(new App(new Abs('x', new App(new Var('x', { start: 7, end: 8 }), new Var('True', { start: 9, end: 13 }), { start: 7, end: 13 }), { start: 0, end: 14 }), new Var('not', { start: 15, end: 18 }), { start: 0, end: 18 }))

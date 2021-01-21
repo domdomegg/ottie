@@ -23,7 +23,7 @@ function Main() {
         <div className="modal-content">
           <button className="sans-serif" onClick={() => hideHelp()}>Close</button>
           <h2>Language reference</h2>
-          <p>The language is similar in syntax to Haskell. All functions are applied in prefix notation, i.e. <code>+ 3 4</code> instead of <code>3 + 4</code>.</p>
+          <p>The language is similar in syntax to Haskell. All functions are applied in prefix notation, i.e. <code>+ 3 4</code> instead of <code>3 + 4</code>. Anonymous functions only take one parameter, i.e. <code>\x -{'>'} \y -{'>'} y x</code> instead of <code>\x y -{'>'} y x</code>.</p>
           <p>The type constructors available are:</p>
           <ul>
             <li><code>Int</code></li>

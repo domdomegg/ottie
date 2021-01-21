@@ -458,7 +458,7 @@ const LEAF = (): SingleParser<Expr> => F
     .or(F.try(lparen.map((v, r) => r.location() - 1).then((F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).rep())).array()).then(rparen.map((s, r) => getPos(r).end)).map(toTuple)))
     .or(F.try(identifier.map((value, r) => new Var(value, getPos(r)))))
 const ABS = (): SingleParser<Abs> => lparen.drop().then(ABS_()).then(rparen.drop()).single().map(expandPos)
-const ABS_ = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression2)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
+const ABS_ = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression1)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
 const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression2)).then(rparen.drop()).single().map(expandPos)
 const LET = (): SingleParser<Abs> => lparen.drop().then(LET_()).then(rparen.drop()).single().map(expandPos)
 const LET_ = (): SingleParser<Let> => letTok.map((v, r) => getPos(r).start).then(identifier).then(equal.drop()).then(F.lazy(expression2)).then(inTok.drop()).then(F.lazy(expression2)).map((tuple, r) => new Let(tuple.at(1), tuple.at(2), tuple.at(3), { start: tuple.at(0), end: r.location() }))
