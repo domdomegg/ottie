@@ -129,7 +129,7 @@ class TypeVar {
     }
 }
 
-type TypeFunc = "->" | "[]" | "Maybe" | "Either" | "Int" | "Char" | "Bool" | "," | ",," | ",,," | ",,,," | ",,,,," | ",,,,,," | ",,,,,,,";
+type TypeFunc = "->" | "[]" | "Maybe" | "Either" | "Int" | "Char" | "Bool" | "," | ",," | ",,," | ",,,," | ",,,,," | ",,,,,," | ",,,,,,," | ",,,,,,,,";
 
 class TypeFuncApp {
     readonly constructorName: TypeFunc;
@@ -192,7 +192,7 @@ const f = (one: MonoType, two: MonoType, ...extra: MonoType[]): TypeFuncApp => {
 const list = (monoType: MonoType): TypeFuncApp => new TypeFuncApp('[]', monoType);
 const tuple = (...monoTypes: MonoType[]): TypeFuncApp => {
     if (monoTypes.length <= 1) throw new Error('Tuple has too few elements, minimum of 2 but given ' + monoTypes.length)
-    if (monoTypes.length > 8) throw new Error('Tuple has too many elements, maximum of 8 but given ' + monoTypes.length)
+    if (monoTypes.length > 9) throw new Error('Tuple has too many elements, maximum of 9 but given ' + monoTypes.length)
     return new TypeFuncApp(','.repeat(monoTypes.length - 1) as TypeFunc, ...monoTypes);
 }
 const maybe = (monoType: MonoType): TypeFuncApp => new TypeFuncApp('Maybe', monoType);
@@ -289,9 +289,19 @@ const standardCtx: Context = {
     ',': new PolyType(['a', 'b'], f(a, b, tuple(a, b))),
     ',,': new PolyType(['a', 'b', 'c'], f(a, b, c, tuple(a, b, c))),
     ',,,': new PolyType(['a', 'b', 'c', 'd'], f(a, b, c, d, tuple(a, b, c, d))),
+    ',,,,': new PolyType(['a', 'b', 'c', 'd', 'e'], f(a, b, c, d, new TypeVar('e'), tuple(a, b, c, d, new TypeVar('e')))),
+    ',,,,,': new PolyType(['a', 'b', 'c', 'd', 'e', 'f'], f(a, b, c, d, new TypeVar('e'), new TypeVar('f'), tuple(a, b, c, d, new TypeVar('e'), new TypeVar('f')))),
+    ',,,,,,': new PolyType(['a', 'b', 'c', 'd', 'e', 'f', 'g'], f(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), tuple(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g')))),
+    ',,,,,,,': new PolyType(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], f(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), new TypeVar('h'), tuple(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), new TypeVar('h')))),
+    ',,,,,,,,': new PolyType(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'], f(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), new TypeVar('h'), new TypeVar('i'), tuple(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), new TypeVar('h'), new TypeVar('i')))),
     't': new PolyType(['a', 'b'], f(a, b, tuple(a, b))),
     'tt': new PolyType(['a', 'b', 'c'], f(a, b, c, tuple(a, b, c))),
     'ttt': new PolyType(['a', 'b', 'c', 'd'], f(a, b, c, d, tuple(a, b, c, d))),
+    'tttt': new PolyType(['a', 'b', 'c', 'd', 'e'], f(a, b, c, d, new TypeVar('e'), tuple(a, b, c, d, new TypeVar('e')))),
+    'ttttt': new PolyType(['a', 'b', 'c', 'd', 'e', 'f'], f(a, b, c, d, new TypeVar('e'), new TypeVar('f'), tuple(a, b, c, d, new TypeVar('e'), new TypeVar('f')))),
+    'tttttt': new PolyType(['a', 'b', 'c', 'd', 'e', 'f', 'g'], f(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), tuple(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g')))),
+    'ttttttt': new PolyType(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], f(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), new TypeVar('h'), tuple(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), new TypeVar('h')))),
+    'tttttttt': new PolyType(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'], f(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), new TypeVar('h'), new TypeVar('i'), tuple(a, b, c, d, new TypeVar('e'), new TypeVar('f'), new TypeVar('g'), new TypeVar('h'), new TypeVar('i')))),
     'fst': new PolyType(['a', 'b'], f(tuple(a, b), a)),
     'snd': new PolyType(['a', 'b'], f(tuple(a, b), b)),
     'curry': new PolyType(['a', 'b', 'c'], f(f(tuple(a, b), c), a, b, c)),

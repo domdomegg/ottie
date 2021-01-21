@@ -20,7 +20,7 @@ test('tuple helper works', () => {
     expect(tuple(a, b, c, d, a, b)).toEqual(new TypeFuncApp(',,,,,', a, b, c, d, a, b));
     expect(tuple(a, b, c, d, a, b, c)).toEqual(new TypeFuncApp(',,,,,,', a, b, c, d, a, b, c));
     expect(tuple(a, b, c, d, a, b, c, d)).toEqual(new TypeFuncApp(',,,,,,,', a, b, c, d, a, b, c, d));
-    expect(() => tuple(a, b, c, d, a, b, c, d, a)).toThrow();
+    expect(() => tuple(a, b, c, d, a, b, c, d, a, b)).toThrow();
 })
 
 test('maybe helper works', () => {
