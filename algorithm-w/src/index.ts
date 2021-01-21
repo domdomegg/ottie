@@ -42,6 +42,10 @@ function combine(...substitutions: Substitution[]): Substitution {
 
 function unify(type1: MonoType, type2: MonoType): Substitution {
     if (type1 instanceof TypeVar) {
+        if (type2 instanceof TypeVar && type1.name == type2.name) {
+            return {};
+        }
+
         if (contains(type2, type1)) {
             throw new TypeInferenceError('Occurs check failed. `' + type1.toString() + '` occurs in `' + type2.toString() + '` so unifying them would create an infinite type.');
         }

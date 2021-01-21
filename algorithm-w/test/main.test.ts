@@ -261,6 +261,9 @@ test('unifies types correctly', () => {
             t1: number,
             t2: number,
         });
+
+    expect(unify(new TypeVar('t0'), new TypeVar('t0')))
+        .toEqual({});
 });
 
 test('unifying rejects un-unifyable types', () => {
