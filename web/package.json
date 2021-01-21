@@ -19,8 +19,12 @@
   },
   "homepage": ".",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "npm run start:dev",
+    "build": "npm run build:prod",
+    "start:dev": "REACT_APP_STAGE=dev react-scripts start",
+    "build:dev": "REACT_APP_STAGE=dev react-scripts build",
+    "start:prod": "REACT_APP_STAGE=prod react-scripts start",
+    "build:prod": "REACT_APP_STAGE=prod react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

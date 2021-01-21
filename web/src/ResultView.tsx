@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { parse } from 'language'
 import { infer } from 'algorithm-w'
 import ASTView from './ASTView';
@@ -11,16 +11,11 @@ export interface Highlight {
 
 function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: Highlight[]) => void }) {
   // Parse the code, highlighting any errors
-  const parseResult = useMemo(() => {
-    return parse(code, true);
-  }, [code]);
+  const parseResult = parse(code, true);
   useEffect(() => setHighlights(parseResult.accepted ? [] : [{ start: parseResult.issuePosition.start, end: parseResult.issuePosition.end, className: 'highlight-error' }]), [parseResult, setHighlights]);
 
   // Infer the types, highlighting any errors
-  const inferenceResult = useMemo(() => {
-    if (!parseResult.accepted) return;
-    return infer(parseResult.value, true);
-  }, [parseResult])!;
+  const inferenceResult = !parseResult.accepted ? undefined! : infer(parseResult.value, true);
   useEffect(() => inferenceResult && setHighlights(inferenceResult.accepted ? [] : [{ start: inferenceResult.issuePosition.start, end: inferenceResult.issuePosition.end, className: 'highlight-error' }]), [inferenceResult, setHighlights]);
 
   if (!parseResult.accepted) {

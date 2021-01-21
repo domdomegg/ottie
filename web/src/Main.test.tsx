@@ -1,6 +1,9 @@
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
 import Main from './Main'
+import { a, b } from './analytics'
+
+jest.mock('./analytics')
 
 test('has a title', () => {
   const screen = render(<Main />)
@@ -52,4 +55,22 @@ test('can open and close help modal', () => {
     screen.getAllByText('Language reference');
     fireEvent.click(screen.getByText('Close'));
     expect(screen.queryByText('Language reference')).not.toBeInTheDocument();
+});
+
+test('clicking buttons sends analytics events', () => {
+    const screen = render(<Main />)
+    expect(a).toHaveBeenCalledTimes(0)
+    fireEvent.click(screen.getByText('4'));
+    expect(a).toHaveBeenCalledTimes(1)
+    expect((a as any).mock.calls[0][0].name).toBe('codeButtonSet')
+    expect((a as any).mock.calls[0][0].value).toBe('4')
+});
+
+test('entering text sends debounced analytics events', () => {
+    const screen = render(<Main />)
+    expect(b).toHaveBeenCalledTimes(0)
+    fireEvent.change((screen.container.querySelector('input') as HTMLInputElement), { target: { value: 'Just 3' }});
+    expect(b).toHaveBeenCalledTimes(1)
+    expect((b as any).mock.calls[0][0].name).toBe('codeChange')
+    expect((b as any).mock.calls[0][0].value).toBe('Just 3')
 });
