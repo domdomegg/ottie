@@ -6,6 +6,7 @@ on:
     - '.github/workflows/web.yaml'
     - 'language/**'
     - 'algorithm-w/**'
+    - 'algorithm-m/**'
     - 'web/**'
 
 jobs:
@@ -38,6 +39,13 @@ jobs:
         run: npm ci
       - name: 'algorithm-w: Build'
         working-directory: algorithm-w
+        run: npm run build --if-present
+
+      - name: 'algorithm-m: Install dependencies'
+        working-directory: algorithm-m
+        run: npm ci
+      - name: 'algorithm-m: Build'
+        working-directory: algorithm-m
         run: npm run build --if-present
 
       - name: 'web: Install dependencies'
