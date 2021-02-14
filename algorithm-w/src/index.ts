@@ -3,9 +3,10 @@ import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs,
 class TypeInferenceError extends Error {
     expr?: Expr;
 
-    constructor(message: string) {
+    constructor(message: string, expr?: Expr) {
         super(message);
         this.name = "TypeInferenceError";
+        this.expr = expr;
     }
 }
 
@@ -145,7 +146,7 @@ function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtil
             value: {
                 steps
             },
-            issuePosition: e.name == TypeInferenceError.name ? e.expr.pos : expr.pos,
+            issuePosition: (e.name == TypeInferenceError.name && e.expr) ? e.expr.pos : expr.pos,
             message: (e as Error).message
         }
     }
@@ -186,13 +187,12 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         const type = ctx[expr.name]
         if (!type) {
             logger('We try to look up the variable `' + expr.toString() + '` but find it is not in scope. We stop here as this is an error.', highlight(expr));
-            const err = new TypeInferenceError('`' + expr.name + '` is not in scope');
-            err.expr = expr;
+            const err = new TypeInferenceError('`' + expr.name + '` is not in scope', expr);
             throw err;
         }
         const instantiatedType = inst(type, freshTypeName);
 
-        logger('We can look up the variable `' + expr.toString() + '` and find it has type `' + type.toString() + (type.quantifiedVars.length ? '`\nWe instatiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : ''), highlight(expr));
+        logger('We can look up the variable `' + expr.toString() + '` and find it has type `' + type.toString() + '`' + (type.quantifiedVars.length ? '\nWe instatiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : ''), highlight(expr));
         
         return [instantiatedType, {}];
     }
@@ -203,7 +203,7 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         const t = new TypeVar(freshTypeName());
 
         // Give an easier to read and understand message if we can, otherwise default to the more general case
-        let firstPartOfLogMessage = (funcType instanceof TypeFuncApp && funcType.constructorName == '->')
+        const firstPartOfLogMessage = (funcType instanceof TypeFuncApp && funcType.constructorName == '->')
             ? 'In function application, the function must accept the expected argument type.\nBefore unification, the function has type `' + funcType.toString() + '`\n\nTherefore we unify:\nFunction accepts `' + (funcType as TypeFuncApp).args[0].toString() + '`\nArgument has type `' + argType.toString() + '`\n\n'
             : 'In function application, the function must accept the expected argument type and returns some other type.\n\nTherefore we unify:\nFunction type `' + funcType.toString() + '`\nArgument to fresh type `' + new TypeFuncApp("->", argType, t).toString() + '`\n\n';
 

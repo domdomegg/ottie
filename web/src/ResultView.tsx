@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { parse } from 'language'
-import { infer } from 'algorithm-w'
+import { infer as inferW } from 'algorithm-w'
+import { infer as inferM } from 'algorithm-m'
 import ASTView from './ASTView';
 
 export interface Highlight {
@@ -9,10 +10,12 @@ export interface Highlight {
   className: string;
 }
 
-function ResultView({ code, setHighlights }: { code: string, setHighlights: (h: Highlight[]) => void }) {
+function ResultView({ code, algorithm, setHighlights }: { code: string, algorithm: 'w' | 'm', setHighlights: (h: Highlight[]) => void }) {
   // Parse the code, highlighting any errors
   const parseResult = parse(code, true);
   useEffect(() => setHighlights(parseResult.accepted ? [] : [{ start: parseResult.issuePosition.start, end: parseResult.issuePosition.end, className: 'highlight-error' }]), [parseResult, setHighlights]);
+
+  const infer = algorithm === 'w' ? inferW : inferM;
 
   // Infer the types, highlighting any errors
   const inferenceResult = !parseResult.accepted ? undefined! : infer(parseResult.value, true);

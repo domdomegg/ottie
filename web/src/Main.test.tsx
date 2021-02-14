@@ -74,3 +74,13 @@ test('entering text sends debounced analytics events', () => {
     expect((b as any).mock.calls[0][0].name).toBe('codeChange')
     expect((b as any).mock.calls[0][0].value).toBe('Just 3')
 });
+
+test('can set algorithm to algorithm M then W', () => {
+    const screen = render(<Main />)
+    expect(screen.getByText('w')).toHaveClass('active');
+    fireEvent.click(screen.getByText('m'));
+    expect(screen.getByText('m')).toHaveClass('active');
+    expect(screen.queryByText(/We start algorithm M by/)).toBeInTheDocument();
+    fireEvent.click(screen.getByText('w'));
+    expect(screen.queryByText(/We start algorithm M by/)).not.toBeInTheDocument();
+});

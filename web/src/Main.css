@@ -48,7 +48,7 @@ button:hover {
     background-color: rgba(255, 255, 255, 0.5);
 }
 
-button:active {
+button:active, button.active {
     color: black;
     background-color: rgb(255, 255, 255);
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
@@ -271,7 +271,7 @@ code {
     background-color: rgba(203, 59, 118, 0.5);
 }
 
-.modal-content button:active {
+.modal-content button:active, .modal-content button.active {
     background-color:rgba(203, 59, 118, 0.9);
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
 }

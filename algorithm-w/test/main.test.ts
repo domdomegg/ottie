@@ -122,6 +122,7 @@ test('function definitions', () => {
 test('invalid function definitions', () => {
     expect(new Abs('x', new Abs('y', parse('+ x (not y)'), undefined!), undefined!)).toHaveInvalidType();
     expect(new Abs('x', parse('map + (map not x)'), undefined!)).toHaveInvalidType();
+    expect(parse('(\\x -> not x) id')).toHaveInvalidType();
 });
 
 test('let bindings', () => {

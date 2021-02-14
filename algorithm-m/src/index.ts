@@ -3,9 +3,10 @@ import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs,
 class TypeInferenceError extends Error {
     expr?: Expr;
 
-    constructor(message: string) {
+    constructor(message: string, expr?: Expr) {
         super(message);
         this.name = "TypeInferenceError";
+        this.expr = expr;
     }
 }
 
@@ -134,9 +135,12 @@ function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtil
     const logger = (message: string, notes: Map<Expr, string>) => {
         steps.push({ message, ast: cloneAst(expr, notes) })
     }
+    logger('We start algorithm M by assigning the root node a fresh type `' + rootType.toString() + '`', highlight(expr));
 
     try {
         const s = _infer(expr, ctx, rootType, freshTypeName, logger);
+        // We'll already have just logged str(s), so probably not too much point doing it again
+        logger('We can extract the root type `' + rootType.toString() + '` from the most recent substitution to get expression\'s type as `' + s[rootType.name]!.toString() + '`', highlight(expr));
         return {
             accepted: true,
             value: {
@@ -150,7 +154,7 @@ function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtil
             value: {
                 steps
             },
-            issuePosition: e.name == TypeInferenceError.name ? e.expr.pos : expr.pos,
+            issuePosition: (e.name == TypeInferenceError.name && e.expr) ? e.expr.pos : expr.pos,
             message: (e as Error).message
         }
     }
@@ -178,29 +182,50 @@ const str = (substitution: Substitution, except?: string): string => ('{ ' + Obj
 
 function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => string, logger: (message: string, notes: Map<Expr, string>) => void = () => {}): Substitution {
     if (expr instanceof CharLiteral) {
-        logger('We know the primitive `' + expr.toString() + '` is a `Char`', highlight(expr));
-        return unify(type, inst(new PolyType([], new TypeFuncApp('Char')), freshTypeName));
+        const firstPartOfLogMessage = 'We expect the type to unify with `' + type.toString() + '`, and we know the primitive `' + expr.toString() + '` is a `Char`.'
+        try {
+            const substitution = unify(type, inst(new PolyType([], new TypeFuncApp('Char')), freshTypeName));
+            logger(firstPartOfLogMessage + '\nThese unify, giving the substitution `' + str(substitution) + '`', highlight(expr));
+            return substitution;
+        } catch (err) {
+            logger(firstPartOfLogMessage + '\nHowever, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
+            err.expr = expr;
+            throw err;
+        }
     }
 
     if (expr instanceof NumberLiteral) {
-        logger('We know the primitive `' + expr.toString() + '` is an `Int`', highlight(expr));
-        return unify(type, inst(new PolyType([], new TypeFuncApp('Int')), freshTypeName));
+        const firstPartOfLogMessage = 'We expect the type to unify with `' + type.toString() + '`, and we know the primitive `' + expr.toString() + '` is an `Int`.'
+        try {
+            const substitution = unify(type, inst(new PolyType([], new TypeFuncApp('Int')), freshTypeName));
+            logger(firstPartOfLogMessage + '\nThese unify, giving the substitution `' + str(substitution) + '`', highlight(expr));
+            return substitution;
+        } catch (err) {
+            logger(firstPartOfLogMessage + '\nHowever, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
+            err.expr = expr;
+            throw err;
+        }
     }
 
     if (expr instanceof Var) {
         const varType = ctx[expr.name]
         if (!varType) {
             logger('We try to look up the variable `' + expr.toString() + '` but find it is not in scope. We stop here as this is an error.', highlight(expr));
-            const err = new TypeInferenceError('`' + expr.name + '` is not in scope');
-            err.expr = expr;
+            const err = new TypeInferenceError('`' + expr.name + '` is not in scope', expr);
             throw err;
         }
         const instantiatedType = inst(varType, freshTypeName);
 
-        logger('We can look up the variable `' + expr.toString() + '` and find it has type `' + varType.toString() + (varType.quantifiedVars.length ? '`\nWe instatiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : ''), highlight(expr));
-        
-        // TODO: better log messages
-        return unify(type, instantiatedType);
+        const firstPartOfLogMessage = 'We expect this variable to unify with `' + type.toString() + '`\nWe look up the variable `' + expr.toString() + '` and find it has type `' + varType.toString() + '`' + (varType.quantifiedVars.length ? '\nWe instatiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : '');
+        try {
+            const substitution = unify(type, instantiatedType);
+            logger(firstPartOfLogMessage + '\nThese unify, giving the substitution `' + str(substitution) + '`', highlight(expr));
+            return substitution;
+        } catch (err) {
+            logger(firstPartOfLogMessage + '\nHowever, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
+            err.expr = expr;
+            throw err;
+        }
     }
 
     if (expr instanceof App) {
@@ -209,9 +234,9 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
         const argSubstitution = _infer(expr.arg, substitute(funcSubstitution, ctx), apply(beta, funcSubstitution), freshTypeName, logger);
         const t = new TypeVar(freshTypeName());
 
-        // TODO: better log message
-        logger('We checked the function application is valid', highlight(expr));
-        return combine(funcSubstitution, argSubstitution);
+        const combinedSubstitution = combine(funcSubstitution, argSubstitution);
+        logger('As the argument unifies with the function definition the function application is valid, giving a combined substitution of `' + str(combinedSubstitution) +'`', highlight(expr));
+        return combinedSubstitution;
     }
 
     if (expr instanceof Abs) {
@@ -219,22 +244,30 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
         const beta2 = new TypeVar(freshTypeName());
         const functionType = new TypeFuncApp('->', beta1, beta2);
 
-        logger('Our function definition is unified with the fresh function type `' + functionType.toString()  + '`', highlight(expr));
-
-        // TODO: do we need error logging? Better logs?
-
-        const s1 = unify(type, functionType);
+        const firstPartOfLogMessage = 'We expect this function definition to unify with a fresh function type `' + functionType.toString()  + '` to unify with `' + type.toString() + '`';
+        let s1: Substitution;
+        try {
+            s1 = unify(type, functionType);
+            logger(firstPartOfLogMessage + '\nThese unify, giving `' + str(s1) + '`\nWe next will unify the body with `' + beta2.toString() + '`', highlight(expr));
+        } catch (err) {
+            logger(firstPartOfLogMessage + '\nHowever, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
+            err.expr = expr;
+            throw err;
+        }
         const s2 = _infer(expr.body, { ...substitute(s1, ctx), [expr.param]: new PolyType([], apply(beta1, s1)) }, apply(beta2, s1), freshTypeName, logger);
-        return combine(s1, s2);
+        const combinedSubstitution = combine(s1, s2);
+        logger('Combining the function and body substitutions gives `' + str(combinedSubstitution) + '`', highlight(expr));
+        return combinedSubstitution;
     }
 
     if (expr instanceof Let) {
         const beta = new TypeVar(freshTypeName());
+        logger('We create a new type variable `' + beta.toString() + '` for this let statement\'s parameter `' + expr.param + '`, then infer on the parameter and body', highlight(expr));
         const s1 = _infer(expr.def, ctx, beta, freshTypeName, logger);
         const s2 = _infer(expr.body, { ...substitute(s1, ctx), [expr.param]: generalise(substitute(s1, ctx), apply(beta, s1)) }, apply(type, s1), freshTypeName, logger);
-        // TODO: better log message
-        logger('We checked the let statement is valid', highlight(expr));
-        return combine(s1, s2);
+        const combinedSubstitution = combine(s1, s2);
+        logger('Combining the parameter and body substitutions gives `' + str(combinedSubstitution) + '`', highlight(expr));
+        return combinedSubstitution;
     }
 
     // Should be unreachable...

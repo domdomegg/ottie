@@ -8,6 +8,7 @@ const body = document.getElementById('body') || { style: { overflow: '' } };
 
 function Main() {
   const [code, setCode] = useState<string>('map not []');
+  const [algorithm, setAlgorithm] = useState<'w' | 'm'>('w');
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [showingHelp, setShowingHelp] = useState<boolean>(false);
   const showHelp = () => { setShowingHelp(true); a({ name: 'help', value: 'show' }); }
@@ -15,7 +16,7 @@ function Main() {
 
   body.style.overflow = showingHelp ? 'hidden' : '';
 
-  const resultview = useMemo(() => code && <ResultView code={code} setHighlights={setHighlights} />, [code]);
+  const resultview = useMemo(() => code && <ResultView code={code} algorithm={algorithm} setHighlights={setHighlights} />, [code, algorithm]);
 
   return (
     <div id="main">
@@ -47,18 +48,22 @@ function Main() {
         Play with algorithm W in your browser.
       </h2>
       <p>Type inference is the ability to determine an expression's type in a language. Hindley-Milner (HM) is a typed λ-calculus which allows for complete type inference without explicit type annotations. Haskell's type system is based on HM.</p>
-      <p>This tool allows you to enter expressions in syntax similar to Haskell and view how a type inference algorithm (algorithm W) could work out the types. A full list of built-in functions and their types is available <button className="sans-serif" onClick={() => showHelp()} data-testid="help-open-button">here</button>. Expressions must be given in prefix notation, i.e. <SetCodeButton value='+ 3 4' setCode={setCode} /> instead of <SetCodeButton value='3 + 4' setCode={setCode} />.</p>
+      <p>This tool allows you to enter expressions in syntax similar to Haskell and view how a type inference algorithm (algorithm W) could work out the types. A full list of built-in functions and their types is available <button className="sans-serif" onClick={() => showHelp()} data-testid="help-open-button">here</button>. Expressions must be given in prefix notation, i.e. <SetButton type='button' value='+ 3 4' current={code} setter={setCode} /> instead of <SetButton type='code' value='3 + 4' current={code} setter={setCode} />.</p>
       <p>Usage data such as button clicks and evaluated expressions may be collected to evaluate and improve the tool.</p>
+      <h2>Algorithm:
+        <SetButton type='algorithm' value='w' current={algorithm} setter={setAlgorithm} />
+        <SetButton type='algorithm' value='m' current={algorithm} setter={setAlgorithm} />
+      </h2>
       <h2>Samples:
-        <SetCodeButton value='4' setCode={setCode} />
-        <SetCodeButton value='not' setCode={setCode} />
-        <SetCodeButton value='odd 5' setCode={setCode} />
-        <SetCodeButton value='map not []' setCode={setCode} />
-        <SetCodeButton value='fst' setCode={setCode} /><br className="md-only" />
-        <SetCodeButton value='Just' setCode={setCode} />
-        <SetCodeButton value='let x = 3 in (+, x)' setCode={setCode} />
-        <SetCodeButton value='\x -> / x 2' setCode={setCode} />
-        <SetCodeButton value=': 23 [1]' setCode={setCode} />
+        <SetButton type='code' value='4' current={code} setter={setCode} />
+        <SetButton type='code' value='not' current={code} setter={setCode} />
+        <SetButton type='code' value='odd 5' current={code} setter={setCode} />
+        <SetButton type='code' value='map not []' current={code} setter={setCode} />
+        <SetButton type='code' value='fst' current={code} setter={setCode} /><br className="md-only" />
+        <SetButton type='code' value='Just' current={code} setter={setCode} />
+        <SetButton type='code' value='let x = 3 in (+, x)' current={code} setter={setCode} />
+        <SetButton type='code' value='\x -> / x 2' current={code} setter={setCode} />
+        <SetButton type='code' value=': 23 [1]' current={code} setter={setCode} />
       </h2>
       <div className='code-container'>
         <input placeholder="Enter code..." value={code} onChange={e => { setCode(e.target.value); b({ name: 'codeChange', value: e.target.value }); }} />
@@ -69,8 +74,8 @@ function Main() {
   );
 }
 
-function SetCodeButton({ value, setCode }: { value: string, setCode: (code: string) => void }) {
-  return <button onClick={() => { setCode(value); a({ name: 'codeButtonSet', value }); }}>{value}</button>
+function SetButton<T extends string>({ type, value, setter, current }: { type: string, value: T, setter: (v: T) => void, current?: T }) {
+  return <button className={current === value ? 'active' : undefined} onClick={() => { setter(value); a({ name: type + 'ButtonSet', value }); }}>{value}</button>
 }
 
 export default Main;
