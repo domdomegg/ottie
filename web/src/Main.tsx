@@ -8,7 +8,7 @@ const body = document.getElementById('body') || { style: { overflow: '' } };
 
 function Main() {
   const [code, setCode] = useState<string>('map not []');
-  const [algorithm, setAlgorithm] = useState<'w' | 'm'>('w');
+  const [algorithm, setAlgorithm] = useState<'w' | 'w\'' | 'm'>('w');
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [showingHelp, setShowingHelp] = useState<boolean>(false);
   const showHelp = () => { setShowingHelp(true); a({ name: 'help', value: 'show' }); }
@@ -52,6 +52,7 @@ function Main() {
       <p>Usage data such as button clicks and evaluated expressions may be collected to evaluate and improve the tool.</p>
       <h2>Algorithm:
         <SetButton type='algorithm' value='w' current={algorithm} setter={setAlgorithm} />
+        <SetButton type='algorithm' value={'w\''} current={algorithm} setter={setAlgorithm} />
         <SetButton type='algorithm' value='m' current={algorithm} setter={setAlgorithm} />
       </h2>
       <h2>Samples:

@@ -12,6 +12,7 @@
     "@types/react-dom": "^16.9.9",
     "algorithm-m": "file:../algorithm-m",
     "algorithm-w": "file:../algorithm-w",
+    "algorithm-w-prime": "file:../algorithm-w-prime",
     "language": "file:../language",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

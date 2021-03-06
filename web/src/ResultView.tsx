@@ -1,8 +1,15 @@
 import React, { useEffect } from 'react';
 import { parse } from 'language'
 import { infer as inferW } from 'algorithm-w'
+import { infer as inferWPrime } from 'algorithm-w-prime'
 import { infer as inferM } from 'algorithm-m'
 import ASTView from './ASTView';
+
+const algorithms: { [key: string]: typeof inferW } = {
+  'w': inferW,
+  'm': inferM,
+  'w\'': inferWPrime
+}
 
 export interface Highlight {
   start: number;
@@ -10,15 +17,13 @@ export interface Highlight {
   className: string;
 }
 
-function ResultView({ code, algorithm, setHighlights }: { code: string, algorithm: 'w' | 'm', setHighlights: (h: Highlight[]) => void }) {
+function ResultView({ code, algorithm, setHighlights }: { code: string, algorithm: 'w' | 'w\'' | 'm', setHighlights: (h: Highlight[]) => void }) {
   // Parse the code, highlighting any errors
   const parseResult = parse(code, true);
   useEffect(() => setHighlights(parseResult.accepted ? [] : [{ start: parseResult.issuePosition.start, end: parseResult.issuePosition.end, className: 'highlight-error' }]), [parseResult, setHighlights]);
 
-  const infer = algorithm === 'w' ? inferW : inferM;
-
   // Infer the types, highlighting any errors
-  const inferenceResult = !parseResult.accepted ? undefined! : infer(parseResult.value, true);
+  const inferenceResult = !parseResult.accepted ? undefined! : algorithms[algorithm](parseResult.value, true);
   useEffect(() => inferenceResult && setHighlights(inferenceResult.accepted ? [] : [{ start: inferenceResult.issuePosition.start, end: inferenceResult.issuePosition.end, className: 'highlight-error' }]), [inferenceResult, setHighlights]);
 
   if (!parseResult.accepted) {
