@@ -1,10 +1,10 @@
-name: specification
+name: finalreport
 
 on:
   push:
     paths:
-    - '.github/workflows/specification.yaml'
-    - 'docs/specification/**'
+    - '.github/workflows/finalreport.yaml'
+    - 'docs/finalreport/**'
 
 jobs:
   build:
@@ -17,17 +17,17 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt install texlive-latex-extra texlive-bibtex-extra
-          sudo npm install -g gdoc2latex@3.0.1
+          sudo npm install -g gdoc2latex@3.0.4
 
-      - name: Build specification
+      - name: Build finalreport
         run: ./build.sh
-        working-directory: docs/specification
+        working-directory: docs/finalreport
       - uses: actions/upload-artifact@v2
         with:
-          name: specification
-          path: docs/specification/index.pdf
+          name: finalreport
+          path: docs/finalreport/index.pdf
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: 'Specification: Update latex sources'
+          commit_message: 'finalreport: Update latex sources'
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com

@@ -1,7 +1,7 @@
 # Installation instructions (or at least what I did on Ubuntu 20.04):
 #   sudo apt install texlive-latex-extra
 #   sudo apt install texlive-bibtex-extra
-#   npm install -g gdoc2latex@3.0.3
+#   npm install -g gdoc2latex@3.0.4
 
 set -e
 
@@ -22,4 +22,4 @@ gdoc2latex --input $f.html --output $f.tex --template-start start.tex --template
 pdflatex --shell-escape -interaction=nonstopmode $f || true
 bibtex $f || true
 pdflatex --shell-escape -interaction=nonstopmode $f || true
-pdflatex --shell-escape -interaction=nonstopmode $f
+pdflatex --shell-escape -interaction=nonstopmode $f || true
