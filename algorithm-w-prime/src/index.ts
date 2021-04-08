@@ -357,4 +357,4 @@ function contains(type: MonoType | PolyType, other: TypeVar): boolean {
     throw new Error('Internal error, this should never happen');
 }
 
-export { TypeInferenceError, Context, Substitution, substitute, combine, unify, infer, apply };
+export { TypeInferenceError, Context, Substitution, substitute, combine, unify, unifySubtitutions, infer, apply };

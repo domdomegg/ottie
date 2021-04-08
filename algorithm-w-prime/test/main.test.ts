@@ -1,6 +1,6 @@
 import './jest.setup'
-import { TypeVar, Var, Abs, Let, CharLiteral, NumberLiteral, typeUtils, parse, App } from 'language'
-import { combine, unify, apply, infer } from '../src/index';
+import { TypeVar, Var, Abs, Let, CharLiteral, NumberLiteral, typeUtils, parse, App, TypeFuncApp } from 'language'
+import { combine, unify, unifySubtitutions, apply, infer } from '../src/index';
 const { number, char, boolean, f, list, tuple, maybe, either, a, b } = typeUtils;
 const [t0, t1, t2, t3] = [0, 1, 2, 3].map(v => new TypeVar('t' + v.toString()))
 
@@ -278,4 +278,21 @@ test('unifying rejects un-unifyable types', () => {
     expect(() => unify(f(number, number), number)).toThrow('Could not unify types `Int -> Int` and `Int` with different constructors `->` and `Int`');
     expect(() => unify(f(number, number), f(number, boolean))).toThrow('Could not unify types `Int` and `Bool` with different constructors `Int` and `Bool`');
     expect(() => unify(f(number, number), f(number, number, number))).toThrow();
+});
+
+test('unifying basic substitutions', () => {
+    expect(unifySubtitutions({}, {})).toEqual({});
+    expect(unifySubtitutions({ t0: new TypeFuncApp('Int') }, { t1: new TypeFuncApp('Bool') })).toEqual({ t0: new TypeFuncApp('Int'), t1: new TypeFuncApp('Bool') });
+});
+
+test('unifying a substitution', () => {
+    const s1 = { t0: new TypeFuncApp('->', new TypeVar('t1'), new TypeFuncApp('Bool')) };
+    const s2 = { t0: new TypeFuncApp('->', new TypeFuncApp('Int'), new TypeVar('t2')) };
+    const u = unifySubtitutions(s1, s2);
+    const v1 = combine(s1, u);
+    const v2 = combine(s2, u);
+
+    expect(u).toEqual({ t1: new TypeFuncApp('Int'), t2: new TypeFuncApp('Bool') });    
+    expect(v1).toEqual({ t0: new TypeFuncApp('->', new TypeFuncApp('Int'), new TypeFuncApp('Bool')), t1: new TypeFuncApp('Int'), t2: new TypeFuncApp('Bool') });
+    expect(v1).toEqual(v2);
 });
