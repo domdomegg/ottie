@@ -113,7 +113,7 @@ There have been previous attempts to build visualisation and teaching tools rela
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.770\linewidth]{images/image9.png}
+  \includegraphics[width=0.770\linewidth]{images/image15.png}
   \caption{Screenshot of results from TypeTool, taken from their paper}
 \end{figure} \par}
 
@@ -129,7 +129,7 @@ Another tool in the area of visualising type systems was developed by~\cite{ref7
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.797\linewidth]{images/image2.png}
+  \includegraphics[width=0.797\linewidth]{images/image3.png}
   \caption{Screenshot of Yung and Michaelson's tool, taken from their paper}
 \end{figure} \par}
 
@@ -137,11 +137,11 @@ NiMo \citep{ref8} is a graphical programming language related to functional data
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image7.png}
+  \includegraphics[width=0.960\linewidth]{images/image13.png}
   \caption{A diagram showing the types of some variables in NiMo, taken from their paper}
 \end{figure} \par}
 
-\cite{ref9} implemented a successful teaching tool, named TILC, for visualising lambda-calculus parse trees in order to help with teaching lambda-calculus to undergraduate students. They noted that to develop an intuitive understanding, students would benefit from  experimenting with lambda-calculus and that “a tool that deals with all these aspects in a friendly and graphical manner incentivises [experimentation]”. TILC was successful, with the module organisers of ‘programming paradigms’ at the Universitat de Girona having a “good experience of using this tool in the course lectures and as a downloadable tool for students”. The authors suggested extending TILC to show types and type inference would have pedagogical value.
+\cite{ref9} implemented a successful teaching tool, named TILC, for visualising lambda-calculus parse trees in order to help with teaching lambda-calculus to undergraduate students. They noted that to develop an intuitive understanding, students would benefit from experimenting with lambda-calculus and that “a tool that deals with all these aspects in a friendly and graphical manner incentivises [experimentation]”. TILC was successful, with the module organisers of ‘programming paradigms’ at the Universitat de Girona having a “good experience of using this tool in the course lectures and as a downloadable tool for students”. The authors suggested extending TILC to show types and type inference would have pedagogical value.
 
 To summarise, types aid the construction of correct programs and type checking can detect issues in programs, either at compile-time or runtime. Type inference is a method often used alongside compile-time type checking to determine types in a program, an understanding of which could benefit computer scientists in writing and debugging programs. Some solutions exist which give students a better idea about types, however they either have significant limitations or do not explicitly cover type inference. In this report, we present an interactive web application for teaching type inference.
 \section{Background}\label{id:h.ebjyqi73zdyo}
@@ -152,7 +152,7 @@ For this project, we will consider a calculus with five constructs to build expr
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.510\linewidth]{images/image8.png}
+  \includegraphics[width=0.510\linewidth]{images/image14.png}
 \end{figure}
     | c constant
 
@@ -206,13 +206,13 @@ Like expressions, types can be considered to be built from \mintinline{text}{|va
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.467\linewidth]{images/image5.png}
+  \includegraphics[width=0.467\linewidth]{images/image9.png}
 \end{figure}
 where C is a set of type functions such as \mintinline{text}{|->|}, \mintinline{text}{|List|} and \mintinline{text}{|Maybe|}.
 
 TODO: latexify the above, replace alpha with tn
 
-For a type to be valid all functions must be fully applied, unlike expressions where the final expression may be a function.  As with expressions, we can again assume a global context that binds the basics variables like \mintinline{text}{|Bool|} and \mintinline{text}{|Int|}. In Hindley’s original paper only \mintinline{text}{|->|} was considered as a type function (i.e. $C = \{ \rightarrow \}$), however here we explore several type functions that have been found useful in practice.
+For a type to be valid all functions must be fully applied, unlike expressions where the final expression may be a function. As with expressions, we can again assume a global context that binds the basics variables like \mintinline{text}{|Bool|} and \mintinline{text}{|Int|}. In Hindley’s original paper only \mintinline{text}{|->|} was considered as a type function (i.e. $C = \{ \rightarrow \}$), however here we explore several type functions that have been found useful in practice.
 
 The type function we’ve already been using is \mintinline{text}{|->|} (the \textit{function} type function). It takes two types as arguments and represents a function from the first type to the second. A function from \mintinline{text}{|Int|} to \mintinline{text}{|Bool|} is represented by \mintinline{text}{|(->) Bool Int|} in prefix notation, although would more commonly be written infix as \mintinline{text}{|Bool \rightarrow Int|}.
 
@@ -232,7 +232,7 @@ Adding zero or more for-all quantified type variables to monotypes forms polymor
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.290\linewidth]{images/image10.png}
+  \includegraphics[width=0.290\linewidth]{images/image16.png}
 \end{figure}
 
 TODO: latexify the above, but use rho instead of sigma and a instead of alpha
@@ -319,7 +319,7 @@ If at any point unification is not possible, the type constraints must be incomp
 
 For practical purposes, in type inference algorithms we require unifying substitutions to be finite as infinite types are difficult to represent and reason about. For example \mintinline{text}{|x|} in \mintinline{text}{|$\lambda$x. x x|} needs to be a function that accepts itself. Initially assuming \mintinline{text}{|x|} has type $t0 \rightarrow t1$ and knowing it should accept itself, it also has type $(t0 \rightarrow t1) \rightarrow t1$. It also must accept that, so has type $((t0 \rightarrow t1) \rightarrow t1) \rightarrow t1$, $(((t0 \rightarrow t1) \rightarrow t1) \rightarrow t1) \rightarrow t1$, and so on. This is an infinite type and is not allowed by HM. Note that this does not exclude functions from HM which do accept themselves, such as the identity function \mintinline{text}{|id|} with its finite type $\forall a. a \rightarrow a$, as long as they themselves have finite types.
 
-Detecting infinite types in unification is done by checking whether the types are not equal and one of the types occurs in another. This is known as the occurs check. In the previous example \mintinline{text}{|$\lambda$x. x x|} we might try to unify $t0 \rightarrow t1$ with $t0$. $t0$ occurs in $t0 \rightarrow t1$ so there is no finite unifying substitution (an infinite unifying substitution is $\{ t0 \mapsto ((((t0 \rightarrow t1) \rightarrow t1) \rightarrow \text\{infinite \}t1\text\{s\}\dots) \rightarrow t1) \}$). The occurs check failing necessarily means we have an infinite type: the type contains itself.
+Detecting infinite types in unification is done by checking whether the types are not equal and one of the types occurs in another. This is known as the occurs check. In the previous example \mintinline{text}{|$\lambda$x. x x|} we might try to unify $t0 \rightarrow t1$ with $t0$. $t0$ occurs in $t0 \rightarrow t1$ so there is no finite unifying substitution (an infinite unifying substitution is $\{ t0 \mapsto ((((t0 \rightarrow t1) \rightarrow t1) \rightarrow infinite t1s \dots) \rightarrow t1) \}$). The occurs check failing necessarily means we have an infinite type: the type contains itself.
 
 Inferring types is done in a typing context. Languages often have a global context with built-in functions and their types pre-defined, such as Haskell’s Prelude and JavaScript’s global objects.
 
@@ -347,7 +347,7 @@ Our five key syntax rules plus instatitation and generalisation give us nine typ
 
  \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.505\linewidth]{images/image4.png}
+  \includegraphics[width=0.505\linewidth]{images/image7.png}
 \end{figure}
 
 ---------- [Const\_i]
@@ -408,7 +408,7 @@ Given we know $e\_1$ is a function that should accept $e\_2$’s type, $\tau\_2$
 
 To illustrate, consider \mintinline{text}{|odd 3|} in the context $\Gamma = \{ odd: Int \rightarrow Bool \}$. We find the types of \mintinline{text}{|odd|} and \mintinline{text}{|3|} as $Int \rightarrow Bool$ and $Int$ respectively, unify $Int \rightarrow Bool$ with $Int \rightarrow t0$ to get the substitution $S\_3 = \{ t0 \mapsto Bool \}$ and return the overall type $S\_3(tn) = \{ t0 \mapsto Bool \}t0 = Bool$.
 
-Also consider \mintinline{text}{|odd x|} in the context $\Gamma = \{ odd: Int \rightarrow Bool, x: t0 \}$. Here we find the types of \mintinline{text}{|odd|} and \mintinline{text}{|x|} as $Int \rightarrow Bool$ and $t0$ respectively, unify $Int \rightarrow Bool$ with $t0 \rightarrow t1$ to get the substitution $S\_3 = \{ t0 \mapsto Int, t1 \mapsto Bool \}$ and return the overall type $S\_3(tn) = \{ t0 \mapsto Int, t1 \mapsto Bool \}t1 = Bool$.  In this we also return the substitution $\{ t0: Int, t1: Bool \}$, constraining the external type $t0$ to an $Int$. Given we created $t1$ as a new type variable, it won’t be found elsewhere so does not need to be considered in other expressions so the substitution $\{ t0 \mapsto Int \}$ could equivalently have been returned.
+Also consider \mintinline{text}{|odd x|} in the context $\Gamma = \{ odd: Int \rightarrow Bool, x: t0 \}$. Here we find the types of \mintinline{text}{|odd|} and \mintinline{text}{|x|} as $Int \rightarrow Bool$ and $t0$ respectively, unify $Int \rightarrow Bool$ with $t0 \rightarrow t1$ to get the substitution $S\_3 = \{ t0 \mapsto Int, t1 \mapsto Bool \}$ and return the overall type $S\_3(tn) = \{ t0 \mapsto Int, t1 \mapsto Bool \}t1 = Bool$. In this we also return the substitution $\{ t0: Int, t1: Bool \}$, constraining the external type $t0$ to an $Int$. Given we created $t1$ as a new type variable, it won’t be found elsewhere so does not need to be considered in other expressions so the substitution $\{ t0 \mapsto Int \}$ could equivalently have been returned.
 
 Case (3abs) for function abstraction first infers the type of the function body expression, $e$, by calling W recursively. It passes the current context with an additional binding for the function parameter $x$, assigned to a new type variable with no constraints. This subcall to W for the function body returns the substitution $S\_1$ and type $\tau\_1$. Finally, the substitution $S\_1$ and type $S\_1(tn \rightarrow \tau\_1)$ is returned as the final result for the function abstraction. The type arises from the fact that the function abstraction takes the parameter with the new type $tn$ and returns the type of the body, $\tau\_1$. We apply the substitution $S\_1$ to it to reflect any constraints on the function parameter picked up in the function body.
 
@@ -420,7 +420,7 @@ Algorithm W’ is a slightly altered variant of Algorithm W, only changing rule 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.782\linewidth]{images/image6.png}
+  \includegraphics[width=0.782\linewidth]{images/image11.png}
 \end{figure}
 
 TODO: write out algorithm in Lee format for W’, 1-index, replace S’ with S\_3, V with S\_4
@@ -441,7 +441,7 @@ M is initially started at the root node with a new type, i.e. $M(\Gamma, e, tn),
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image3.png}
+  \includegraphics[width=1.000\linewidth]{images/image4.png}
 \end{figure}
 
 TODO: latexify the above (taken from Lee), make replacements as per W alg, replace rho with tau\_e
@@ -480,16 +480,128 @@ A Practical Framework for Type Inference Error Explanation
 \underline{\href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.5050\&rep=rep1\&type=pdf}{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.5050\&rep=rep1\&type=pdf}}
 PhD thesis which talks about hindley milner and type inference errors a lot
 \section{Design}\label{id:h.7ggvdxb04tzm}
-- different ui mockups
-- different structures
-- different libraries
+The design of the teaching tool is split into two parts, working backwards from the end product in mind: designing the user interface and experience, and designing the architecture to support that.
+\subsection{User interface and experience}\label{id:h.dr046u473e01}
+Before designing the new teaching tool, we explore the existing available resources to see what works well, and what is missing. The current resources for learning about type inference can be generally categorised into three categories: programming language documentation, formal resources and informal resources. These resources were found by examining the pages returned by the first 5 pages of Google search on the query ‘type inference’. The following is a summary of what was found from reading these resources with the aim of determining their strengths and weaknesses.
 
-\underline{\href{https://www.sigmacomputing.com/blog/writing-a-parser-combinator-from-scratch-in-typescript/}{https://www.sigmacomputing.com/blog/writing-a-parser-combinator-from-scratch-in-typescript/}}
-Parser in TypeScript
+Programming language documentation are pages written to explain how type inference works in a specific language, as part of that language’s official documentation. For example, TypeScript, Java and Golang all have official websites where they discuss how type inference works in their language.
 
-\underline{\href{https://tomassetti.me/parsing-in-javascript/}{https://tomassetti.me/parsing-in-javascript/}}
-Parsing in JavaScript - lots of library recommendations (see Parjs and Jison)
+Formal resources include university lecture notes, papers on type inference or encyclopedias. The first two are often in PDF format or on archiving websites. Wikipedia and WikiWikiWeb are examples of the latter (while encyclopedias summarise the subject they are generally written formally, with a lot of mathematical notation hence fall in this category).
+
+Informal resources include personal blog posts and online talk recordings. These are generally written by developers interested in programming language design or compiler development.
+
+Each category of resource covers different aspects of type inference.
+
+Formal resources generally cover the most generic and widely-applicable concepts in a succinct manner. They usually present type inference in the context of the Hindley-Milner system, or a related functional language such as ML or OCaml. Formal resources usually detail how type inference algorithms (usually algorithm W) go about determining types, and the specific rules of the type system they operate in. It is rare for them to discuss how type errors are treated or give examples of error cases.
+
+Programming language documentation covers type inference in the context of a specific language, with all results inspected giving code examples along with text explaining what the code is doing. Generally this documentation explains the features of type inference present in the language, rather than the wider concepts, although does so in a directly-applicable way. Some languages also explain language-specific concepts in detail, such as how type inference works with Java’s generics or TypeScript’s functions. They are also tailored to how languages are used, with Java’s documentation exploring how type inference is applied in object-oriented programming and TypeScript giving examples of type inference with web APIs. They often do not discuss how the type inference algorithms determine the types, but rather just what the types are and roughly the rules of the type system. However, they do usually give sufficient examples to understand the type system, with languages such as TypeScript, Java and Scala including error cases and explanations on how to fix the type errors. These error examples are particularly helpful as they show how a programmer might go about debugging and fixing type errors found in their program.
+
+Informal resources generally discusses personal reflections on what the author has learnt about type inference or they heavily focus on type inference’s application within a specific language the author is familiar with. These are generally the least widely-applicable, and often only cover a small part of a single programming language, however do so in great detail and often giving practical advice about work related to their subject matter.
+
+Resources also differ in accessibility: how easy it is for a user to read, understand and apply their content.
+
+Programming language documentation and informal resources both are generally aimed at a more clearly targeted audience, usually programmers using a specific language. They are written in simpler language and use significantly less notation than formal resources which makes them easier reading. Their use of examples makes concepts clearer, and many of them have a level of interactivity which allows readers to try things for themselves, allowing readers to test their own knowledge or verify something that isn’t clear to them from the documentation alone. For example TypeScript’s documentation allows users to hover over code samples to inspect the types as well as open it up in an online coding environment, while Golang and Rust’s respective documentation sites have example programs which users are encouraged to edit and run online. Blog posts often have code snippets or GitHub gists for users to run, and in talks presenters may give live coding demos, which serve similar purposes.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1.000\linewidth]{images/image5.png}
+  \caption{The TypeScript playground, with an example opened from the Type Inferece documentation showing how JavaScript classes can work in TypeScript.}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1.000\linewidth]{images/image2.png}
+  \caption{Golang's limited type inference is explained in 'A Tour of Go', with an example program the user is prompted to edit and run.}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1.000\linewidth]{images/image12.png}
+  \caption{Rust's page on type inference is short, but has a well-commented and insightful example that can be run and edited inline in the browser.}
+\end{figure}
+
+Formal resources are usually aimed at a more mathematically-inclined audience, with less specific focus on any language or technology. It often uses mathematical terms and notation to convey ideas, which some readers may find difficult to understand. In particular, papers are often written in a very precise and succinct way with few examples, which can make them hard to interpret. This is likely due to the length constraints put in place by academic journals which incentives authors to cut more detailed explanations and examples from their work. Few papers and lecture notes would be immediately accessible to the general computer scientist, as papers often assume the reader has a strong grounding in the field already and lecture nodes are meant to be read in order, expecting the reader to have read the previous 20 lectures worth of notes. However, they do usually give clear and useful references for background and further reading which is useful for in-depth research on the topic, if not for an introduction. The implementation of a type inference algorithm and how it is applied to a specific language is rarely discussed. Where it is discussed the only languages used were Haskell, ML and OCaml. According to the StackOverflow Developers Survey\footnote{\underline{\href{https://insights.stackoverflow.com/survey/2020\#technology-programming-scripting-and-markup-languages}{https://insights.stackoverflow.com/survey/2020}}} Haskell is used by 1.8\% of professional developers, while ML and OCaml are very rarely used in practice. These examples may therefore be of limited use to explain to developers how type inference is used in languages they are familiar with.
+
+
+
+Finally, the different nature of resources means some are harder to correct or update with new information.
+
+Informal resources generally seem to have the most errors, likely because it has little review process and may be written by anyone. Sometimes through comments other readers can provide corrections or clarifications, but these are not always incorporated into the material. However, commenting is not always available and also given the specific nature of some content few people are likely to view and suggest corrections to the content. Additionally, as informal resources are usually published as one-off talks or blog posts, it is rare for the document to be maintained and kept updated which can lead to inaccuracies if the underlying technology they are discussing has made breaking changes to its implementation.
+
+Programming language documentation on type inference is generally accurate and well maintained. It is kept up to date with changes to the language, as usually there is a requirement to keep documentation updated in programming language projects. Additionally, almost all programming languages are open source and welcome external contributions to their documentation so readers are able to suggest improvements or raise issues about inaccuracies. Generally there is a review process, often requiring a maintainer of the programming language to approve the changes before edits are made.
+
+Formal resources generally have few errors. For academic papers, this is likely a result of the peer-review process. Lecture notes are generally written by academics with relevant qualifications and educational backgrounds, who are likely to be knowledgeable on the subject. However, academic papers and lecture notes are unlikely to be updated, which means any inaccuracies in them are harder to correct. Exploring the literature we find there are some papers on type inference with errors which make understanding them fully more difficult. Finally, online encyclopedias can be reviewed and edited by many people, whose combined expertise generally results in accurate articles although they are prone to errors being introduced by even just a single contributor if they lack a review process. Luckily, except for errors, formal resources are unlikely to become outdated with time as much as informal resources. This is because formal resources focus on the more general underlying concepts over discussion on a specific implementation.
+
+This exploration into existing teaching resources is summarised in the table:
+
+
+
+\begin{adjustbox}{center}\begin{tabular}{ |l|l|l|l| }
+  \hline
+   & \textbf{Content} & \textbf{Accessibility} & \textbf{Correctness} \\
+  \hline
+  \textbf{Programming language documentation} & Explains how type inference is applied in the context of a specific programming language including error cases. & Written in plain language with code samples and often interactive environments. & Few errors, and generally well-maintained. Content may change as rules of the language do. \\
+  \hline
+  \textbf{Formal resources} & Explains how type inference works at a general level. & Often uses complex or mathematical notation and requires significant background reading, and is sometimes too brief at the expense of clarity. & Few errors, although errors that do exist may persist given some resources can be hard to update. Generally relevant for a long time. \\
+  \hline
+  \textbf{Informal resources} & Contains practical tips, however usually very specific and irrelevant to many programmers. & Written in plain language with many code samples. & Inaccuracies are common, and often go undetected or unresolved. Can become outdated quickly. \\
+  \hline
+\end{tabular}\end{adjustbox}\\
+
+TODO: (maybe?) discuss my exploration of existing teaching tools (wolframalpha, khanacademy, cymath, microsoft math, css diner)
+
+This research into existing resources identifies strengths and weaknesses of different approaches. Given that this project is a one-off piece of work and the end product may not be maintained indefinitely, research into the content, correctness and longevity of resources suggests that the focus should be on the more general type inference concepts rather than specific programming language features. The tool should support error cases, not just correctly-typed expressions. It should be reviewed by my project supervisor tested with users to identify errors that can be resolved before project completion. To aid accessibility text should be written in plain language, the tool should offer several insightful examples and the output should avoid overuse of complex notation.
+
+As a tool that displays the output of type inference algorithms, to further determine the user interface for the output of the tool the presentation of type inference proofs is examined. My supervisor initially gave some examples of worked proofs for type inference, which also matched the format of proofs found in papers and in online resources. These proofs are broken down into steps, which each look at a particular subexpression and apply a certain typing rule. Depending on the type of proof (whether it is based purely on the typing rules or is more procedural and similar to an algorithm), this may also result in explicit unification resulting in a substitution to be applied.
+
+Based on this, the tool is designed to show the result of type inference on an expression broken into steps. Given that the tool will be automated, the steps must be generated based on some deterministic procedure and so the steps will correspond to those of the type inference algorithms. This means the steps will need to show the unification operations performed and the resultant substitutions to fully explain how the types are being inferred.
+
+A basic UI mockup is shown below that takes an input expression and displays the inference algorithm steps beneath it. While simple, it is fundamentally similar to the final design of the application. It was also at this design that it was decided to show the type derivation feedback instantly on the same page, based on the limitations of previous related work and the strength of interactive playgrounds in programming language documentation. On top of this design, the final application adds a choice of algorithms, several samples to choose from and a display of the final type. In addition, the final application shows and explains the steps of the type inference algorithm when type errors are present.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.756\linewidth]{images/image10.png}
+  \caption{Recreation of an initial sketch of the UI for the teaching tool.}
+\end{figure} \par}
+
+A step in the UI generally corresponds to a rule of the type inference algorithm. As the type inference algorithms are recursive, some rules may call the type inference algorithms again on a subexpression. In these cases it may be necessary to split rules of the type inference algorithm up into two parts, before and after a recursive call. This helps ensure the ordering of the steps makes logical sense.
+
+For example, this happens with function abstraction in algorithm W: the before step shows assigning a new type variable as the parameter’s type, steps between show the results of the recursive call to the body, while the after step details the final type of the function abstraction expression.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.945\linewidth]{images/image8.png}
+  \caption{Function abstraction in algorithm W requires two UI steps to represent one rule of the algorithm}
+\end{figure} \par}
+
+In addition to the rule steps, algorithm M requires an extra beginning and end step. These are required as algorithm M requires an input type and does not return a type respectively. The first step is to create an initial new type $t0$ for the root node, and the final step is added to apply the final substitution to type $t0$ (effectively the value of $t0$ from the substitution).
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.960\linewidth]{images/image6.png}
+  \caption{Algorithm M requires an initial and final step.}
+\end{figure} \par}
+
+As well as the text of the steps, to make it clear what parts of the expression they refer to each step shows a representation of the expression as an AST, highlighting the relevant parts. TODO: expand on this para, maybe some diagrams/consideration of alternatives like just showing the expression
+\subsection{Architecture}\label{id:h.l33hnjbawceh}
+TODO: structure of program
+
+TODO: why is the structure good
+
+TODO: why is the structure bad
+
+TODO: what other ways could it have been structured
+
+TODO: discuss language, (base (types, models, helpers), parser (library, combinators))
+- \underline{\href{https://www.sigmacomputing.com/blog/writing-a-parser-combinator-from-scratch-in-typescript/}{sigmacomputing.com/blog/writing-a-parser-combinator-from-scratch-in-typescript/}} (Parser in TypeScript)
+- \underline{\href{https://tomassetti.me/parsing-in-javascript/}{tomassetti.me/parsing-in-javascript/}} (Parsing in JavaScript - lots of library recommendations (see Parjs and Jison))
+
+TODO: discuss algorithms (type signature, interchangeability, testing)
+
+TODO: discuss web (why use React v other frameworks? why use create-react-app? why use a static site? how is state managed? how does it use the core/algorithm libraries?)
 \section{Implementation}\label{id:h.igepudpadp49}
+TODO: reorder and reorganize this section - content likely has to change from below
+
 Developed gdoc2latex
 
 Set up CI system to build latex docs
@@ -587,11 +699,12 @@ Improvement themes found were:
 \subsubsection{Analytics}\label{id:h.67g05flyfv0z}
 
 \section{Conclusions and Further Work}\label{id:h.fc67ipatea73}
-
+TODO: further work: lazy loading of libraries, adding custom type environments
 \section{Ethics}\label{id:h.i0n8c6hqdr6j}
 
 \section{Acknowledgements}\label{id:h.xqaef57orpsv}
 This document was typeset using a derivative of the CS310 starter pack\footnote{\href{https://github.com/mbg/cs310}{https://github.com/mbg/cs310}} by Michael Gale, licensed under CC BY 4.0.
+
 
 
 
