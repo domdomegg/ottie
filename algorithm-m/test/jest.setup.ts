@@ -1,5 +1,5 @@
-import { TypeVar, MonoType, Expr } from 'language'
-import { TypeInferenceError, infer } from '../src/index';
+import { TypeVar, MonoType, Expr, TypeInferenceError } from 'language'
+import { infer } from '../src/index';
 import diff from 'jest-diff';
 
 declare global {

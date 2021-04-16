@@ -177,9 +177,19 @@ class PolyType {
 }
 
 interface Context { [name: string]: PolyType | undefined }
+interface Substitution { [name: string]: MonoType | undefined }
+
+class TypeInferenceError extends Error {
+    expr?: Expr;
+
+    constructor(message: string, expr?: Expr) {
+        super(message);
+        this.name = "TypeInferenceError";
+        this.expr = expr;
+    }
+}
 
 /* Type utilities */
-
 
 // Utilities which make creating types easier
 const number = new TypeFuncApp('Int');
@@ -319,7 +329,175 @@ const standardCtx: Context = {
     'id': new PolyType(['a'], f(a, a)),
 }
 
-/* Utilities */
+/** @returns whether a type contains a type variable */
+function contains(type: MonoType | PolyType, other: TypeVar): boolean {
+    if (type instanceof TypeVar) {
+        return type.name == other.name;
+    }
+
+    if (type instanceof TypeFuncApp) {
+        return type.args.some(arg => contains(arg, other));
+    }
+
+    if (type instanceof PolyType) {
+        return contains(type.monoType, other) && !type.quantifiedVars.includes(other.name)
+    }
+
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
+}
+
+/** Instatiates a type with fresh type variables */
+function inst(type: PolyType, freshTypeName: () => string): MonoType;
+function inst(type: MonoType, freshTypeName: () => string, from: string[], to: string[]): MonoType;
+function inst(type: MonoType | PolyType, freshTypeName: () => string, from: string[] = [], to: string[] = []): MonoType {
+    if (type instanceof TypeVar) {
+        const i = from.indexOf(type.name);
+        return (i === -1) ? type : new TypeVar(to[i]);
+    }
+
+    if (type instanceof TypeFuncApp) {
+        return new TypeFuncApp(type.constructorName, ...type.args.map(arg => inst(arg, freshTypeName, from, to)));
+    }
+
+    if (type instanceof PolyType) {
+        return inst(type.monoType, freshTypeName, type.quantifiedVars, type.quantifiedVars.map(freshTypeName));
+    }
+
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
+}
+
+/* Substitution utilities */
+
+/** Applies a substitution to a context */
+function substitute(substitution: Substitution, arg: Context): Context {
+    const context = arg;
+    let mappedContext: Context = {};
+    for (const key in context) {
+        mappedContext[key] = apply(context[key] as PolyType, substitution);
+    }
+    return mappedContext;
+}
+
+/** Applies a susbstitution to a type */
+function apply<T extends MonoType | PolyType>(type: T, substitution: Substitution): T;
+function apply(type: MonoType | PolyType, substitution: Substitution): MonoType | PolyType {
+    if (type instanceof TypeVar) {
+        return type.name in substitution ? (substitution[type.name] as MonoType) : type;
+    }
+
+    if (type instanceof TypeFuncApp) {
+        return new TypeFuncApp(type.constructorName, ...type.args.map(arg => apply(arg, substitution)));
+    }
+
+    if (type instanceof PolyType) {
+        return new PolyType(type.quantifiedVars, apply(type.monoType, substitution));
+    }
+
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
+}
+
+/** Combines substitutions. Applies leftmost substitution first, e.g. apply(combine(a, b), e) == apply(b, apply(a, e)) */
+function combine(...substitutions: Substitution[]): Substitution {
+    if (substitutions.length === 0) return {};
+    if (substitutions.length === 1) return substitutions[0];
+    if (substitutions.length > 2) return combine(substitutions[0], combine(...substitutions.slice(1)));
+
+    const a = substitutions[0];
+    const b = substitutions[1];
+    let newSubstitution: Substitution = {}
+    for (const key in a) {
+        newSubstitution[key] = apply(a[key] as MonoType, b);
+    }
+    for (const key in b) {
+        if (!(key in a)) {
+            newSubstitution[key] = b[key];
+        }
+    }
+    return newSubstitution;
+}
+
+/** Returns a unifying susbtitution to unify two monotypes. Throws a TypeInferenceError iff no such substitution exists */
+function unify(type1: MonoType, type2: MonoType): Substitution {
+    if (type1 instanceof TypeVar) {
+        if (type2 instanceof TypeVar && type1.name == type2.name) {
+            return {};
+        }
+
+        if (contains(type2, type1)) {
+            throw new TypeInferenceError('Occurs check failed. `' + type1.toString() + '` occurs in `' + type2.toString() + '` so unifying them would create an infinite type.');
+        }
+        return { [type1.name]: type2 }
+    }
+    
+    if (type2 instanceof TypeVar) {
+        return unify(type2, type1);
+    }
+
+    if (type1 instanceof TypeFuncApp && type2 instanceof TypeFuncApp) {
+        if (type1.constructorName !== type2.constructorName) {
+            throw new TypeInferenceError('Could not unify types `' + type1.toString() + '` and `' + type2.toString() + '` with different constructors `' + type1.constructorName + '` and `' + type2.constructorName + '`');
+        }
+
+        if (type1.args.length !== type2.args.length) {
+            throw new TypeInferenceError('Could not unify types `' + type1.toString() + '` and `' + type2.toString() + '` with different argument list lengths `' + type1.args.length + '` and `' + type2.args.length + '`');
+        }
+
+        let sub: Substitution = {};
+        for (let i = 0; i < type1.args.length; i++) {
+            sub = combine(sub, unify(apply(type1.args[i], sub), apply(type2.args[i], sub)));
+        }
+        return sub;
+    }
+
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
+}
+
+/** Returns a collection with duplicate elements removed */
+function unique<T>(xs: T[]): T[] {
+    const vs: T[] = [];
+    new Set(xs).forEach(x => vs.push(x));
+    return vs;
+}
+
+/** Returns the first collection with any elements in the second removed, i.e. a \ b */
+function diff<T>(a: T[], b: T[]): T[] {
+    const bset = new Set(b);
+    return a.filter(v => !bset.has(v));
+}
+
+/** Returns a list of free type variable names in a given type or context */
+function freeVars(type: MonoType | PolyType | Context): string[] {    
+    if (type instanceof PolyType) {
+        return diff(freeVars(type.monoType), type.quantifiedVars);
+    }
+
+    if (type instanceof TypeVar) {
+        return [type.name];
+    }
+
+    if (type instanceof TypeFuncApp) {
+        return type.args.map(freeVars).reduce((acc, cur) => [...acc, ...cur], []);
+    }
+
+    if (type) {
+        // type: Context
+        return (Object.values(type) as PolyType[]).map(freeVars).reduce((acc, cur) => [...acc, ...cur], []);
+    }
+
+    // Should be unreachable...
+    throw new Error('Internal error, this should never happen');
+}
+
+/** Fully generalises a monotype type, for-all qualifying any free type variables not free in the context */
+function generalise(ctx: Context, type: MonoType): PolyType {
+    return new PolyType(unique(diff(freeVars(type), freeVars(ctx))), type);
+}
+
+/* Utility types */
 
 interface Rejected<T> {
     value?: T;
@@ -335,6 +513,11 @@ interface Accepted<T> {
     accepted: true;
 }
 type Response<A, R = undefined> = Rejected<R> | Accepted<A>
+
+interface TypeResult {
+    type: MonoType; // The overall type of the expression
+    steps: { message: string, ast: Expr }[]; // An array of steps showing the derivation
+}
 
 /* Parser */
 
@@ -506,7 +689,9 @@ function parse(code: string, forResponse: boolean = false): Expr | Response<Expr
 const typeUtils = { number, char, boolean, f, list, tuple, maybe, either, a, b, c, d, pt, standardCtx };
 export {
     CharLiteral, NumberLiteral, Var, App, Abs, Let, Expr,
-    MonoType, TypeVar, TypeFunc, TypeFuncApp, PolyType, Context,
-    parse, ParseError, Response, Rejected, Accepted,
-    typeUtils
+    MonoType, TypeVar, TypeFunc, TypeFuncApp, PolyType, Context, Substitution,
+    ParseError, TypeInferenceError,
+    Response, Rejected, Accepted, TypeResult,
+    typeUtils,
+    parse, contains, inst, substitute, apply, combine, unify, unique, diff, freeVars, generalise
 };
