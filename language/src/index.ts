@@ -1,4 +1,4 @@
-import { C, N, F, GenLex, Streams, TupleParser, SingleParser, Response as MasalaResponse, Tuple, Option, Reject } from '@domdomegg/masala-parser';
+import { C, N, F, GenLex, Streams, SingleParser, Response as MasalaResponse, Tuple, Option, Reject } from '@domdomegg/masala-parser';
 
 /* AST expression nodes */
 
@@ -370,29 +370,29 @@ function inst(type: MonoType | PolyType, freshTypeName: () => string, from: stri
 
 /* Substitution utilities */
 
-/** Applies a substitution to a context */
-function substitute(substitution: Substitution, arg: Context): Context {
-    const context = arg;
-    let mappedContext: Context = {};
-    for (const key in context) {
-        mappedContext[key] = apply(context[key] as PolyType, substitution);
-    }
-    return mappedContext;
-}
-
-/** Applies a susbstitution to a type */
-function apply<T extends MonoType | PolyType>(type: T, substitution: Substitution): T;
-function apply(type: MonoType | PolyType, substitution: Substitution): MonoType | PolyType {
+/** Applies a susbstitution to a type or context */
+function apply<T extends MonoType | PolyType | Context>(substitution: Substitution, type: T): T;
+function apply(substitution: Substitution, type: MonoType | PolyType | Context): MonoType | PolyType | Context {
     if (type instanceof TypeVar) {
         return type.name in substitution ? (substitution[type.name] as MonoType) : type;
     }
 
     if (type instanceof TypeFuncApp) {
-        return new TypeFuncApp(type.constructorName, ...type.args.map(arg => apply(arg, substitution)));
+        return new TypeFuncApp(type.constructorName, ...type.args.map(arg => apply(substitution, arg)));
     }
 
     if (type instanceof PolyType) {
-        return new PolyType(type.quantifiedVars, apply(type.monoType, substitution));
+        return new PolyType(type.quantifiedVars, apply(substitution, type.monoType));
+    }
+
+    if (type) {
+        // type: Context
+        const context = type;
+        let mappedContext: Context = {};
+        for (const key in context) {
+            mappedContext[key] = apply(substitution, context[key] as PolyType);
+        }
+        return mappedContext;
     }
 
     // Should be unreachable...
@@ -409,7 +409,7 @@ function combine(...substitutions: Substitution[]): Substitution {
     const b = substitutions[1];
     let newSubstitution: Substitution = {}
     for (const key in a) {
-        newSubstitution[key] = apply(a[key] as MonoType, b);
+        newSubstitution[key] = apply(b, a[key] as MonoType);
     }
     for (const key in b) {
         if (!(key in a)) {
@@ -447,7 +447,7 @@ function unify(type1: MonoType, type2: MonoType): Substitution {
 
         let sub: Substitution = {};
         for (let i = 0; i < type1.args.length; i++) {
-            sub = combine(sub, unify(apply(type1.args[i], sub), apply(type2.args[i], sub)));
+            sub = combine(sub, unify(apply(sub, type1.args[i]), apply(sub, type2.args[i])));
         }
         return sub;
     }
@@ -500,17 +500,14 @@ function generalise(ctx: Context, type: MonoType): PolyType {
 /* Utility types */
 
 interface Rejected<T> {
-    value?: T;
-    accepted: false;
-    issuePosition: {
-        start: number;
-        end: number;
-    };
-    message: string;
+    readonly value?: T;
+    readonly accepted: false;
+    readonly issuePosition: Position;
+    readonly message: string;
 }
 interface Accepted<T> {
-    value: T;
-    accepted: true;
+    readonly value: T;
+    readonly accepted: true;
 }
 type Response<A, R = undefined> = Rejected<R> | Accepted<A>
 
@@ -558,22 +555,19 @@ const rparen = genlex.tokenize(C.char(')'), 'rparen');
 const equal = genlex.tokenize(C.char('='), 'equal');
 const comma = genlex.tokenize(C.char(','), 'comma');
 
-const expression1 = (): SingleParser<Expr> =>
-        F.try(LET_())
-    .or(F.try(ABS_()))
-    .or(F.try(expression2()))
-
-const expression2 = (): SingleParser<Expr> =>
-        F.try(optApp(LEAF()))
-    .or(F.try(optApp(ABS())))
-    .or(F.try(optApp(LET())))
-    .or(F.try(optApp(PAR())))
-
-const expression3 = (): SingleParser<Expr> =>
-        F.try(LEAF())
+const expression = (): SingleParser<Expr> =>
+        F.try(LIT_NUM())
+    .or(F.try(LIT_CHAR()))
+    .or(F.try(LIT_STRING()))
+    .or(F.try(TUPLE()))
+    .or(F.try(LIST()))
+    .or(F.try(VAR()))
     .or(F.try(ABS()))
     .or(F.try(LET()))
     .or(F.try(PAR()))
+    .rep().array().map(nestLeft);
+
+const nestLeft = (v: Expr[]) => v.reduce((prev, cur) => new App(prev, cur, { start: prev.pos.start, end: cur.pos.end }));
 
 const toCharList = (string: string, r: MasalaResponse<string>) => {
     const chars = string.split('');
@@ -633,22 +627,15 @@ const expandPos = <T extends Expr>(v: T, r: MasalaResponse<T>): T => {
 }
 
 // We have to SHOUT as var and let are restricted keywords in JavaScript
-const LEAF = (): SingleParser<Expr> => F
-    .try(numberLiteral.map((value, r) => new NumberLiteral(value, getPos(r))))
-    .or(F.try(stringLiteral.map(toCharList)))
-    .or(F.try(charLiteral.map((value, r) => new CharLiteral(value, getPos(r)))))
-    .or(F.try(lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).optrep())).opt()).then(rbracket.map((s, r) => getPos(r).end)).map(toList)))
-    .or(F.try(lparen.map((v, r) => r.location() - 1).then((F.lazy(expression1).then((comma.drop().then(F.lazy(expression1))).rep())).array()).then(rparen.map((s, r) => getPos(r).end)).map(toTuple)))
-    .or(F.try(identifier.map((value, r) => new Var(value, getPos(r)))))
-const ABS = (): SingleParser<Abs> => lparen.drop().then(ABS_()).then(rparen.drop()).single().map(expandPos)
-const ABS_ = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression1)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
-const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression2)).then(rparen.drop()).single().map(expandPos)
-const LET = (): SingleParser<Abs> => lparen.drop().then(LET_()).then(rparen.drop()).single().map(expandPos)
-const LET_ = (): SingleParser<Let> => letTok.map((v, r) => getPos(r).start).then(identifier).then(equal.drop()).then(F.lazy(expression2)).then(inTok.drop()).then(F.lazy(expression2)).map((tuple, r) => new Let(tuple.at(1), tuple.at(2), tuple.at(3), { start: tuple.at(0), end: r.location() }))
-
-const optApp = (parser: SingleParser<Expr>): SingleParser<Expr> => parser.then(expressionPrime()).array().map(nestLeft);
-const expressionPrime = (): TupleParser<Expr> => F.lazy(expression3).optrep();
-const nestLeft = (v: Expr[]) => v.reduce((prev, cur) => new App(prev, cur, { start: prev.pos.start, end: cur.pos.end }));
+const LIT_NUM = (): SingleParser<NumberLiteral> => numberLiteral.map((value, r) => new NumberLiteral(value, getPos(r))); 
+const LIT_CHAR = (): SingleParser<CharLiteral> => charLiteral.map((value, r) => new CharLiteral(value, getPos(r)));
+const LIT_STRING = (): SingleParser<Expr> => stringLiteral.map(toCharList);
+const TUPLE = (): SingleParser<Expr> => lparen.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).rep())).array()).then(rparen.map((s, r) => getPos(r).end)).map(toTuple);
+const LIST = (): SingleParser<Expr> => lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).optrep())).opt()).then(rbracket.map((s, r) => getPos(r).end)).map(toList);
+const VAR = (): SingleParser<Var> => identifier.map((value, r) => new Var(value, getPos(r)));
+const ABS = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
+const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single().map(expandPos)
+const LET = (): SingleParser<Let> => letTok.map((v, r) => getPos(r).start).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).map((tuple, r) => new Let(tuple.at(1), tuple.at(2), tuple.at(3), { start: tuple.at(0), end: r.location() }))
 
 const specialCases = (code: string): undefined | Rejected<undefined> => {
     if (code == 'let' || code.endsWith(' let')) {
@@ -667,7 +654,7 @@ const specialCases = (code: string): undefined | Rejected<undefined> => {
     }
 }
 
-const parser: SingleParser<Expr> = genlex.use(expression1().then(F.eos().drop()).single());
+const parser: SingleParser<Expr> = genlex.use(expression().then(F.eos().drop()).single());
 function parse(code: string): Expr;
 function parse(code: string, forResponse: true): Response<Expr>;
 function parse(code: string, forResponse: boolean = false): Expr | Response<Expr> {
@@ -693,5 +680,5 @@ export {
     ParseError, TypeInferenceError,
     Response, Rejected, Accepted, TypeResult,
     typeUtils,
-    parse, contains, inst, substitute, apply, combine, unify, unique, diff, freeVars, generalise
+    parse, contains, inst, apply, combine, unify, unique, diff, freeVars, generalise
 };

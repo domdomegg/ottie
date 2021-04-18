@@ -1,4 +1,4 @@
-import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response, TypeResult, TypeInferenceError, Substitution, inst, substitute, unify, apply, combine, generalise } from 'language'
+import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response, TypeResult, TypeInferenceError, Substitution, inst, unify, apply, combine, generalise } from 'language'
 
 function infer(expr: Expr): MonoType;
 function infer(expr: Expr, forResponse: true, ctx?: Context): Response<TypeResult, Omit<TypeResult, 'type'>>;
@@ -111,7 +111,7 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
     if (expr instanceof App) {
         const beta = new TypeVar(freshTypeName());
         const funcSubstitution = _infer(expr.func, ctx, new TypeFuncApp('->', beta, type), freshTypeName, logger);
-        const argSubstitution = _infer(expr.arg, substitute(funcSubstitution, ctx), apply(beta, funcSubstitution), freshTypeName, logger);
+        const argSubstitution = _infer(expr.arg, apply(funcSubstitution, ctx), apply(funcSubstitution, beta), freshTypeName, logger);
         const t = new TypeVar(freshTypeName());
 
         const combinedSubstitution = combine(funcSubstitution, argSubstitution);
@@ -134,7 +134,7 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
             err.expr = expr;
             throw err;
         }
-        const s2 = _infer(expr.body, { ...substitute(s1, ctx), [expr.param]: new PolyType([], apply(beta1, s1)) }, apply(beta2, s1), freshTypeName, logger);
+        const s2 = _infer(expr.body, { ...apply(s1, ctx), [expr.param]: new PolyType([], apply(s1, beta1)) }, apply(s1, beta2), freshTypeName, logger);
         const combinedSubstitution = combine(s1, s2);
         logger('Combining the function and body substitutions gives `' + str(combinedSubstitution) + '`', highlight(expr));
         return combinedSubstitution;
@@ -144,7 +144,7 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
         const beta = new TypeVar(freshTypeName());
         logger('We create a new type variable `' + beta.toString() + '` for this let statement\'s parameter `' + expr.param + '`, then infer on the parameter and body', highlight(expr));
         const s1 = _infer(expr.def, ctx, beta, freshTypeName, logger);
-        const s2 = _infer(expr.body, { ...substitute(s1, ctx), [expr.param]: generalise(substitute(s1, ctx), apply(beta, s1)) }, apply(type, s1), freshTypeName, logger);
+        const s2 = _infer(expr.body, { ...apply(s1, ctx), [expr.param]: generalise(apply(s1, ctx), apply(s1, beta)) }, apply(s1, type), freshTypeName, logger);
         const combinedSubstitution = combine(s1, s2);
         logger('Combining the parameter and body substitutions gives `' + str(combinedSubstitution) + '`', highlight(expr));
         return combinedSubstitution;

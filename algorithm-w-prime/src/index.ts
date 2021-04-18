@@ -1,4 +1,4 @@
-import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response, TypeResult, TypeInferenceError, Substitution, inst, substitute, unify, apply, combine, generalise, freeVars } from 'language'
+import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response, TypeResult, TypeInferenceError, Substitution, inst, unify, apply, combine, generalise, freeVars } from 'language'
 
 function unifySubtitutions(s0: Substitution, s1: Substitution): Substitution {
     // const d0 = diff(Object.keys(s0), Object.keys(s1));
@@ -11,7 +11,7 @@ function unifySubtitutions(s0: Substitution, s1: Substitution): Substitution {
     let s = t0.reduce<Substitution>((acc, cur) => { acc[cur[0]] = cur[1]; return acc; }, {});
     for (let i = 0; i < t1.length; i++) {
         const [alpha, tau] = [t1[i][0], t1[i][1]!];
-        const tauPrime = apply(tau, s);
+        const tauPrime = apply(s, tau);
         if (freeVars(tauPrime).includes(alpha)) {
             throw new TypeInferenceError('Occurs check failed. `' + alpha.toString() + '` occurs in `' + tauPrime.toString() + '` so unifying them would create an infinite type.');
         }
@@ -21,8 +21,8 @@ function unifySubtitutions(s0: Substitution, s1: Substitution): Substitution {
     let v = s;
     for (let i = 0; i < dn.length; i++) {
         const beta = new TypeVar(dn[i]);
-        const tau0 = apply(apply(beta, s0), v);
-        const tau1 = apply(apply(beta, s1), v);
+        const tau0 = apply(v, apply(s0, beta));
+        const tau1 = apply(v, apply(s1, beta));
         if (freeVars(tau0).includes(dn[i])) {
             throw new TypeInferenceError('Occurs check failed. `' + dn[i].toString() + '` occurs in `' + tau0.toString() + '` so unifying them would create an infinite type.');
         }
@@ -130,8 +130,8 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
             throw err;
         }
 
-        const funcType2 = apply(funcType, unifiedSubsitution);
-        const argType2 = apply(argType, unifiedSubsitution);
+        const funcType2 = apply(unifiedSubsitution, funcType);
+        const argType2 = apply(unifiedSubsitution, argType);
 
         // Give an easier to read and understand message if we can, otherwise default to the more general case
         const firstPartOfLogMessage2 = firstPartOfLogMessage1 + 'These can be unified as `' + str(unifiedSubsitution) + '`\n\n' + ((funcType instanceof TypeFuncApp && funcType.constructorName == '->')
@@ -147,7 +147,7 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
             err.expr = expr;
             throw err;
         }
-        const exprType = apply(t, unifyingSubstitution)
+        const exprType = apply(unifyingSubstitution, t)
         logger(firstPartOfLogMessage2 + 'This gives the final substitution `' + str(unifyingSubstitution, t.name) + '`\nAnd the function\'s return type as `' + exprType.toString() + '`', highlight(expr));
         return [exprType, combine(funcSubstitution, unifiedSubsitution, unifyingSubstitution)]
     }
@@ -158,7 +158,7 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         logger('Our function definition binds `' + expr.param + '` in the body to the fresh type `' + t.toString() + '`', highlight(expr));
 
         const [bodyType, bodySubstitution] = _infer(expr.body, { ...ctx, [expr.param]: new PolyType([], t) }, freshTypeName, logger);
-        const type = apply(new TypeFuncApp("->", t, bodyType), bodySubstitution);
+        const type = apply(bodySubstitution, new TypeFuncApp("->", t, bodyType));
 
         logger((bodySubstitution[t.name] ? 'We apply the substitution `{ ' + t.name + ' ↦ ' + bodySubstitution[t.name]!.toString() + ' }` to get the parameter\'s type `' + type.args[0].toString() + '`.\n' : '') + 'The return type is given by the function body\'s type `' + type.args[1].toString() + '`\nTherefore the overall type is `' + type.toString() + '`', highlight(expr));
 
@@ -167,11 +167,11 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
 
     if (expr instanceof Let) {
         const [defType, defSubstitution] = _infer(expr.def, ctx, freshTypeName, logger);
-        const generalisedDefType = generalise(substitute(defSubstitution, ctx), defType);
+        const generalisedDefType = generalise(apply(defSubstitution, ctx), defType);
 
         logger('Our let statement binds `' + expr.param + '` in the body to the type `' + generalisedDefType.toString() + '`', highlight(expr));
 
-        const [bodyType, bodySubstitution] = _infer(expr.body, { ...substitute(defSubstitution, ctx), [expr.param]: generalisedDefType }, freshTypeName, logger);
+        const [bodyType, bodySubstitution] = _infer(expr.body, { ...apply(defSubstitution, ctx), [expr.param]: generalisedDefType }, freshTypeName, logger);
 
         logger('Our let statement then takes its body\'s type `' + bodyType.toString() + '`', highlight(expr));
         

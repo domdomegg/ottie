@@ -21,33 +21,33 @@ test('combines substitutions correctly', () => {
 })
 
 test('combines equivalence', () => {
-    expect(apply(t0, { t0: t1 })).toEqual(t1);
-    expect(apply(t0, combine({ t0: t1 }))).toEqual(t1);
+    expect(apply({ t0: t1 }, t0)).toEqual(t1);
+    expect(apply(combine({ t0: t1 }), t0)).toEqual(t1);
     
-    expect(apply(apply(t0, { t0: t1 }), ({ t1: t2 }))).toEqual(t2);
-    expect(apply(t0, combine({ t0: t1 }, { t1: t2 }))).toEqual(t2);
+    expect(apply(({ t1: t2 }), apply({ t0: t1 }, t0))).toEqual(t2);
+    expect(apply(combine({ t0: t1 }, { t1: t2 }), t0)).toEqual(t2);
 
-    expect(apply(apply(apply(t0, { t0: t1 }), { t1: t2 }), { t2: t3 })).toEqual(t3);
-    expect(apply(t0, combine({ t0: t1 }, { t1: t2 }, { t2: t3 }))).toEqual(t3);
+    expect(apply({ t2: t3 }, apply({ t1: t2 }, apply({ t0: t1 }, t0)))).toEqual(t3);
+    expect(apply(combine({ t0: t1 }, { t1: t2 }, { t2: t3 }), t0)).toEqual(t3);
 
-    expect(apply(apply(apply(apply(t0, { t0: t1 }), { t1: t2 }), { t2: t3 }), { t3: number })).toEqual(number);
-    expect(apply(t0, combine({ t0: t1 }, { t1: t2 }, { t2: t3 }, { t3: number }))).toEqual(number);
+    expect(apply({ t3: number }, apply({ t2: t3 }, apply({ t1: t2 }, apply({ t0: t1 }, t0))))).toEqual(number);
+    expect(apply(combine({ t0: t1 }, { t1: t2 }, { t2: t3 }, { t3: number }), t0)).toEqual(number);
 
     // NB: substitution should happen at once, so only t1/t0 gets applied
-    expect(apply(t0, { t0: t1, t1: t2 })).toEqual(t1);
-    expect(apply(t0, combine({ t0: t1, t1: t2 }))).toEqual(t1);
+    expect(apply({ t0: t1, t1: t2 }, t0)).toEqual(t1);
+    expect(apply(combine({ t0: t1, t1: t2 }), t0)).toEqual(t1);
     
     // ...but applying a t2/t1 afterwards should still get applied
-    expect(apply(apply(t0, { t0: t1, t1: t2 }), { t1: t2 })).toEqual(t2);
-    expect(apply(t0, combine({ t0: t1, t1: t2 }, { t1: t2 }))).toEqual(t2);
+    expect(apply({ t1: t2 }, apply({ t0: t1, t1: t2 }, t0))).toEqual(t2);
+    expect(apply(combine({ t0: t1, t1: t2 }, { t1: t2 }), t0)).toEqual(t2);
 
     // If we apply the number/t2 first, there are no t2s to match at that point
-    expect(apply(apply(apply(t0, { t2: number }), { t0: t1 }), { t1: t2 })).toEqual(t2);
-    expect(apply(t0, combine({ t2: number }, { t0: t1 }, { t1: t2 }))).toEqual(t2);
+    expect(apply({ t1: t2 }, apply({ t0: t1 }, apply({ t2: number }, t0)))).toEqual(t2);
+    expect(apply(combine({ t2: number }, { t0: t1 }, { t1: t2 }), t0)).toEqual(t2);
 
-    expect(apply(t0, {})).toEqual(t0);
-    expect(apply(t0, combine())).toEqual(t0);
-    expect(apply(t0, combine({}))).toEqual(t0);
+    expect(apply({}, t0)).toEqual(t0);
+    expect(apply(combine(), t0)).toEqual(t0);
+    expect(apply(combine({}), t0)).toEqual(t0);
 })
 
 test('unifies types correctly', () => {

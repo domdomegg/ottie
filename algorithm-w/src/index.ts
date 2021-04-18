@@ -1,4 +1,4 @@
-import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response, TypeResult, TypeInferenceError, Substitution, inst, substitute, unify, apply, combine, generalise } from 'language'
+import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response, TypeResult, TypeInferenceError, Substitution, inst, unify, apply, combine, generalise } from 'language'
 
 function infer(expr: Expr): MonoType;
 function infer(expr: Expr, forResponse: true, ctx?: Context): Response<TypeResult, Omit<TypeResult, 'type'>>;
@@ -79,7 +79,7 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
 
     if (expr instanceof App) {
         const [funcType, funcSubstitution] = _infer(expr.func, ctx, freshTypeName, logger);
-        const [argType, argSubstitution] = _infer(expr.arg, substitute(funcSubstitution, ctx), freshTypeName, logger);
+        const [argType, argSubstitution] = _infer(expr.arg, apply(funcSubstitution, ctx), freshTypeName, logger);
         const t = new TypeVar(freshTypeName());
 
         // Give an easier to read and understand message if we can, otherwise default to the more general case
@@ -89,13 +89,13 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
 
         let unifiedSubstitution;
         try {
-            unifiedSubstitution = unify(apply(funcType, argSubstitution), new TypeFuncApp("->", argType, t))
+            unifiedSubstitution = unify(apply(argSubstitution, funcType), new TypeFuncApp("->", argType, t))
         } catch (err) {
             logger(firstPartOfLogMessage + 'However, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
             err.expr = expr;
             throw err;
         }
-        const exprType = apply(t, unifiedSubstitution)
+        const exprType = apply(unifiedSubstitution, t)
         logger(firstPartOfLogMessage + 'This gives the substitution `' + str(unifiedSubstitution, t.name) + '`\nAnd the function\'s return type as `' + exprType.toString() + '`', highlight(expr));
         return [exprType, combine(funcSubstitution, argSubstitution, unifiedSubstitution)]
     }
@@ -106,7 +106,7 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         logger('Our function definition binds `' + expr.param + '` in the body to the fresh type `' + t.toString() + '`', highlight(expr));
 
         const [bodyType, bodySubstitution] = _infer(expr.body, { ...ctx, [expr.param]: new PolyType([], t) }, freshTypeName, logger);
-        const type = apply(new TypeFuncApp("->", t, bodyType), bodySubstitution);
+        const type = apply(bodySubstitution, new TypeFuncApp("->", t, bodyType));
 
         logger((bodySubstitution[t.name] ? 'We apply the substitution `{ ' + t.name + ' ↦ ' + bodySubstitution[t.name]!.toString() + ' }` to get the parameter\'s type `' + type.args[0].toString() + '`.\n' : '') + 'The return type is given by the function body\'s type `' + type.args[1].toString() + '`\nTherefore the overall type is `' + type.toString() + '`', highlight(expr));
 
@@ -115,11 +115,11 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
 
     if (expr instanceof Let) {
         const [defType, defSubstitution] = _infer(expr.def, ctx, freshTypeName, logger);
-        const generalisedDefType = generalise(substitute(defSubstitution, ctx), defType);
+        const generalisedDefType = generalise(apply(defSubstitution, ctx), defType);
 
         logger('Our let statement binds `' + expr.param + '` in the body to the type `' + generalisedDefType.toString() + '`', highlight(expr));
 
-        const [bodyType, bodySubstitution] = _infer(expr.body, { ...substitute(defSubstitution, ctx), [expr.param]: generalisedDefType }, freshTypeName, logger);
+        const [bodyType, bodySubstitution] = _infer(expr.body, { ...apply(defSubstitution, ctx), [expr.param]: generalisedDefType }, freshTypeName, logger);
 
         logger('Our let statement then takes its body\'s type `' + bodyType.toString() + '`', highlight(expr));
         
