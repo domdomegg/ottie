@@ -113,7 +113,7 @@ There have been previous attempts to build visualisation and teaching tools rela
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.770\linewidth]{images/image15.png}
+  \includegraphics[width=0.770\linewidth]{images/image19.png}
   \caption{Screenshot of results from TypeTool, taken from their paper}
 \end{figure} \par}
 
@@ -137,7 +137,7 @@ NiMo \citep{ref8} is a graphical programming language related to functional data
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image13.png}
+  \includegraphics[width=0.960\linewidth]{images/image16.png}
   \caption{A diagram showing the types of some variables in NiMo, taken from their paper}
 \end{figure} \par}
 
@@ -152,7 +152,7 @@ For this project, we will consider a calculus with five constructs to build expr
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.510\linewidth]{images/image14.png}
+  \includegraphics[width=0.510\linewidth]{images/image18.png}
 \end{figure}
     | c constant
 
@@ -206,7 +206,7 @@ Like expressions, types can be considered to be built from \mintinline{text}{|va
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.467\linewidth]{images/image9.png}
+  \includegraphics[width=0.467\linewidth]{images/image11.png}
 \end{figure}
 where C is a set of type functions such as \mintinline{text}{|->|}, \mintinline{text}{|List|} and \mintinline{text}{|Maybe|}.
 
@@ -232,7 +232,7 @@ Adding zero or more for-all quantified type variables to monotypes forms polymor
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.290\linewidth]{images/image16.png}
+  \includegraphics[width=0.290\linewidth]{images/image20.png}
 \end{figure}
 
 TODO: latexify the above, but use rho instead of sigma and a instead of alpha
@@ -420,7 +420,7 @@ Algorithm W’ is a slightly altered variant of Algorithm W, only changing rule 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.782\linewidth]{images/image11.png}
+  \includegraphics[width=0.782\linewidth]{images/image14.png}
 \end{figure}
 
 TODO: write out algorithm in Lee format for W’, 1-index, replace S’ with S\_3, V with S\_4
@@ -516,7 +516,7 @@ Programming language documentation and informal resources both are generally aim
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image12.png}
+  \includegraphics[width=1.000\linewidth]{images/image15.png}
   \caption{Rust's page on type inference is short, but has a well-commented and insightful example that can be run and edited inline in the browser.}
 \end{figure}
 
@@ -560,7 +560,7 @@ A basic UI mockup is shown below that takes an input expression and displays the
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.756\linewidth]{images/image10.png}
+  \includegraphics[width=0.756\linewidth]{images/image13.png}
   \caption{Recreation of an initial sketch of the UI for the teaching tool.}
 \end{figure} \par}
 
@@ -570,7 +570,7 @@ For example, this happens with function abstraction in algorithm W: the before s
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.945\linewidth]{images/image8.png}
+  \includegraphics[width=0.945\linewidth]{images/image9.png}
   \caption{Function abstraction in algorithm W requires two UI steps to represent one rule of the algorithm}
 \end{figure} \par}
 
@@ -582,43 +582,428 @@ In addition to the rule steps, algorithm M requires an extra beginning and end s
   \caption{Algorithm M requires an initial and final step.}
 \end{figure} \par}
 
-As well as the text of the steps, to make it clear what parts of the expression they refer to each step shows a representation of the expression as an AST, highlighting the relevant parts. TODO: expand on this para, maybe some diagrams/consideration of alternatives like just showing the expression
+To make it clear what part of the expression each step relates to, a representation of the expression as an AST with the relevant parts highlighted is shown at each step. The visualisation is computer generated and must fit in a fixed width space, and as such a vertical design was chosen to represent it. In this design, each box represents a tree node and the boxes are ordered in a vertical list. Nodes may have children, which they are attached to with edges to the left of the children.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.357\linewidth]{images/image21.png}
+  \caption{The expression \mintinline{text}{|let x = 3 in odd x|} may be represented by this vertical AST.}
+\end{figure} \par}
+
+
+This vertical design was chosen over a horizontal design due to the space constraints of the tool page, and the difficulty in implementing a consistent and well functioning horizontal tree visualisation algorithm.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.813\linewidth]{images/image8.png}
+  \caption{Example of what a more horizontal design of AST might look like.}
+\end{figure} \par}
+
+Showing ASTs is preferable to just showing the relevant subexpression as it makes it clearer what part of the whole tree is being analysed. Showing ASTs is also preferable to showing the full expression and highlighting only the relevant part as it better demonstrates how the program is broken into its constituent parts, is clearer for showing syntactically-sugared features such as lists, and relates it to the original type inference algorithms more closely as users can see how similar AST structures follow similar type inference rules.
+
+To help relate the ASTs to the entered expression, when a user hovers over a part of the AST the matching part of the entered expression that corresponds to the hovered AST node is highlighted. For consistency and to help users understand larger subexpressions too this also works for non-leaf nodes of the tree.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.884\linewidth]{images/image17.png}
+  \caption{Hovering ove r the 'function application' node highlights the corresponding subexpression in the entered program.}
+\end{figure} \par}
+
+TODO: explain why web interface over desktop program
 \subsection{Architecture}\label{id:h.l33hnjbawceh}
-TODO: structure of program
+The design of the software aims to promote interchangeable, loosely-coupled modules to make it easy to adapt and extend. This also gives the project freedom to change over time in response to feedback, without having to redevelop common functionality.
 
-TODO: why is the structure good
+TODO: insert module diagram
 
-TODO: why is the structure bad
+The alternative general module structure considered was to have the type inference modules standalone, to avoid depending on the language core. They would then be parameterized with methods to extract the necessary data from an arbitrary structured AST. This would allow the type inference algorithms to be used with any AST model. However, it would add significant complexity and performance overhead for not much gain as the language core is fairly lightweight. In addition, it would have meant utility functions, types and models could not be shared in the language core between type inference modules, meaning they would need to either have another separate module for shared utilities or have a large amount of code duplication.
 
-TODO: what other ways could it have been structured
+TODO: insert alternate module diagrams
 
-TODO: discuss language, (base (types, models, helpers), parser (library, combinators))
-- \underline{\href{https://www.sigmacomputing.com/blog/writing-a-parser-combinator-from-scratch-in-typescript/}{sigmacomputing.com/blog/writing-a-parser-combinator-from-scratch-in-typescript/}} (Parser in TypeScript)
-- \underline{\href{https://tomassetti.me/parsing-in-javascript/}{tomassetti.me/parsing-in-javascript/}} (Parsing in JavaScript - lots of library recommendations (see Parjs and Jison))
+The main downside to splitting the project up into several modules is the tooling is a little more complex. Modules must be built separately and in the correct order which is slightly slower than compiling one larger app, and IDEs have to be set up to understand how to navigate between the modules. However, this is outweighed by the maintainability and extensibility benefits of keeping functionality in separate modules.
 
-TODO: discuss algorithms (type signature, interchangeability, testing)
+\subsubsection{Choice of programming language}\label{id:h.dj2rwwqr30vu}
+All of the modules are written in the same language, so they are all compatible and easy to get working together. Additionally, using one typed language allows for type-checking to ensure module APIs are correctly called and their results are used sensibly. To write a modern web application, a JavaScript-compatible language is the obvious choice as it is supported and promoted by all major browsers. TypeScript was chosen for this for several reasons.
 
-TODO: discuss web (why use React v other frameworks? why use create-react-app? why use a static site? how is state managed? how does it use the core/algorithm libraries?)
+TypeScript is a statically-typed language similar to JavaScript which transcompiles to JavaScript that can be run in the browser. As a typed language, it provides the benefits of types listed earlier, which is especially important when dealing with a sizable codebase with several modules so was chosen over plain JavaScript.
+
+Elm, CoffeeScript, PureScript and Dart are other languages that compile to JavaScript, however they lack rich package systems which can provide useful utilities and dependencies. Furthermore, Dart and Elm are largely focused on the presentation of data, so while it would be possible to write reusable independent libraries for type inference in them, it would not be easy.
+
+Of the browser-compatible languages, TypeScript is the most used after JavaScript itself (according to the StackOverflow developers survey) and so developing and publishing packages in TypeScript may be useful for a wider audience.
+
+Lastly, my own previous experiences with both TypeScript and the other languages informed the decision. Familiarity with TypeScript played a key role in choosing it over other languages targeting the browser.
+\subsubsection{Language core}\label{id:h.hggmfighusoc}
+The base module of the software, which all other parts depend on is the language core.
+
+The language core contains key types and models, which are used throughout the rest of the software. These types and models are used in representing AST nodes, types, contexts, substitutions and other results from type inference algorithms. They also include function signatures which define the interfaces for modules containing type inference algorithms.
+
+In addition to these types and models, it contains a default global context with types for many common functions. This context is based on Haskell’s Prelude, which makes it easy for learners familiar with Haskell or similar functional programming languages to use the tool.
+
+The language core also contains key helper functions such as utilities to create types. For example, callers can construct and instance of a type as \mintinline{text}{|tuple(char, boolean)|} instead of \mintinline{text}{|new TypeFuncApp(‘,’, new TypeFuncApp(‘Char’), new TypeFuncApp(‘Bool’))|}. It also contains helpers to combine and apply substitutions, as well as to perform unification. These helper functions can be tested independently, verifying the correctness before using them in dependent modules. Testing is discussed in more detail in the implementation chapter.
+
+Lastly, the language core contains a lexer and parser. Together, these take an input program as a string and return an AST, or report that the program is syntactically invalid. The lexer splits the input string into tokens, while the parser operates on this stream of tokens to recognise higher-level program constructs and construct the AST nodes.
+
+A parser combinator library is used to perform the lexing and parsing. A parser combinator library was chosen over a recursive descent parser or an LL, LR or LALR parser generator as it was recommended by my project supervisor and several online sources discussing implementing functional language parsers. In addition the software needs to be compatible with running in the browser which most LL, LR and LALR generators do not support. In addition, none of these types of generators provides output that is easy to implement for the browser or debug manually, whereas parser combinators are relatively easier to implement by hand.
+
+The library chosen for lexing and parsing is Masala, one of the few parser combinator libraries implemented in JavaScript. Masala is based on Haskell’s Parsec library, is tested for the browser and is well-maintained. In addition, it has strong TypeScript definitions which support its integration into the language module. Other libraries including Parjs, Parsimmon and Chevrotrain have weaker documentation, and Parsimmon lacks full TypeScript type definitions. Some other libraries like Jison and Nearley cannot easily and directly output the custom AST node classes, while Masala can. This helps extract the location of nodes in the source program to support being able to highlight where in the input expression an AST node has come from.
+\subsubsection{Type inference algorithms}\label{id:h.75leuokwbltp}
+On top of this language core are type inference algorithms W, W’ and M. Given an AST representing an expression, they return either a type or an error explaining why they were not able to infer the type. Along with these, they can also optionally return a sequence of steps taken as part of the algorithm. Each step includes a message and AST to be displayed, with appropriate parts of the AST highlighted.
+
+Each type inference algorithm shares the same interface, allowing them to be used interchangeably. This means new algorithms conforming to this interface can be added to tools using the type inference algorithms, such as the web application, by simply changing the type inference library installed. Sharing the same interface also means that high-level module tests that call only the common function signature and assert on the final type can be shared across all the inference algorithms as they should all return the same type result, even if they take different steps to get there. This makes the development of tests easier so more can be written, and asserting the final types are the same across a number of varied cases improves confidence that the algorithms are implemented correctly.
+
+Publishing the type inference algorithms separately helps keep the code clean and maintainable, and allows developers to only install the algorithms they need. While this does result in some code duplication, particularly between algorithm W and W’, the benefits from keeping the modules small and easier to maintain individually make this trade-off worthwhile. Most of the common helper functions are already in the language core, which means the code duplication in the type inference modules is not excessive.
+\subsubsection{Web interface}\label{id:h.q67ivlz7h61r}
+Finally, depending on both the language core and the type inference algorithms is the web interface itself. This is the end-product that users interact with, implementing the user interface. Here users can type in a program, and view the steps the type inference algorithm took to infer its type. To do this, the web application passes the program to the language core which lexes and parses it into an AST, then passes that AST to a type inference library. The results of this are then shown to the user.
+
+TODO: diagram of pipeline: user enters program as string, lexer lexes as tokens, parser parses to AST, type inference algorithm returns steps, web application displays them
+
+The web application uses the React framework. Using a framework improves the structure of the code, as the application can be broken down into separate, independent components. These components can be reused to minimise code duplication, and can be individually unit tested with many testing libraries developed specifically for frameworks. As well as this, using a framework in combination with a module bundler such as webpack makes importing and depending on other modules (such as the language core and type inference algorithms) simple. And in combination with a transcompiler that converts modern JavaScript to be backwards compatible, such as Babel, the application can be made to work for users with older browsers.
+
+React was chosen over the alternative web frameworks Vue, Angular and Svelte. Vue and Angular are other popular frameworks, however for a one page application they are a little more complex than what is needed. In particular, Angular’s component and dependency injection system, while useful in very large projects, would add significant unnecessary overhead to developing the system. Svelte is different to React, Vue and Angular in that it avoids managing a model of the page through a framework library that is part of the application, but instead compiles directly to simple JavaScript. This gives it better performance, but makes it harder to integrate with existing libraries and tooling. In addition, while Svelte supports TypeScript this support was only added recently (July 2020) and is much weaker than React’s TypeScript support. Vue, Angular and Svelte are all significantly less popular than React (which is the most popular JavaScript framework). This means they have fewer available compatible packages and less community-developed documentation such as tutorials, guides or forums. In particular, Svelte is a new and much less widely-used framework, with less than 2,000 questions on StackOverflow compared to React’s nearly 300,000.
+
+Create React App sets up the initial structure of the web application. It includes a starter template, which is set up with the required dependencies to build a basic React site. A variant of the starter template is available with TypeScript support. Using this starter template rather than starting from scratch allows the project to focus on developing the novel type inference teaching tool parts of the web application, rather than being too concerned with the setup of the tooling. However, using Create React App does somewhat limit how the build can be configured without choosing to “eject” (an irreversible process that makes the implicit build tooling explicit, but results in more maintenance). For example, while it installs Webpack and Babel to bundle resources and transcompile to more-compatible JavaScript, their corresponding configurations cannot be edited without an “eject”.
+
+The web application directly imports the type inference algorithms and the language core, and bundles them as part of the client application to be run entirely inside the user’s web browser. Using a static site and doing the processing fully client-side was chosen over a client-server architecture to reduce latency, minimise running costs and maximise the resource’s longevity. It also helps to simplify communication between the modules, which otherwise would either need to be manually specified or use a complex networking layer, likely using the proxy pattern along with dependency injection. In addition, potentially complex data types representing the AST would otherwise need to be reliably serialized and deserialized which is non-trivial when as classes they have non-serializable member functions.
+
+Performing calculations client side reduces latency as users do not need to wait on the network to transport data back and forth. Parsing and inferring the type of simple expressions in the browser takes tens of milliseconds, compared to the hundreds of milliseconds that might be expected from a RESTful API. However, for particularly complex expressions where users have particularly weak hardware (such as older smartphones) relative to the hosting server, doing calculations client-side may be slightly slower than a client-server architecture. These cases will be rare, but happen when the networking-related overheads are outweighed by the difference in processing speeds between the server and client devices.
+
+TODO: insert bar graph comparing average laptop, average phone, average server-client, older smartphone, high latency server-client
+
+Avoiding dynamic calculations on the server means free static hosting sites such as GitHub pages can be used to serve the website. This significantly reduces running costs when compared to running a custom server to respond to requests.
+
+The teaching tool’s longevity is increased by serving a static artifact, as opposed to having dynamic server and client parts. A static website can easily be copied and archived, and as it can be run for free there is no incentive to shut the service down. TypeTool, a related work that also aimed to explain type inference, was client-server based. However, the server has since been taken down and so is no longer accessible. As the lexing, parsing and type inference process was done server-side, archive websites like the Internet Archive’s Wayback Machine are unable to keep a copy of it, as they only store the static website content.
+\subsection{Analytics}\label{id:h.60njhv340fb0}
+To help evaluate the main teaching tool and understand user behaviour, a system to collect and store behavioural analytics data is required. This tool should respect user privacy settings, minimize personal data collected (ideally data collected should be anonymous) and be able to view a single event stream to understand how a user is using the application.
+
+Several of the most popular existing analytics solutions were explored, including Google Analytics, Matomo, W3Counter, Simple Analytics, Angelfish, Open Web Analytics and AWStats.
+
+The “Do not track” (DNT) browser setting is the simplest and most widely-supported way to indicate a user does not want to be tracked. However, Google Analytics, Angelfish, W3Counter, Open Web Analytics and AWStats do not respect “do not track” browser settings by default, and while possible are difficult to set up so that they do.
+
+IP addresses are classified as personal data under the General Data Protection Regulations (GDPR). Some analytics tools such as Angelfish, AWStats, Open Web Analytics and W3Counter collect and analyse IP addresses and other personal data. This presents a problem for using these analytics tools within the EU, as users must be informed as to how their personal data is collected and processed, and users have several rights relating to personal data such as the right to be forgotten, the right to object or the right to access. In addition, many of these tools use cookies and similar on-device storage technologies to track users, which require consent under the UK’s Privacy and Electronic Communications Regulations (PECR). This would add significant unwanted overhead to the website for what is actually necessary.
+
+To understand user behaviour, a single event stream that shows the different steps they took would be most useful. For example, seeing in what order they try out type inference examples and whether they view the more in depth documentation is much more useful data for evaluating and improving the tool than aggregate data about user demographics. Many platforms such as AWStats focus on the latter, and do not offer event stream (also known as ‘clickstream’ or ‘clickpath’) analytics. Some platforms meet in the middle, offering event tracking but cannot present these in individual user streams such as Google Analytics. Angelfish offers event stream analytics, but does not support custom events, such as choosing a type inference example.
+
+Finally the most practical concern is their running cost. Google Analytics and W3Counter are the options with free plans, while other managed services such as Matomo Cloud and Simple Analytics are generally fairly expensive (both more than £275 per year for their cheapest plan). The cheapest available Angelfish license costs over £1,000 a year, and along with “free” options AWStats and Open Web Analytics needs to be hosted on a server which would incur server running and maintenance costs.
+
+These factors can be summarised in a comparison table:
+
+
+
+\begin{adjustbox}{center}\begin{tabular}{ |l|l|l|l|l| }
+  \hline
+  \textbf{Service} & \textbf{Obeys DNT} & \textbf{Anonymous} & \textbf{Event streams} & \textbf{Cost} \\
+  \hline
+  Google Analytics & ✗ & ✗ & ✗ & Free \\
+  \hline
+  Matomo Cloud & ✓ & ✓ & ✓ & £348/year \\
+  \hline
+  Matomo (self-hosted) & ✓ & ✓ & ✓ & Server hosting \\
+  \hline
+  W3Counter & ✗ & ✗ & ✓ & Free \\
+  \hline
+  Simple Analytics & ✓ & ✓ & ✓ & £276/year \\
+  \hline
+  Angelfish & ✗ & ✗ & ✓ & £1123/year + server hosting \\
+  \hline
+  Open Web Analytics & ✗ & ✗ & ✓ & Server hosting \\
+  \hline
+  AWStats & ✗ & ✗ & ✗ & Server hosting \\
+  \hline
+\end{tabular}\end{adjustbox}\\
+
+From this, we see that self-hosted Matomo is the only somewhat affordable option considering the budget for a 3rd year project. However, Matomo’s set up is complicated and managing and maintaining a server is time-consuming. In particular, ensuring data is held securely would require running or renting a potentially-expensive private server indefinitely for hosting, as the available free departmental machines such as Joshua do not guarantee confidentiality, integrity or availability. The departmental machines also limit the installation of certain software which require root permissions, and many applications are not supported as Joshua libraries are outdated. In addition frequent restarts combined with limited powers to automatically run applications (through systemd units or similar) on Joshua means Matomo would have to be frequently restarted manually and may miss some user events.
+
+As such, we design a custom analytics platform to meet the three main criteria while having a very low running and maintenance cost.
+
+This platform offers an API to record custom events. The web application is then augmented to call the API to log certain user behaviours such as opening the help section or viewing a type inference example. An anonymised identifier is created for each new visit, which allows events to be collected and later viewed in anonymised custom event streams.
+
+The data collected is the anonymised identifier, a timestamp, and any payload specified by the web application. For example to represent a user choosing to show the more detailed helper a JSON payload may be sent, such as:
+
+\begin{minted}[breaklines]{json}
+\{ "name": "help", "value": "show" \}
+\end{minted}
+
+Or, in the case where an button to set up the code example \mintinline{text}{|map not []|} the web application may send the payload: 
+
+\begin{minted}[breaklines]{json}
+\{ "name": "codeButtonSet", "value": "map not []" \}
+\end{minted}
+
+The analytics API records this data, associating it with the anonymised identifier and timestamp. This is held securely for a configurable retention period, which is by default set to 90 days. While there are no legal requirements or responsibilities under PECR or GDPR to hold this data securely and minimize data retention as it is not personal data, doing so follows best ethical practices and reducing the volume of data held reduces running costs.
+
+Running costs generally are kept low (<£1 per year) by using serverless cloud products. These are cloud products which offer compute and storage in individual on-demand units, rather than requiring renting of a permanent server. Serverless products also allow the analytics platform to easily scale to handle spikes in traffic, while being free when the site is not in use.
+
+The custom event streams are then viewed in an analytics viewer. To keep the implementation consistent between the main project and the analytics sub-project, this too is written as a TypeScript application initialized with Create React App. Using a different framework would have resulted in less knowledge sharing between the two, and introduced additional unwanted complexity. Also, for similar reasons to the main project React was a well-suited framework for the viewer.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1.000\linewidth]{images/image10.png}
+  \caption{The analytics viewer, showing an example stream from the web application.}
+\end{figure}
+
+The viewer shows analytics events by stream, which can be navigated simply using the left sidebar which represents a list of streams. The main view shows a list of events within that stream, ordered by timestamp.
 \section{Implementation}\label{id:h.igepudpadp49}
-TODO: reorder and reorganize this section - content likely has to change from below
+As detailed in the design section, the application is broken into several loosely-coupled modules, written in TypeScript. This chapter details their implementation, examining specific features of the code at a lower level.
 
-Developed gdoc2latex
+\subsection{Language core}\label{id:h.o3ngfa303saw}
+The language core contains models, utility and helper functions, and a lexer and parser. Together these comprise all the basics for interpreting and representing the expression language, and support implementing the type inference algorithm upon it.
 
-Set up CI system to build latex docs
+For clarity, in this section the term ‘models’ will be used to mean TypeScript types, function signatures, interfaces and classes. The term ‘types’ will be used exclusively to refer to the type objects, used for example as the result of type inference algorithms. For example the TypeScript expression in the implementation:
 
-Tried using Docker to run latex compilation step in GitHub actions, but found it was significantly slower (2 mins vs 45 seconds) than installing texlive-latex-extra and texlive-bibtex-extra on the runner directly.
+\begin{minted}[breaklines]{typescript}
+new TypeVar(‘t0’)
+\end{minted}
 
-Implemented algorithm W in a mix of class-based and functions, then reimplemented to be just functions.
+instantiates a TypeVar \textit{model} that represents the \textit{type} $t0$.
+\subsubsection{Models}\label{id:h.f0aymht9bwx3}
+TypeScript models are used to represent abstract syntax trees, types, contexts, substitutions, results and errors.
+\subsubsubsection{Abstract syntax trees}\label{id:h.26q0jf334v10}
+Abstract syntax trees are represented by their nodes alone. Each node corresponds to a subexpression, and contains the relevant information about itself and has references to its direct children. For example, the AST for the expression \mintinline{text}{|\x -> not x|} may be represented by the node:
 
-Added custom test matcher
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.863\linewidth]{images/image12.png}
+\end{figure} \par}
 
-How the step logging works
+Here we see the tree is effectively just an \mintinline{text}{|Abs|} node, with a \textit{parameter} by the name of “x” and \textit{body} with a reference to another AST node. This body node is an \mintinline{text}{|App|} node, which has two properties: a \textit{function} and \textit{argument}, each being AST nodes of type \mintinline{text}{|Var|}. These \mintinline{text}{|Var|} nodes have a single property \textit{name}, the name of the variable referenced.
 
-How does the web app work, performance analysis and considerations
+All nodes represent some expression in the original program. We declare a model \mintinline{text}{|Expr|} as the union of all the different node models, which we can use to represent a general subtree. This is used in defining the node models, for example in its simplest form the \mintinline{text}{|Abs|} node in TypeScript can be represented:
 
-Analytics
+\begin{minted}[breaklines]{typescript}
+interface Abs \{
+  param: string;
+  body: Expr;
+\}
+\end{minted}
 
-Adding algorithm M and W’
+To expand upon this model, we add the position in the original source program it was found at. This can be represented by a simple start and end index into the string of the source program, where the start is the index of the first character (0-indexed) and the end is the index of the last character plus one. For example, the \mintinline{text}{|Var|} node representing \mintinline{text}{|not|} in \mintinline{text}{|\x -> not x|} starts at index 6 and ends at index 9. This indexing scheme is convenient as the length of the expression in the original source code can be calculated by simple subtraction, and the standard TypeScript string methods \mintinline{text}{|slice|} uses this convention. Therefore \mintinline{text}{|code.slice(p.start, p.end)|} will result in the source code specified by a position \mintinline{text}{|p|}. Positions are represented by the simple model:
+
+\begin{minted}[breaklines]{typescript}
+interface Position \{
+  start: number;
+  end: number;
+\}
+\end{minted}
+
+In addition to positions, AST nodes have a notes property. This is represented as an optional string, and is used to record additional arbitrary information about certain nodes, for example that they should be highlighted in the UI or that they are from certain syntactically sugared expressions. For \mintinline{text}{|Abs|}, we now have:
+
+\begin{minted}[breaklines]{typescript}
+interface Abs \{
+  param: string;
+  body: Expr;
+  pos: Position;
+  notes?: string;
+\}
+\end{minted}
+
+Once constructed, properties should be immutable. Immutability prevents properties from being changed, which prevents certain hard-to-detect bugs as all object transformations must be explicit. For example, a method call to an object may not unexpectedly change that object. In addition, immutability helps . While immutability may have a small performance and memory usage overhead in some implementations, this may be offset (and in some cases, performance may be improved) by structural sharing. Structural sharing uses existing references to parts of an object when making a slightly changed copy of it. This reduces memory usage and reduces the overhead of creating new objects. This can be done safely given the knowledge objects are immutable as neither reference will attempt to update the child. For example:
+
+TODO: diagram
+
+Finally, immutability can improve performance when using front-end frameworks like React, which is used to implement the web application. With immutability, front-end frameworks can be sure objects have not changed on subsequent renders if they have referential equality (they point to the same object). Without immutability, objects may have changed between render calls so the front-end framework must re-render the page or perform deep value equality comparisons which require traversing the entire object. These are both potentially costly operations, so avoiding them through immutability brings performance benefits.
+
+TODO: discuss use of const and let
+
+Given the benefits of immutability, models are updated to generally be immutable, marked with the \mintinline{text}{|readonly|} modifier in TypeScript:
+
+\begin{minted}[breaklines]{typescript}
+interface Abs \{
+  readonly param: string;
+  readonly body: Expr;
+  readonly pos: Position;
+  readonly notes?: string;
+\}
+\end{minted}
+
+To make constructing these models easier, we convert these TypeScript interfaces into classes. This allows us to use the \textit{new} keyword to construct instances of these models, and we can use the \textit{instanceof} operator to verify an AST node is of a specific type more easily. These are not possible with TypeScript interfaces alone.
+
+In addition, classes allow us to easily add default methods to objects. We add a \mintinline{text}{|toString|} method to all AST node classes which returns a string containing a program representing the node. This then gives us the final implementation for our \mintinline{text}{|Abs|} node:
+
+\begin{minted}[breaklines]{typescript}
+class Abs \{
+  readonly param: string;
+  readonly body: Expr;
+  readonly pos: Position;
+  readonly notes?: string;
+
+  constructor(param: string, body: Expr, pos: Position, notes?: string) \{
+    this.param = param;
+    this.body = body;
+    this.pos = pos;
+    this.notes = notes;
+  \}
+
+  toString(): string \{
+      return '(\textbackslash ' + this.param + ' -> ' + this.body.toString() + ')'
+  \}
+\}
+\end{minted}
+
+This structure is used for all the AST node models, including:
+\begin{itemize}
+  \item \mintinline{text}{|Var|} for variables
+  \item \mintinline{text}{|App|} for function application
+  \item \mintinline{text}{|Abs|}, for function abstraction, as shown above
+  \item \mintinline{text}{|Let|} for let statements
+  \item \mintinline{text}{|CharLiteral|} and \mintinline{text}{|NumberLiteral|} for literal constants
+\end{itemize}
+
+\subsubsubsection{Types}\label{id:h.bzdo56ibho4h}
+As discussed in the background chapter, monotypes are constructed from type variables and type function applications. We consider basic types (such as $Bool$ or $Int$) to be type function applications on zero arguments. Polytypes are monotypes with zero or more for-all quantifier variables.
+
+For simplicity when modelling polytypes, we consider type variables bound at the highest level. Any type that can be expressed with for-all quantifiers at lower levels, is equivalent to moving those bindings to the top level. For example, $\forall a. (a \rightarrow (\forall b. (b \rightarrow (a, b)))$ is equivalent to $\forall a \forall b. (a \rightarrow b \rightarrow (a, b))$.
+
+From this, and following the same reasoning about using classes with readonly properties we can develop simple models for types. Here we remove constructors and toString methods for simplicity.
+
+\begin{minted}[breaklines]{typescript}
+type MonoType = TypeVar | TypeFuncApp;
+
+class TypeVar \{
+  readonly name: string;
+
+  /* constructor and toString methods */
+\}
+
+type TypeFunc = "->" | "[]" | "Maybe" | "Either" | "Int" | "Char" | "Bool" | "," | ",," | /* ... */;
+
+class TypeFuncApp \{
+  readonly constructorName: TypeFunc;
+  readonly args: MonoType[];
+
+  /* constructor and toString methods */
+\}
+
+class PolyType \{
+  readonly quantifiedVars: string[];
+  readonly monoType: MonoType;
+
+  /* constructor and toString methods */
+\}
+\end{minted}
+
+While PolyType’s \mintinline{text}{|quantifiedVars|} property could be modelled with \mintinline{text}{|TypeVar[]|}, for simplicity \mintinline{text}{|string[]|} was chosen as the methods on these type variables are never called.
+
+The constructors are all trivial, and simply set the corresponding properties in the object. The \mintinline{text}{|toString|} methods are fairly simple for \mintinline{text}{|TypeVar|} and \mintinline{text}{|PolyType|}, however \mintinline{text}{|TypeFuncApp|} has additional logic to pretty-format some types. For example, it formats types like $[(Bool, Int)] \rightarrow Int$ rather than $\rightarrow ([] (, (Bool) (Int))) (Int)$ which would be the result if it treated all type functions equivalently in prefix notation with explicit bracketing. To do this it uses case matching, with different rules depending on the type function used.
+\subsubsubsection{Contexts and substitutions}\label{id:h.ux3btyb2wvh8}
+A context, as defined in the background chapter, is a mapping from variable names to their corresponding types. This informs the type inference algorithm what variables are in scope, and what their types are.
+
+This is modelled in TypeScript as a simple object which has string keys (variable names) and type values. Specifically these type values are polytypes, because as stated before monotypes can be considered polytypes with zero for-all quantified variables. This is written:
+
+\begin{minted}[breaklines]{typescript}
+interface Context \{ [name: string]: PolyType | undefined \}
+\end{minted}
+
+Substitutions can be seen as mappings from type variable names to corresponding types they should be substituted with. In Hindley-Milner there is no need to ever substitute type variables with polytypes, so we can assume these are only monotypes. This therefore can be represented with a model similar to contexts:
+
+\begin{minted}[breaklines]{typescript}
+interface Substitution \{ [name: string]: MonoType | undefined \}
+\end{minted}
+\subsubsubsection{Results and errors}\label{id:h.5yk2zijb0axq}
+The parser and type inference algorithms use response models to return their results. A \mintinline{text}{|Response|} from one of these methods may either be a \mintinline{text}{|Rejected|} or \mintinline{text}{|Accepted|}, indicating the input was invalid or valid respectively.
+
+For example, if a syntax error is present in the program passed to the parser, it may return a \mintinline{text}{|Rejected|} model with the location of the error and a message explaining the issue. Alternatively if a valid program is passed to the parser, it returns an \mintinline{text}{|Accepted|} model with the AST representation as its value. Similarly, the type inference algorithms return \mintinline{text}{|Rejected|} if type inference fails, and \mintinline{text}{|Accepted|} if it succeeds.
+
+These models are defined:
+
+\begin{minted}[breaklines]{typescript}
+type Response<A, R = undefined> = Accepted<A> | Rejected<R>;
+
+interface Rejected<T> \{
+  value?: T;
+  accepted: false;
+  issuePosition: Position;
+  message: string;
+\}
+
+interface Accepted<T> \{
+  value: T;
+  accepted: true;
+\}
+\end{minted}
+
+These models have generic parameters which can be used to specify the type of value expected to be returned. For example, an \mintinline{text}{|Response<Expr, ParseError>|} represents a model which may either be an \mintinline{text}{|Accepted<Expr>|}, containing an \mintinline{text}{|Expr|} as a value, or a \mintinline{text}{|Rejected<ParseError>|}, containing an optional \mintinline{text}{|ParseError|} as a value.
+
+In addition to this, a \mintinline{text}{|TypeResult|} container is defined which is used as part of the function signature for type inference algorithms. This contains a type, representing the overall type of the expression, and the steps the type inference algorithm took to derive that type. Each step has a message and AST to go with it, to match the designed user interface steps.
+
+\begin{minted}[breaklines]{typescript}
+interface TypeResult \{
+  type: MonoType;
+  steps: \{ message: string, ast: Expr \}[];
+\}
+\end{minted}
+
+Type inference algorithms return a \mintinline{text}{|Response|} where if \mintinline{text}{|Accepted|}, the value should be a \mintinline{text}{|TypeResult|} object. If \mintinline{text}{|Rejected|}, the value should be the steps only in the \mintinline{text}{|TypeResult|}. A TypeScript utility, \mintinline{text}{|Omit|} is used to remove the \mintinline{text}{|’type’|} property from the TypeResult in the rejection case. This gives the overall return type for type inference algorithms:
+
+\begin{minted}[breaklines]{typescript}
+Response<TypeResult, Omit<TypeResult, 'type'>>
+\end{minted}
+
+TODO: consider cutting/moving the following paragraph
+
+In addition to these result wrappers, the parser and type inference algorithms also offer an alternative simple interface where just the AST or type is returned without any wrappers. In this case, if an error is found with the input a \mintinline{text}{|ParseError|} or \mintinline{text}{|TypeInferenceError|} is raised, which should be caught by the caller. These errors are also used internally by the methods returning result wrappers.
+\subsubsection{Helper functions}\label{id:h.sw77qek8b49p}
+Several helper functions are implemented in the language core that are relevant to the parser and type inference algorithms. Generally these perform the functions by the same name defined in the background chapter:
+\begin{itemize}
+  \item \mintinline{text}{|apply|} applies a substitution to a type or context
+  \item \mintinline{text}{|combine|} combines substitutions
+  \item \mintinline{text}{|unify|} attempts to find a unifying substitution given two monotypes
+  \item \mintinline{text}{|contains|} returns whether a type contains a certain type variable
+  \item \mintinline{text}{|freeVars|} returns an array of free variables names in a given type or context
+  \item \mintinline{text}{|inst|} instantiates a type, replacing all for-all quantified type variables with new type variables
+  \item \mintinline{text}{|generalise|} fully generalises a type, for-all quantifying any free type variables in the type that are not free in the given context
+  \item \mintinline{text}{|unique|} removes duplicate elements from an array
+  \item \mintinline{text}{|diff|} performs the list difference operation
+\end{itemize}
+
+Generally the helper functions are written recursively, often with the base case being the when the function is called with a \mintinline{text}{|TypeVar|} or a \mintinline{text}{|TypeFuncApp|} with no arguments. This helps keep function implementations simple and maintainable.
+
+As key helper functions it is important that their correctness can be depended upon. To verify correctness, many automated unit tests are run against them using the Jest framework. Jest is a simple to set-up test runner and is recommended by the authors of React for testing React projects. To reduce tooling complexity Jest is used for all automated testing throughout the project.
+\subsubsection{Lexer and Parser}\label{id:h.qbtwwllp8tw6}
+The lexer and parser use the Masala library, as explained in the design chapter.
+
+The GenLex class from the library is used to generate a lexer, which is in turn used for lexing. An instance of GenLex is used to define different tokens, such as identifiers, parentheses, numeric literals and keywords such as ‘let’. For example, the left parenthesis token is defined:
+
+\begin{minted}[breaklines]{typescript}
+const lparen = genlex.tokenize(C.char('('), 'lparen');
+\end{minted}
+
+Once the input program is split into tokens, the parser can attempt to construct an AST. Masala is a parser combinator library, which means functions are chained to parse the expression, each consuming a part of the input.
+
+The parser starts by trying to parse the given program as one of many types of node, using Masala’s \mintinline{text}{|F.try|} utility. This tries to parse the expression with several different construct-specific parsers, taking the first valid match.
+
+These construct-specific parsers match the basic constant literal, variable, function abstraction and let statement expressions defined in Hindley Milner. In addition, we add parsers for tuples and lists that support sugared syntax to allow users to construct these easily. This syntactic sugar is similar to Haskell’s for lists and tuples. For example \mintinline{text}{|[1, 2, 3]|} instead of  \mintinline{text}{|cons 1 (cons 2 (cons 3 [])|} and \mintinline{text}{|(1, True)|} instead of \mintinline{text}{|(,) 1 True|}. Lastly, we add a parser for parenthesized expressions, to make the order of operations explicit.
+
+Once we match one of these parsers, we use it to construct an AST node. Each construct-specific parser returns a single \mintinline{text}{|Expr|}, and so implements the TypeScript interface \mintinline{text}{|SingleParser<Expr>|}. Generally each construct-specific parser extracts the value from the matched tokens, and extracts the location of the node in the source program from a parser metadata object from Masala. The original Masala library does not provide the absolute offset in the source program consistently for all tokens through this metadata object. As Masala is an open-source library, it can be forked and modified. The library was modified to provide the metadata object consistently, and this forked version is used in the implementation to get the position property for AST nodes. For example, the rule for parsing and extracting details about a \mintinline{text}{|Var|} node is:
+
+\begin{minted}[breaklines]{typescript}
+const VAR = () => identifier.map((value, r) => new Var(value, getPos(r)));
+\end{minted}
+
+(\mintinline{text}{|getPos|} is a helper function which extracts the token position from the Masala metadata object \mintinline{text}{|r|})
+
+More complicated rules such as for \mintinline{text}{|Abs|} use Masala’s tuple model, which collects multiple values and allows accessing them by index:
+
+\begin{minted}[breaklines]{typescript}
+const ABS = () =>
+  backslash.map((v, r) => r.location() - 1) // \, and store the start location
+  .then(identifier) // parameter
+  .then(arrow.drop()) // ->, dropped as we don’t need information from it
+  .then(F.lazy(expression)) // body, F.lazy avoids infinite loop as expression references ABS
+  // map to an Abs. tuple is (startLocation: string, parameter: string, body: Expr)
+  .map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), \{ start: tuple.at(0), end: r.location() \}))
+\end{minted}
+
+At the end of the construct-specific parsers, in the main parser we then call \mintinline{text}{|.rep().array().map(nestLeft)|}. Together, these handle function application:
+\begin{itemize}
+  \item \mintinline{text}{|.rep()|} tells the parser to require one or more construct-specific parsers (similar to the $+$ symbol in RegEx). This matches function application, as this matches subexpressions separated by whitespaces.
+  \item \mintinline{text}{|.array()|} tells the parser to map these one or more construct-specific parser results into an array (which will result in an array of \mintinline{text}{|Expr|}s).
+  \item \mintinline{text}{|.map(nestLeft)|} maps the resultant array through the helper function \mintinline{text}{|nestLeft|}. This \mintinline{text}{|nestLeft|} function reduces a given array of expressions into an \mintinline{text}{|App|} model, nesting towards the left as is convention for function application. For example, the array of expressions \mintinline{text}{|[a, b, c, d]|} would be transformed to an \mintinline{text}{|App|} node representing applying the functions in order \mintinline{text}{|((a b) c) d|}. In the case only one expression is passed to \mintinline{text}{|nestLeft|} (i.e., there is not a function application) it simply returns the provided expression.
+\end{itemize}
+\subsubsection{Type inference algorithms}\label{id:h.flyu66glh76t}
+TODO: discuss implementation of type inference algorithms. How expressions are matched and how rules are executed. Give an example of a rule. Implemented algorithm W in a mix of class-based and functions, then reimplemented to be just functions. Adding algorithm M and W’. How is the logger implemented: how is it constructed, how does it log steps, how is it passed recursively, how are results returned at the end. How ASTs are cloned and highlighted. testing (+custom test matcher)
+\subsubsection{Web application}\label{id:h.jqmg1n3w35mp}
+TODO: web application, explain the different components, how state is managed, why React function components and hooks over class components, use of useMemo (+with performance analysis), how the AST is displayed, how different algorithms are called, how the help modal works (generated from default context), testing
+\subsubsection{Analytics}\label{id:h.39bhrrv1fi5p}
+TODO: analytics, AWS implementation (lambdas, s3, api gateway, bucket policies), viewer (s3 sync, server, react front-end)
 \section{Evaluation}\label{id:h.e6letww4nhn0}
 Maybe also analyse performance?
 
@@ -697,12 +1082,21 @@ Improvement themes found were:
 - 2x Add animation
 - Add dark theme
 \subsubsection{Analytics}\label{id:h.67g05flyfv0z}
+\subsubsection{Ethics}\label{id:h.q5st3bb4afm1}
+\section{Project Management}\label{id:h.3j8xp631ygy}
+TODO: consider whether this section is necessary?
 
-\section{Conclusions and Further Work}\label{id:h.fc67ipatea73}
+Version control with Git, Git hosting on GitHub, backups (can probably take some stuff from spec/progress report?)
+
+Developed gdoc2latex
+
+Set up CI system to build latex docs
+
+Tried using Docker to run latex compilation step in GitHub actions, but found it was significantly slower (2 mins vs 45 seconds) than installing texlive-latex-extra and texlive-bibtex-extra on the runner directly.
+\section{Conclusions}\label{id:h.fc67ipatea73}
 TODO: further work: lazy loading of libraries, adding custom type environments
-\section{Ethics}\label{id:h.i0n8c6hqdr6j}
-
-\section{Acknowledgements}\label{id:h.xqaef57orpsv}
+\subsection{Further Work}\label{id:h.60yvcrl0lpu}
+\subsection{Acknowledgements}\label{id:h.xqaef57orpsv}
 This document was typeset using a derivative of the CS310 starter pack\footnote{\href{https://github.com/mbg/cs310}{https://github.com/mbg/cs310}} by Michael Gale, licensed under CC BY 4.0.
 
 

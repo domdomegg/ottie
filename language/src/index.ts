@@ -567,6 +567,18 @@ const expression = (): SingleParser<Expr> =>
     .or(F.try(PAR()))
     .rep().array().map(nestLeft);
 
+/* Construct-specific parsers */
+// We have to SHOUT as var and let are restricted keywords in JavaScript
+const LIT_NUM = (): SingleParser<NumberLiteral> => numberLiteral.map((value, r) => new NumberLiteral(value, getPos(r))); 
+const LIT_CHAR = (): SingleParser<CharLiteral> => charLiteral.map((value, r) => new CharLiteral(value, getPos(r)));
+const LIT_STRING = (): SingleParser<Expr> => stringLiteral.map(toCharList);
+const TUPLE = (): SingleParser<Expr> => lparen.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).rep())).array()).then(rparen.map((s, r) => getPos(r).end)).map(toTuple);
+const LIST = (): SingleParser<Expr> => lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).optrep())).opt()).then(rbracket.map((s, r) => getPos(r).end)).map(toList);
+const VAR = (): SingleParser<Var> => identifier.map((value, r) => new Var(value, getPos(r)));
+const ABS = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
+const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single().map(expandPos)
+const LET = (): SingleParser<Let> => letTok.map((v, r) => getPos(r).start).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).map((tuple, r) => new Let(tuple.at(1), tuple.at(2), tuple.at(3), { start: tuple.at(0), end: r.location() }))
+
 const nestLeft = (v: Expr[]) => v.reduce((prev, cur) => new App(prev, cur, { start: prev.pos.start, end: cur.pos.end }));
 
 const toCharList = (string: string, r: MasalaResponse<string>) => {
@@ -625,17 +637,6 @@ const expandPos = <T extends Expr>(v: T, r: MasalaResponse<T>): T => {
     v.pos.start = rawString.slice(0, v.pos.start).lastIndexOf('(')
     return v;
 }
-
-// We have to SHOUT as var and let are restricted keywords in JavaScript
-const LIT_NUM = (): SingleParser<NumberLiteral> => numberLiteral.map((value, r) => new NumberLiteral(value, getPos(r))); 
-const LIT_CHAR = (): SingleParser<CharLiteral> => charLiteral.map((value, r) => new CharLiteral(value, getPos(r)));
-const LIT_STRING = (): SingleParser<Expr> => stringLiteral.map(toCharList);
-const TUPLE = (): SingleParser<Expr> => lparen.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).rep())).array()).then(rparen.map((s, r) => getPos(r).end)).map(toTuple);
-const LIST = (): SingleParser<Expr> => lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).optrep())).opt()).then(rbracket.map((s, r) => getPos(r).end)).map(toList);
-const VAR = (): SingleParser<Var> => identifier.map((value, r) => new Var(value, getPos(r)));
-const ABS = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
-const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single().map(expandPos)
-const LET = (): SingleParser<Let> => letTok.map((v, r) => getPos(r).start).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).map((tuple, r) => new Let(tuple.at(1), tuple.at(2), tuple.at(3), { start: tuple.at(0), end: r.location() }))
 
 const specialCases = (code: string): undefined | Rejected<undefined> => {
     if (code == 'let' || code.endsWith(' let')) {
