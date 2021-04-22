@@ -128,6 +128,14 @@ test('let: valid', () => {
 })
 
 test('let: syntax error', () => {
+    expect(() => parse('let x = True in')).toThrow()
+    expect(() => parse('let')).toThrow()
+    expect(() => parse('let ')).toThrow()
+    expect(() => parse('in')).toThrow()
+    expect(() => parse('in ')).toThrow()
+    expect(() => parse('not let')).toThrow()
+    expect(() => parse('not let 3')).toThrow()
+    expect(() => parse('not in')).toThrow()
     expect(() => parse('(let x = True in )')).toThrow()
     expect(() => parse('(let x = True i x)')).toThrow()
     expect(() => parse('(let x = True in in x)')).toThrow()

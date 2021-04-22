@@ -113,7 +113,7 @@ There have been previous attempts to build visualisation and teaching tools rela
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.770\linewidth]{images/image19.png}
+  \includegraphics[width=0.770\linewidth]{images/image23.png}
   \caption{Screenshot of results from TypeTool, taken from their paper}
 \end{figure} \par}
 
@@ -129,7 +129,7 @@ Another tool in the area of visualising type systems was developed by~\cite{ref7
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.797\linewidth]{images/image3.png}
+  \includegraphics[width=0.797\linewidth]{images/image5.png}
   \caption{Screenshot of Yung and Michaelson's tool, taken from their paper}
 \end{figure} \par}
 
@@ -137,7 +137,7 @@ NiMo \citep{ref8} is a graphical programming language related to functional data
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image16.png}
+  \includegraphics[width=0.960\linewidth]{images/image20.png}
   \caption{A diagram showing the types of some variables in NiMo, taken from their paper}
 \end{figure} \par}
 
@@ -152,7 +152,7 @@ For this project, we will consider a calculus with five constructs to build expr
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.510\linewidth]{images/image18.png}
+  \includegraphics[width=0.510\linewidth]{images/image22.png}
 \end{figure}
     | c constant
 
@@ -206,7 +206,7 @@ Like expressions, types can be considered to be built from \mintinline{text}{|va
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.467\linewidth]{images/image11.png}
+  \includegraphics[width=0.467\linewidth]{images/image15.png}
 \end{figure}
 where C is a set of type functions such as \mintinline{text}{|->|}, \mintinline{text}{|List|} and \mintinline{text}{|Maybe|}.
 
@@ -232,7 +232,7 @@ Adding zero or more for-all quantified type variables to monotypes forms polymor
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.290\linewidth]{images/image20.png}
+  \includegraphics[width=0.290\linewidth]{images/image24.png}
 \end{figure}
 
 TODO: latexify the above, but use rho instead of sigma and a instead of alpha
@@ -347,7 +347,7 @@ Our five key syntax rules plus instatitation and generalisation give us nine typ
 
  \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.505\linewidth]{images/image7.png}
+  \includegraphics[width=0.505\linewidth]{images/image10.png}
 \end{figure}
 
 ---------- [Const\_i]
@@ -393,7 +393,7 @@ The algorithm is set out below, for each of the five language constructs. There 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.987\linewidth]{images/image1.png}
+  \includegraphics[width=0.987\linewidth]{images/image3.png}
 \end{figure}
 
 TODO: latexify the above (taken from Lee), replace () with constants, replace TypeEnv with Context, replace Expr with Expression, replace Subst with Substitution, replace Type with MonoType, replace Clos with generalise, add brackets around applying substitutions, add explicit combines, number the statements, replace id with \{\}, flip ordering of abs and app, replace var rule with let S\_1 = \{ a \mapsto t0, b \mapsto t1, … \}, new t0, t1, … in (id, S\_1\tau) where \Gamma(x) = \forall a \forall b … \tau
@@ -420,7 +420,7 @@ Algorithm W’ is a slightly altered variant of Algorithm W, only changing rule 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.782\linewidth]{images/image14.png}
+  \includegraphics[width=0.782\linewidth]{images/image18.png}
 \end{figure}
 
 TODO: write out algorithm in Lee format for W’, 1-index, replace S’ with S\_3, V with S\_4
@@ -441,7 +441,7 @@ M is initially started at the root node with a new type, i.e. $M(\Gamma, e, tn),
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image4.png}
+  \includegraphics[width=1.000\linewidth]{images/image6.png}
 \end{figure}
 
 TODO: latexify the above (taken from Lee), make replacements as per W alg, replace rho with tau\_e
@@ -504,19 +504,19 @@ Programming language documentation and informal resources both are generally aim
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image5.png}
+  \includegraphics[width=1.000\linewidth]{images/image7.png}
   \caption{The TypeScript playground, with an example opened from the Type Inferece documentation showing how JavaScript classes can work in TypeScript.}
 \end{figure}
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image2.png}
+  \includegraphics[width=1.000\linewidth]{images/image4.png}
   \caption{Golang's limited type inference is explained in 'A Tour of Go', with an example program the user is prompted to edit and run.}
 \end{figure}
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image15.png}
+  \includegraphics[width=1.000\linewidth]{images/image19.png}
   \caption{Rust's page on type inference is short, but has a well-commented and insightful example that can be run and edited inline in the browser.}
 \end{figure}
 
@@ -560,7 +560,7 @@ A basic UI mockup is shown below that takes an input expression and displays the
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.756\linewidth]{images/image13.png}
+  \includegraphics[width=0.756\linewidth]{images/image17.png}
   \caption{Recreation of an initial sketch of the UI for the teaching tool.}
 \end{figure} \par}
 
@@ -570,7 +570,7 @@ For example, this happens with function abstraction in algorithm W: the before s
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.945\linewidth]{images/image9.png}
+  \includegraphics[width=0.945\linewidth]{images/image13.png}
   \caption{Function abstraction in algorithm W requires two UI steps to represent one rule of the algorithm}
 \end{figure} \par}
 
@@ -578,7 +578,7 @@ In addition to the rule steps, algorithm M requires an extra beginning and end s
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image6.png}
+  \includegraphics[width=0.960\linewidth]{images/image9.png}
   \caption{Algorithm M requires an initial and final step.}
 \end{figure} \par}
 
@@ -586,7 +586,7 @@ To make it clear what part of the expression each step relates to, a representat
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.357\linewidth]{images/image21.png}
+  \includegraphics[width=0.357\linewidth]{images/image25.png}
   \caption{The expression \mintinline{text}{|let x = 3 in odd x|} may be represented by this vertical AST.}
 \end{figure} \par}
 
@@ -595,7 +595,7 @@ This vertical design was chosen over a horizontal design due to the space constr
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.813\linewidth]{images/image8.png}
+  \includegraphics[width=0.813\linewidth]{images/image11.png}
   \caption{Example of what a more horizontal design of AST might look like.}
 \end{figure} \par}
 
@@ -605,7 +605,7 @@ To help relate the ASTs to the entered expression, when a user hovers over a par
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.884\linewidth]{images/image17.png}
+  \includegraphics[width=0.884\linewidth]{images/image21.png}
   \caption{Hovering ove r the 'function application' node highlights the corresponding subexpression in the entered program.}
 \end{figure} \par}
 
@@ -736,7 +736,7 @@ The custom event streams are then viewed in an analytics viewer. To keep the imp
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image10.png}
+  \includegraphics[width=1.000\linewidth]{images/image14.png}
   \caption{The analytics viewer, showing an example stream from the web application.}
 \end{figure}
 
@@ -761,7 +761,7 @@ Abstract syntax trees are represented by their nodes alone. Each node correspond
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.863\linewidth]{images/image12.png}
+  \includegraphics[width=0.863\linewidth]{images/image16.png}
 \end{figure} \par}
 
 Here we see the tree is effectively just an \mintinline{text}{|Abs|} node, with a \textit{parameter} by the name of “x” and \textit{body} with a reference to another AST node. This body node is an \mintinline{text}{|App|} node, which has two properties: a \textit{function} and \textit{argument}, each being AST nodes of type \mintinline{text}{|Var|}. These \mintinline{text}{|Var|} nodes have a single property \textit{name}, the name of the variable referenced.
@@ -940,8 +940,8 @@ Response<TypeResult, Omit<TypeResult, 'type'>>
 TODO: consider cutting/moving the following paragraph
 
 In addition to these result wrappers, the parser and type inference algorithms also offer an alternative simple interface where just the AST or type is returned without any wrappers. In this case, if an error is found with the input a \mintinline{text}{|ParseError|} or \mintinline{text}{|TypeInferenceError|} is raised, which should be caught by the caller. These errors are also used internally by the methods returning result wrappers.
-\subsubsection{Helper functions}\label{id:h.sw77qek8b49p}
-Several helper functions are implemented in the language core that are relevant to the parser and type inference algorithms. Generally these perform the functions by the same name defined in the background chapter:
+\subsubsection{Helper functions and type utilities}\label{id:h.sw77qek8b49p}
+Several helper functions are implemented in the language core that are relevant to the parser and type inference algorithms. These perform the functions by the same name defined in the background chapter:
 \begin{itemize}
   \item \mintinline{text}{|apply|} applies a substitution to a type or context
   \item \mintinline{text}{|combine|} combines substitutions
@@ -956,7 +956,21 @@ Several helper functions are implemented in the language core that are relevant 
 
 Generally the helper functions are written recursively, often with the base case being the when the function is called with a \mintinline{text}{|TypeVar|} or a \mintinline{text}{|TypeFuncApp|} with no arguments. This helps keep function implementations simple and maintainable.
 
-As key helper functions it is important that their correctness can be depended upon. To verify correctness, many automated unit tests are run against them using the Jest framework. Jest is a simple to set-up test runner and is recommended by the authors of React for testing React projects. To reduce tooling complexity Jest is used for all automated testing throughout the project.
+In addition to these helper functions, there are type utilities for constructing types. For example, the type $[Bool] -> Char$ can be constructed with the classes explicitly:
+
+\begin{minted}[breaklines]{typescript}
+new TypeFuncApp('->', new TypeFuncApp('[]', new TypeFuncApp('Bool')), new TypeFuncApp('Char'));
+\end{minted}
+
+but with the type utilities, this can be written:
+
+\begin{minted}[breaklines]{typescript}
+f(list(boolean), char)
+\end{minted}
+
+These type utilities make developing tests significantly easier, and improve readability of the code.
+
+As the helper functions and type utilities are widely-used it is critical that their correctness can be depended upon. To verify correctness, many automated unit tests are run against them using the Jest framework. Jest is a simple to set-up test runner and is recommended by the authors of React for testing React projects. To reduce tooling complexity Jest is used for all automated testing throughout the project.
 \subsubsection{Lexer and Parser}\label{id:h.qbtwwllp8tw6}
 The lexer and parser use the Masala library, as explained in the design chapter.
 
@@ -994,95 +1008,227 @@ const ABS = () =>
 
 At the end of the construct-specific parsers, in the main parser we then call \mintinline{text}{|.rep().array().map(nestLeft)|}. Together, these handle function application:
 \begin{itemize}
-  \item \mintinline{text}{|.rep()|} tells the parser to require one or more construct-specific parsers (similar to the $+$ symbol in RegEx). This matches function application, as this matches subexpressions separated by whitespaces.
+  \item \mintinline{text}{|.rep()|} tells the parser to require one or more construct-specific parsers (similar to the $+$ symbol in common regular expression syntax). This matches function application, as it matches subexpressions separated by whitespaces.
   \item \mintinline{text}{|.array()|} tells the parser to map these one or more construct-specific parser results into an array (which will result in an array of \mintinline{text}{|Expr|}s).
   \item \mintinline{text}{|.map(nestLeft)|} maps the resultant array through the helper function \mintinline{text}{|nestLeft|}. This \mintinline{text}{|nestLeft|} function reduces a given array of expressions into an \mintinline{text}{|App|} model, nesting towards the left as is convention for function application. For example, the array of expressions \mintinline{text}{|[a, b, c, d]|} would be transformed to an \mintinline{text}{|App|} node representing applying the functions in order \mintinline{text}{|((a b) c) d|}. In the case only one expression is passed to \mintinline{text}{|nestLeft|} (i.e., there is not a function application) it simply returns the provided expression.
 \end{itemize}
+
+The overall lexer and parser is then wrapped in a function that maps results from the Masala library into consistent \mintinline{text}{|Response|} models. The wrapping function also handles pre-processing the code before passing it to the lexer, and eliminates some special cases to do with disambiguating let-statement related keywords and identifiers.
+
+Many tests are written against the parser, both verifying valid expressions are parsed correctly and invalid expressions are rejected. Assertions are made on the correctness of parse results, ensuring they return the corresponding AST for the program with nodes being given the expected properties, including their position.
 \subsubsection{Type inference algorithms}\label{id:h.flyu66glh76t}
-TODO: discuss implementation of type inference algorithms. How expressions are matched and how rules are executed. Give an example of a rule. Implemented algorithm W in a mix of class-based and functions, then reimplemented to be just functions. Adding algorithm M and W’. How is the logger implemented: how is it constructed, how does it log steps, how is it passed recursively, how are results returned at the end. How ASTs are cloned and highlighted. testing (+custom test matcher)
+The three type algorithms W, W’ and M are implemented in separate packages, as per the design chapter. While by their nature they have differing rules, they all follow a similar overall structure.
+
+Each algorithm exposes a simple public interface, just one method: \mintinline{text}{|infer|}. This is a polymorphic function which has two possible type signatures. It always takes an AST, but may also take an optional boolean toggle to return a \mintinline{text}{|Response|} model and a custom \mintinline{text}{|Context|}. If the optional boolean toggle is false, just a monotype is returned. If the optional boolean toggle is true, a \mintinline{text}{|Response<TypeResult, Omit<TypeResult, 'type'>>|} is instead returned which represents either a typing result if successful (steps and a final type), or a typing result without a type if unsuccessful (just the steps up to the type error).
+
+This \mintinline{text}{|infer|} method is a wrapper around the real internal \mintinline{text}{|\_infer|} method, which has a type signature much closer to the formal definition of each algorithm. This internal \mintinline{text}{|\_infer|} function is used for recursive calls. The \mintinline{text}{|\_infer|} method does not have an identical type signature to the formal definition as two additional helpers are passed in: a fresh type name generator and a logger.
+
+The fresh type name generator yields a new, unused (fresh) type variable name each time it is called. This utility is used to satisfy the requirement for new type variables in the algorithms. It’s implementation is simple: it initialises an internal counter to zero, which it returns and increments on each call. For example, subsequent executions might return a sequence of new type variables $t0$, $t1$, $t2$, and so on. This counter is stored in the parent function’s scope as a closure to avoid polluting the global state while offering a persistent variable for the duration of the fresh type name generator’s lifetime.
+
+The logger records steps the algorithm has taken, in order to display them to the user later. The algorithm calls the logger at each major step, with a dynamic message explaining in context what actions it has performed. In addition, we pass in a map of AST nodes to notes to be applied to the AST corresponding to the step. For example:
+
+\begin{minted}[breaklines]{typescript}
+logger('We know the primitive \mintinline{text}{|' + expr.toString() + '|} is an \mintinline{text}{|Int|}', highlight(expr));
+\end{minted}
+
+Results in adding a step with the corresponding message. In the message, backticks are used to represent content that should be shown in monospace font, as is standard in Markdown or on most IM platforms such as Slack, Discord and Microsoft Teams. The \mintinline{text}{|.toString()|} method is one defined as part of the AST node models. The \mintinline{text}{|highlight|} helper function results in a map, which when passed to the logger adds a note to highlight the given expression in the UI.
+
+The logger’s implementation is somewhat similar to the fresh type generator’s implementation. Rather than initializing just a counter, we initialize an empty array. Each time the logger is called, it applies the notes to a clone of the AST and pushes a step into the array. At the end of the type inference process, the steps array is extracted and returned as part of the result to the caller of the \mintinline{text}{|infer|} method.
+
+In the internal \mintinline{text}{|\_infer|} method, generally we are given an AST node which we can match against the different classes. Each different class of AST node has its corresponding rule in the algorithm implemented using the helper functions from the language core. For example, for function abstraction in algorithm W the rule:
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1.000\linewidth]{images/image12.png}
+\end{figure}
+
+can now be very directly implemented in TypeScript as:
+
+\begin{minted}[breaklines]{typescript}
+if (expr instanceof Abs) \{
+  const $\beta$ = new TypeVar(freshTypeName());
+  const [S1, $\tau$1] = W(expr.body, \{ ...ctx, [expr.param]: pt([], $\beta$) \});
+  return [S1, apply(S1, f($\beta$, $\tau$1))]
+\}
+\end{minted}
+
+While the actual implementation differs from this (adding logger calls, using different variable names and passing down the helpers to the recursive call) the overall structure is the same. Further rules, and rules in the other algorithms are implemented similarly, again with minor tweaks to the theoretical algorithms to catch type-errors and log the steps taken.
+
+This implementation of the type inference algorithms as standalone functions to be applied to AST nodes is the result of several coding iterations. While appearing simple, getting the models right to represent the algorithms so elegantly in TypeScript was a significant challenge.
+
+An initial implementation extended the AST node classes with type information, helper functions and inference methods. The inference algorithms then would map ASTs to these extended models and call the inference method on the root node. However, this strategy resulted in a lot of code duplication (especially in helper methods) and was difficult to test. In addition, debugging problems was difficult as it was tougher to follow the call stack in the class methods. Finally, the significant difference between a class-based implementation and the way the algorithms are commonly presented made spotting deviations from the algorithms specifications difficult.
+
+A later implementation moved closer to the current implementation but inlined many of the simpler helper functions. This was slightly more performant than the final implementation, however, inlined functions reduced code readability and removed the ability to unit test helper functions on their own. Additionally, while closer to the formal algorithm specifications it did make detecting differences between the implementation and the specification harder.
+
+As the type inference algorithms implement the same interface they can share high level tests, as we expect the same result from each of them. A comprehensive test suite is packaged alongside the implementation, testing a range of expressions and edge cases, including expressions whose types cannot be inferred. To help with this, custom assertion matchers were added to the testing framework.
+
+The first custom assertion matcher, \mintinline{text}{|expect(expr).toHaveType(type)|} asserts that when the type inference algorithm is applied to the given expression \mintinline{text}{|expr|}, the type \mintinline{text}{|type|} is returned. This matcher uses a custom deep equality check on types, allowing for $\alpha$-equivalence (type variables to be renamed consistently throughout the type). For example, the types $t0 -> Int$ and $t1 -> Int$ would be considered to be equivalent by renaming. Note that a pair of types being $\alpha$-equivalent is different to being unifiable as the types must still have the same structure, just the variable names can be changed between them.
+
+The second assertion matcher, \mintinline{text}{|expect(expr).toHaveInvalidType()|} asserts that the type inference algorithm raises a type error when applied to the expression \mintinline{text}{|expr|}.
+
+Both assertion matchers pretty-print output on failure, clearly highlighting where the resultant types differ. They also both support negation, for example \mintinline{text}{|expect(expr).not.toHaveType(type)|} asserts that an expression is not given a certain type by the type inference algorithm.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.769\linewidth]{images/image8.png}
+  \caption{Example test framework output to the command line showing a failing custom assertion}
+\end{figure} \par}
 \subsubsection{Web application}\label{id:h.jqmg1n3w35mp}
-TODO: web application, explain the different components, how state is managed, why React function components and hooks over class components, use of useMemo (+with performance analysis), how the AST is displayed, how different algorithms are called, how the help modal works (generated from default context), testing
+The React web application is broken down in several different reusable components. These components are managed by React, which injects the \mintinline{text}{|Main|} component as the root node of the application.
+
+This \mintinline{text}{|Main|} component is responsible for rendering most of the application, through creating child components and managing the state used to configure the user’s input (such as the algorithm selected and the program entered).
+
+State in the application is managed with React hooks, and the components in the application are written as functions. This is the currently recommended way to develop React applications, as opposed to using older-style class components. React functional components with hooks are less error-prone and are easier to use than class components. In addition, generating and passing around callbacks to update state is significantly easier with hooks. This is used in the application to power reusable components such as the \mintinline{text}{|SetButton|} component, which takes a setter callback and triggers it when the button is clicked.
+
+A key component is the \mintinline{text}{|ResultView|}, which displays the result of running the type inference algorithm on the user input. It is this component which also calls the parser and type inference algorithm to get the result, and displays any errors if the input is invalid. It in turn calls the \mintinline{text}{|ASTView|} to display the AST where relevant.
+
+The \mintinline{text}{|ASTView|} component constructs a visualisation of a given AST using several subcomponents. Like the type inference algorithms, there are cases for each type of AST node which may recursively display parts of that node. The \mintinline{text}{|NodeView|} displays a complete AST node, recursively calling itself, \mintinline{text}{|NodeWrapperView|} and \mintinline{text}{|NodeChildView|}. \mintinline{text}{|NodeWrapperView|} represents a horizontal bar in the AST, wrapping some text content. \mintinline{text}{|NodeChildView|} adds a level indentation so children appear further to the right than their parents. Together, along with some CSS pseudo-elements they are styled to add lines between parent and child nodes. This implements the design of the AST laid out in the design chapter.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.814\linewidth]{images/image1.png}
+  \caption{Example visualisation of an AST by the ASTView}
+\end{figure} \par}
+
+TODO: annotate the diagram above
+
+The \mintinline{text}{|ASTView|} takes a callback function, which is triggered when an AST node is hovered over. It is passed the AST node’s corresponding position in the input program, which is used to highlight that part of the input.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.868\linewidth]{images/image2.png}
+  \caption{The second function application node is hovered here, highlighting the 'map not' part of the expression.}
+\end{figure} \par}
+
+TODO: add cursor position to above screenshot
+
+To improve performance, the \mintinline{text}{|Main|} component memoises renders of \mintinline{text}{|ResultView|}. This means that on future renders of the \mintinline{text}{|Main|} component, the \mintinline{text}{|ResultView|} is only re-rendered (and thus the parser and type inference algorithms are only re-run) if the input program or the selected algorithm changes. This improves performance by avoiding unnecessary computation when other state in the \mintinline{text}{|Main|} component changes, for example when the user opens the help window, this updates the \mintinline{text}{|Main|} component’s state but does not cause the \mintinline{text}{|ResultView|} to re-render.
+
+TODO: show performance flamegraph/render latency comparison with and without useMemo
+
+The help window explains the language’s type constructors and lists the available variables in the global context. It is implemented as a modal that can be toggled with a button, and can be scrolled independently of the main page. The documentation on the available variables is automatically generated from the context, using the language core’s helper functions and it’s model’s \mintinline{text}{|toString|} methods.
+
+TODO: screenshot of the help window
+
+The web application again uses the Jest framework for testing. In addition, it uses the React Testing Library to simulate browser events, such as clicking buttons and entering text into the input box. Some of these tests are effectively end-to-end tests as they simulate a certain user journey. Some may also be considered integration tests, as assertions are made on the behaviour of the web application in combination with the language core and type inference algorithms, ensuring all the modules work correctly together.
 \subsubsection{Analytics}\label{id:h.39bhrrv1fi5p}
-TODO: analytics, AWS implementation (lambdas, s3, api gateway, bucket policies), viewer (s3 sync, server, react front-end)
+Recording analytics is built into the web application, which makes calls to a RESTful HTTP endpoint to record events. This is guarded by a check of the “Do not track” browser flag to ensure user preferences regarding privacy are respected.
+
+Each event is sent along with a randomised identifier per page session, which allows them to be viewed in an event stream. However, by using a randomised identifier the data is not tied to any specific person and is therefore not considered personal data.
+
+The RESTful API offers one simple endpoint which saves valid JSON events sent to it. The API is implemented on Amazon Web Services (AWS), a cloud platform. First the HTTP request is received by an API gateway, and provided it passes basic security checks it is forwarded onto an AWS Lambda function. The function first checks the data sent to it against a schema and if it is valid the event is stored in S3, an object storage service. If the data is invalid, the request is rejected.
+
+Events can then be later retrieved from S3 by authorised users, who can visualise them using the analytics viewer. S3 is configured to automatically delete events after a period of 90 days, to follow best practices on data retention.
+
+These cloud products are all considered ‘serverless’, in that they do not require the explicit management of servers. This significantly reduces running and maintenance costs as the code only needs to be executed when users are using the application. It also improves scalability, as more capacity can automatically be provisioned for the analytics tool to meet user demand.
 \section{Evaluation}\label{id:h.e6letww4nhn0}
-Maybe also analyse performance?
+User testing aims to evaluate whether the teaching tool works and is effective in its current form. These aims can be summarised by:
+\begin{enumerate}
+  \item the tool is accessible and users can enter input
+  \item the results can be understood
+  \item it improves students’ understanding of types and type inference
+\end{enumerate}
 
-Compare to existing available libraries?
+From 1 to 3, these increase in scope and in how difficult they are to measure. However, the key goal of the project is 3, as if the tool meets the first two aims but does not improve student understanding it is still not helpful as a teaching resource.
 
-\subsection{User testing}\label{id:h.bsy9mpun8nk3}
-Lay out the aims of user testing, i.e.: (goals increasing in ‘scope’)
-- software is accessible and usable
-- the results can be understood
-- it improves students’ understanding of types and type inference
+To verify whether the project meets these aims, a questionnaire was distributed to students and analytics data from the web application was reviewed.
+\subsubsection{Questionnaire}\label{id:h.yqiowsgjmohq}
+The questionnaire was composed of three parts: a short test on types and type inference before using the application, introducing users to the application and asking usage questions, then a final test to see if student’s performance improves after using the tool.
 
-How the survey was constructed and how that relates to aims
+This addresses and allows for measurement against all three aims. The tool’s performance on aims 1 and 2 are measured in the middle part, where users are asked to access the tool, enter input and interpret the results. Aim 3 is measured by looking at the relative difference in test results from before and after using the tool.
 
-How the survey was distributed and incentivised
+The questionnaire was distributed across several student-organised group chats and online communication platforms relating to computer science. In addition, my supervisor encouraged students on his CS141 Functional Programming module to complete the questionnaire, highlighting it in lectures and several seminar sessions.
 
-How analytics data was collected and how that relates to aims
+To incentivise students to fill out the questionnaire with detailed and accurate answers, an achievement through the Warwick Automated Assessment Tool (WAAT) was offered to all students who made an honest attempt at all questions. A student was considered to have answered questions honestly if they selected the correct option for the following quality control check question:
 
-How participants privacy was protected
-\subsubsection{Survey}\label{id:h.yqiowsgjmohq}
-Questions:
-- Try entering: map odd []. Try to understand the steps. What is the unifying substitution performed in step 3?
-- Try entering: not 3. Try to understand the steps. What is the problem found?
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.882\linewidth]{images/image26.png}
+  \caption{The trivial quality-control question to ensure users were reading and answering questions properly}
+\end{figure} \par}
 
-TODO: Expand on what options were available for these questions and why
+In addition to the WAAT achievement, vouchers were given out to 4 respondents selected at random and to 2 respondents giving detailed constructive feedback on the tool. Finally, students were also reminded that learning about type inference could improve their functional programming skills, which would help them with the CS141 courseworks and final exam. While students were encouraged to complete the questionnaire, it was made clear that it was optional, it would have no direct effect on any of their assessments and that they could choose to stop taking the questionnaire at any time.
 
-These questions were to verify users were able to access, use and interpret the results of the tool. This helps test the hypothesis that the software was accessible and usable, and that results could be understood.
+The questionnaire had 48 unique responses, of which 46 were valid (where the respondent had fully completed all questions, and answered the quality control check question correctly). Percentages given here are with respect to the number of valid responses.
 
-The first had 91\% of respondents select the correct answer. 2 respondents chose the type distractor, and 1 respondent entered a different substitution. 1 respondent did not understand the output enough.
+There are two types of questions in the second part. The first type directly asks users to try accessing the tool, inputting results and interpreting the results. These questions are:
+\begin{itemize}
+  \item Try entering: map odd []. Try to understand the steps. What is the unifying substitution performed in step 3?
+  \item Try entering: not 3. Try to understand the steps. What is the problem found?
+\end{itemize}
+Both of these questions offer 7 multiple choice options, of which only one is correct. These options included the chance to say they could not enter the input, or could not understand the output. In addition, the questions allow users to enter an ‘other’ free-text response.
 
-The second had 100\% of respondents select the correct answer.
+The first of these questions had 42 (91\%) respondents select the correct answer. 2 respondents chose a type closely related to the substitution but not the substitution itself, and 1 respondent manually entered a different substitution. 1 respondent did not understand the output enough.
 
-In both questions, no respondents selected that they could not access or use the software, and the high correct response rate for both questions support hypotheses 1 and 2.
+The second had all respondents select the correct answer.
 
-Questions:
-- What is really helpful about this tool?
-- What could be improved in this tool?
+In both questions, no respondents selected that they could not access or use the software, and the high correct response rate for both questions provides evidence the tool meets aims 1 and 2.
 
-These questions were to better understand qualitatively what helped students understand type inference, so the tool could be improved. Determining what is most helpful about the tool allows focusing on those parts, while asking what could be improved highlights areas to be changed.
+The second type of question in the second part of the questionnaire seeks feedback on what the tool does well, and how it might be improved upon. These are long-answer text questions with open prompts. This encourages users to be candid in their answers and allows them to comment freely about their experiences with the tool. The questions are:
+\begin{itemize}
+  \item What is really helpful about this tool?
+  \item What could be improved in this tool?
+\end{itemize}
 
-Positive themes found were:
-- 2x Function application was explained well, which also helped explain curried functions
-- 23x Steps are clear / easy-to-understand
-- 15x Steps are well-presented / well-visualised
-- 8x Tool explains why invalid expressions are invalid
-- 8x Showing substitutions helped explain unification
-- Learnt how let syntax worked
-- 9x Liked visual design / colour scheme
-- Tool helpful for more complex examples
-- Liked being able to try different things, felt it was more effective than slides/books
-- Examples were helpful
-- 13x helped me understand unification
-- 11x helped me understand type inference
-- 4x helped me understand Haskell
-- Application is very fast
+These questions give better insight into what helps students understand type inference, so the tool can be improved. Determining what is most helpful about the tool can confirm which parts are working well already, while asking what could be improved highlights areas to be changed.
 
-Improvement themes found were:
-- 2x Information on homepage could be made more obvious
-- Contact details on the website could help report bugs, give feedback
-- Automatically suggesting typo corrections e.g. ‘Fals’ to ‘False’
-- On mobile changing the input expression should not cause the screen to move
-- Adding functor and applicative support
-- Adding support for list comprehensions
-- 5x Adding more general information on the HM type system and the HM algorithm
-- 4x Using arrows to navigate through steps rather than scrolling
-- 3x Function application step could be made clearer
-- 2x Fix typo ‘instatiate’ to ‘instantiate’
-- Support infix expressions
-- Adding a quiz mode
-- 3x Improve wording of function application step
-- 2x Adding support for declaring custom types
-- Swapping order of AST and explaining content
-- 2x Making it clearer the expression box was a text input
-- Want input expression to be visible when scrolled down the page
-- 1x Disliked colour scheme
-- Use more mathematical notation
-- 2x Add animation
-- Add dark theme
+42 respondents answered the first question. Several of these responses were very thorough, and many themes were mentioned by multiple respondents. These common themes are summarised below with their corresponding number of occurrences:
+\begin{itemize}
+  \item 23 said the steps are clear / easy-to-understand
+  \item 15 said the steps are well-presented / well-visualised
+  \item 13 found it helpful for understanding unification
+  \item 11 found it helpful for understanding type inference
+  \item 9 liked the visual design and colour scheme
+  \item 8 liked that the tool explains why invalid expressions are invalid
+  \item 8 stated showing substitutions helps explain unification
+  \item 4 said the tool helped them better understand Haskell
+  \item 2 said function application is explained well
+  \item 2 said the tool helps explain curried functions
+  \item 1 learnt how let syntax worked
+  \item 1 said the tool is most helpful for complex examples
+  \item 1 found the examples helpful
+  \item 1 said the application is very fast
+\end{itemize}
+
+In addition to these overall themes, several quotes highlight the positive experiences users had with the tool. One user states the importance of type inference, and the necessity of having a teaching tool for it: “Type inference is hard, and tools to make it easier for people to understand are both helpful and necessary. Thank you!”, and another suggests an interactive tool may be more effective than traditional learning materials: “I think that this type of learning (trial and error) is much more effective than just learning some rules from slides/books.” Students found that “all the steps are shown clearly”, with one saying “I love the level of detail the tool goes to to suggest why type errors may have occurred”.
+
+As well as this feedback supporting the initial aims of user testing, respondents also gave responses that validated design decisions made in presenting the type inference results. For example on the AST visualisation and highlighting, a user remarks “The tree-type structure that shows how certain steps result from other steps makes it really clear how the process of type checking works, and the colour highlighting makes then shows what step of the process it being worked on at a time.” Another user similarly mentions the AST view, writing “The diagram at the start of each step showing the sort of "graph" of the function inputted helps me visualise the order in which parts of the function need to be "broken down" to get a simpler type overall.” In addition, the presentation of unification in the steps of the type inference algorithms was commented on, with a user stating “Explicitly showing the concept of "unifiable" was very nice, I didn't get that when I did CS141. I understood the concept of "these types kinda fit together" but not exactly why.”
+
+38 respondents answered the second question. Generally respondents were very positive about the tool, and several used this question to continue discussing its benefits. However, the more negative themes and constructive criticisms were:
+\begin{itemize}
+  \item 5 wanted more general information on the HM type system and the HM algorithm
+  \item 4 suggested using arrows to navigate through steps rather than scrolling
+  \item 3 suggested improving the wording of the function application step
+  \item 2 wanted support for declaring a custom global context
+  \item 2 wanted it made clearer that the expression box was a text input
+  \item 2 spotted a typo ‘instatiate’ instead of ‘instantiate’
+  \item 2 wanted additional information on the homepage
+  \item 2 suggested adding animations
+  \item 1 wanted the order of the AST and text in a step swapped
+  \item 1 wanted contact details on the website could to report bugs and give feedback
+  \item 1 wanted automatically suggested typo corrections e.g. ‘Fals’ to ‘False’
+  \item 1 said that on mobile changing the input expression caused the screen to move
+  \item 1 requested functor and applicative support
+  \item 1 requested support for list comprehensions
+  \item 1 suggested adding a quiz mode
+  \item 1 wanted their input expression to be visible when scrolled down the page
+  \item 1 said they disliked colour scheme
+  \item 1 wanted more use of mathematical notation
+  \item 1 wanted a dark theme
+\end{itemize}
+
+Users want more general information on Hindley-Milner and type inference. While they found the tool useful for specific examples, a basic introduction or tutorial could be added to help explain type inference for those completely new to it. For example, a user explains “it would be a good idea to add a section that describes the general process of how it works and then go on to the specific examples”. Another user says the existing information is sufficient, but could be made more prominent with a tutorial page: “The explanation of the tool is robust but could be made more obvious as its [sic] easy to miss. This could be incorporated in the form of a tutorial page perhaps?”
+
+Several users mentioned that they would prefer to click through the steps, rather than scroll through all the output. While similar interactive teaching tools such as WolframAlpha Step-By-Step, Cymath and Khanacademy show steps sequentially for scrolling, these services’ steps are generally shorter so perhaps this pattern is applied differently there. Users of the type inference tool say that the “Output generated is very long and requires a lot of scrolling. If the explanation was layed [sic] out side-by-side with the diagram I feel that would make it easier for someone to parse and a "move to next step" button might save some scroll time.”, and that “Maybe it could be a good idea to have arrows to move between different steps instead of having to scroll down, especially for expressions that have large visualisations”.
+
+While users praised the AST visualisation in the first question, some thought the way function application was shown could be improved, with one suggesting “just showing "Function Application" is a bit opaque, maybe add the function being applied for clarity?”. Some of this feedback may have been due to a misunderstanding of what the “Function application” node represents: it applies the first child (the function) to the second child (the argument). However, this view could potentially be improved by showing the text representing the function being applied in the function application node, or having a function and argument prefix on the child nodes.
+
+TODO: talk about test performance, statistical analysis and split into cohorts
 \subsubsection{Analytics}\label{id:h.67g05flyfv0z}
+TODO: How analytics data was collected and how that relates to aims
+
 \subsubsection{Ethics}\label{id:h.q5st3bb4afm1}
+TODO: How participants privacy was protected
 \section{Project Management}\label{id:h.3j8xp631ygy}
 TODO: consider whether this section is necessary?
 
