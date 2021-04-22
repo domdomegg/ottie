@@ -113,7 +113,7 @@ There have been previous attempts to build visualisation and teaching tools rela
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.770\linewidth]{images/image23.png}
+  \includegraphics[width=0.770\linewidth]{images/image28.png}
   \caption{Screenshot of results from TypeTool, taken from their paper}
 \end{figure} \par}
 
@@ -129,7 +129,7 @@ Another tool in the area of visualising type systems was developed by~\cite{ref7
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.797\linewidth]{images/image5.png}
+  \includegraphics[width=0.797\linewidth]{images/image6.png}
   \caption{Screenshot of Yung and Michaelson's tool, taken from their paper}
 \end{figure} \par}
 
@@ -137,7 +137,7 @@ NiMo \citep{ref8} is a graphical programming language related to functional data
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image20.png}
+  \includegraphics[width=0.960\linewidth]{images/image24.png}
   \caption{A diagram showing the types of some variables in NiMo, taken from their paper}
 \end{figure} \par}
 
@@ -152,7 +152,7 @@ For this project, we will consider a calculus with five constructs to build expr
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.510\linewidth]{images/image22.png}
+  \includegraphics[width=0.510\linewidth]{images/image27.png}
 \end{figure}
     | c constant
 
@@ -206,7 +206,7 @@ Like expressions, types can be considered to be built from \mintinline{text}{|va
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.467\linewidth]{images/image15.png}
+  \includegraphics[width=0.467\linewidth]{images/image17.png}
 \end{figure}
 where C is a set of type functions such as \mintinline{text}{|->|}, \mintinline{text}{|List|} and \mintinline{text}{|Maybe|}.
 
@@ -232,7 +232,7 @@ Adding zero or more for-all quantified type variables to monotypes forms polymor
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.290\linewidth]{images/image24.png}
+  \includegraphics[width=0.290\linewidth]{images/image29.png}
 \end{figure}
 
 TODO: latexify the above, but use rho instead of sigma and a instead of alpha
@@ -347,7 +347,7 @@ Our five key syntax rules plus instatitation and generalisation give us nine typ
 
  \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.505\linewidth]{images/image10.png}
+  \includegraphics[width=0.505\linewidth]{images/image12.png}
 \end{figure}
 
 ---------- [Const\_i]
@@ -393,7 +393,7 @@ The algorithm is set out below, for each of the five language constructs. There 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.987\linewidth]{images/image3.png}
+  \includegraphics[width=0.987\linewidth]{images/image4.png}
 \end{figure}
 
 TODO: latexify the above (taken from Lee), replace () with constants, replace TypeEnv with Context, replace Expr with Expression, replace Subst with Substitution, replace Type with MonoType, replace Clos with generalise, add brackets around applying substitutions, add explicit combines, number the statements, replace id with \{\}, flip ordering of abs and app, replace var rule with let S\_1 = \{ a \mapsto t0, b \mapsto t1, … \}, new t0, t1, … in (id, S\_1\tau) where \Gamma(x) = \forall a \forall b … \tau
@@ -420,7 +420,7 @@ Algorithm W’ is a slightly altered variant of Algorithm W, only changing rule 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.782\linewidth]{images/image18.png}
+  \includegraphics[width=0.782\linewidth]{images/image21.png}
 \end{figure}
 
 TODO: write out algorithm in Lee format for W’, 1-index, replace S’ with S\_3, V with S\_4
@@ -441,7 +441,7 @@ M is initially started at the root node with a new type, i.e. $M(\Gamma, e, tn),
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image6.png}
+  \includegraphics[width=1.000\linewidth]{images/image7.png}
 \end{figure}
 
 TODO: latexify the above (taken from Lee), make replacements as per W alg, replace rho with tau\_e
@@ -504,19 +504,19 @@ Programming language documentation and informal resources both are generally aim
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image7.png}
+  \includegraphics[width=1.000\linewidth]{images/image8.png}
   \caption{The TypeScript playground, with an example opened from the Type Inferece documentation showing how JavaScript classes can work in TypeScript.}
 \end{figure}
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image4.png}
+  \includegraphics[width=1.000\linewidth]{images/image5.png}
   \caption{Golang's limited type inference is explained in 'A Tour of Go', with an example program the user is prompted to edit and run.}
 \end{figure}
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image19.png}
+  \includegraphics[width=1.000\linewidth]{images/image23.png}
   \caption{Rust's page on type inference is short, but has a well-commented and insightful example that can be run and edited inline in the browser.}
 \end{figure}
 
@@ -560,7 +560,7 @@ A basic UI mockup is shown below that takes an input expression and displays the
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.756\linewidth]{images/image17.png}
+  \includegraphics[width=0.756\linewidth]{images/image20.png}
   \caption{Recreation of an initial sketch of the UI for the teaching tool.}
 \end{figure} \par}
 
@@ -570,7 +570,7 @@ For example, this happens with function abstraction in algorithm W: the before s
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.945\linewidth]{images/image13.png}
+  \includegraphics[width=0.945\linewidth]{images/image15.png}
   \caption{Function abstraction in algorithm W requires two UI steps to represent one rule of the algorithm}
 \end{figure} \par}
 
@@ -578,7 +578,7 @@ In addition to the rule steps, algorithm M requires an extra beginning and end s
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image9.png}
+  \includegraphics[width=0.960\linewidth]{images/image10.png}
   \caption{Algorithm M requires an initial and final step.}
 \end{figure} \par}
 
@@ -586,7 +586,7 @@ To make it clear what part of the expression each step relates to, a representat
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.357\linewidth]{images/image25.png}
+  \includegraphics[width=0.357\linewidth]{images/image30.png}
   \caption{The expression \mintinline{text}{|let x = 3 in odd x|} may be represented by this vertical AST.}
 \end{figure} \par}
 
@@ -595,7 +595,7 @@ This vertical design was chosen over a horizontal design due to the space constr
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.813\linewidth]{images/image11.png}
+  \includegraphics[width=0.813\linewidth]{images/image13.png}
   \caption{Example of what a more horizontal design of AST might look like.}
 \end{figure} \par}
 
@@ -605,7 +605,7 @@ To help relate the ASTs to the entered expression, when a user hovers over a par
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.884\linewidth]{images/image21.png}
+  \includegraphics[width=0.884\linewidth]{images/image25.png}
   \caption{Hovering ove r the 'function application' node highlights the corresponding subexpression in the entered program.}
 \end{figure} \par}
 
@@ -736,7 +736,7 @@ The custom event streams are then viewed in an analytics viewer. To keep the imp
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image14.png}
+  \includegraphics[width=1.000\linewidth]{images/image16.png}
   \caption{The analytics viewer, showing an example stream from the web application.}
 \end{figure}
 
@@ -761,7 +761,7 @@ Abstract syntax trees are represented by their nodes alone. Each node correspond
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.863\linewidth]{images/image16.png}
+  \includegraphics[width=0.863\linewidth]{images/image18.png}
 \end{figure} \par}
 
 Here we see the tree is effectively just an \mintinline{text}{|Abs|} node, with a \textit{parameter} by the name of “x” and \textit{body} with a reference to another AST node. This body node is an \mintinline{text}{|App|} node, which has two properties: a \textit{function} and \textit{argument}, each being AST nodes of type \mintinline{text}{|Var|}. These \mintinline{text}{|Var|} nodes have a single property \textit{name}, the name of the variable referenced.
@@ -1039,7 +1039,7 @@ In the internal \mintinline{text}{|\_infer|} method, generally we are given an A
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image12.png}
+  \includegraphics[width=1.000\linewidth]{images/image14.png}
 \end{figure}
 
 can now be very directly implemented in TypeScript as:
@@ -1070,7 +1070,7 @@ Both assertion matchers pretty-print output on failure, clearly highlighting whe
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.769\linewidth]{images/image8.png}
+  \includegraphics[width=0.769\linewidth]{images/image9.png}
   \caption{Example test framework output to the command line showing a failing custom assertion}
 \end{figure} \par}
 \subsubsection{Web application}\label{id:h.jqmg1n3w35mp}
@@ -1125,14 +1125,14 @@ These cloud products are all considered ‘serverless’, in that they do not re
 User testing aims to evaluate whether the teaching tool works and is effective in its current form. These aims can be summarised by:
 \begin{enumerate}
   \item the tool is accessible and users can enter input
-  \item the results can be understood
-  \item it improves students’ understanding of types and type inference
+  \item the tool’s outputs can be understood
+  \item the tool improves students’ understanding of types and type inference
 \end{enumerate}
 
 From 1 to 3, these increase in scope and in how difficult they are to measure. However, the key goal of the project is 3, as if the tool meets the first two aims but does not improve student understanding it is still not helpful as a teaching resource.
 
 To verify whether the project meets these aims, a questionnaire was distributed to students and analytics data from the web application was reviewed.
-\subsubsection{Questionnaire}\label{id:h.yqiowsgjmohq}
+\subsection{Questionnaire}\label{id:h.yqiowsgjmohq}
 The questionnaire was composed of three parts: a short test on types and type inference before using the application, introducing users to the application and asking usage questions, then a final test to see if student’s performance improves after using the tool.
 
 This addresses and allows for measurement against all three aims. The tool’s performance on aims 1 and 2 are measured in the middle part, where users are asked to access the tool, enter input and interpret the results. Aim 3 is measured by looking at the relative difference in test results from before and after using the tool.
@@ -1143,15 +1143,15 @@ To incentivise students to fill out the questionnaire with detailed and accurate
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.882\linewidth]{images/image26.png}
+  \includegraphics[width=0.882\linewidth]{images/image31.png}
   \caption{The trivial quality-control question to ensure users were reading and answering questions properly}
 \end{figure} \par}
 
 In addition to the WAAT achievement, vouchers were given out to 4 respondents selected at random and to 2 respondents giving detailed constructive feedback on the tool. Finally, students were also reminded that learning about type inference could improve their functional programming skills, which would help them with the CS141 courseworks and final exam. While students were encouraged to complete the questionnaire, it was made clear that it was optional, it would have no direct effect on any of their assessments and that they could choose to stop taking the questionnaire at any time.
 
 The questionnaire had 48 unique responses, of which 46 were valid (where the respondent had fully completed all questions, and answered the quality control check question correctly). Percentages given here are with respect to the number of valid responses.
-
-There are two types of questions in the second part. The first type directly asks users to try accessing the tool, inputting results and interpreting the results. These questions are:
+\subsubsection{Direct questions}\label{id:h.abykou9pzwwh}
+The second part of the questionnaire asks direct questions about the tool. There are two types of questions in this part. The first type asks users to try accessing the tool, inputting results and interpreting the results. These questions are:
 \begin{itemize}
   \item Try entering: map odd []. Try to understand the steps. What is the unifying substitution performed in step 3?
   \item Try entering: not 3. Try to understand the steps. What is the problem found?
@@ -1223,12 +1223,72 @@ Several users mentioned that they would prefer to click through the steps, rathe
 
 While users praised the AST visualisation in the first question, some thought the way function application was shown could be improved, with one suggesting “just showing "Function Application" is a bit opaque, maybe add the function being applied for clarity?”. Some of this feedback may have been due to a misunderstanding of what the “Function application” node represents: it applies the first child (the function) to the second child (the argument). However, this view could potentially be improved by showing the text representing the function being applied in the function application node, or having a function and argument prefix on the child nodes.
 
-TODO: talk about test performance, statistical analysis and split into cohorts
-\subsubsection{Analytics}\label{id:h.67g05flyfv0z}
-TODO: How analytics data was collected and how that relates to aims
+Some less commonly raised feedback, for example making it clearer that the expression box was an input and fixing the typo ‘instatiate’ could be directly fixed in the web application. For example, by autofocusing and displaying a cursor in the input box, and updating the website copy respectively. Other larger extensions such as add applicative and functor support (which would require adding typeclasses) or adding a quiz mode would be useful extensions to the project, but due to project time constraints have not been implemented.
+\subsubsection{Test performance}\label{id:h.cn0p90nrqrmi}
+The first and third parts of the questionnaire were tests on types and type inference. While the two tests were not identical to avoid commitment bias and choosing the same answers in the tests without thinking, they were very similar and of equal difficulty. The intention of these tests is to evaluate the tool against aim 3, measured by the difference in performance before and after using the tool. To make the tests easy to fill out and mark without bias, all questions were multiple-choice.
 
-\subsubsection{Ethics}\label{id:h.q5st3bb4afm1}
-TODO: How participants privacy was protected
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.835\linewidth]{images/image11.png}
+  \caption{An example multiple-choice test question asking about the type of an expression}
+\end{figure} \par}
+
+Average test scores improved by 15\% from 54\% to 69\% after using the tool. This is a statistically significant change at the p < 0.001 level. Statistical significance is determined using a paired two-sample t-test, a technique where each respondent’s before and after test scores are paired up and used to determine how likely the before and after set are drawn from the same population. A low p value indicates it is very unlikely they are from the same distribution, so using the teaching tool has had an effect on their ability to choose correct answers to questions on types and type inference. Typically p-values less than 0.05 are considered significant, with lower p-values showing higher significance. t-tests are commonly used in medical and evidence-based education trials to determine whether an intervention makes a difference, where full randomised controlled trials are not practical. While a randomised controlled trial may have been preferable (where some users would be given a control of a different, non type-inference related website to view) this would have halved the effective sample size, and given that when producing the questionnaire it was unknown how many participants would answer it was less risky to run a t-test evaluation.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.845\linewidth]{images/image22.png}
+  \label{figure:Chart}
+\end{figure} \par}
+
+In addition to performance improving in general, we can also examine how useful the tool is to users of different abilities. Students with a wide range of abilities answered the questionnaire, as can be seen by plotting the distribution of test scores. This suggests an academically diverse set of students responded to the survey, improving the quality of the results as the responses represent more students than just the current top-performers.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.921\linewidth]{images/image3.png}
+\end{figure} \par}
+
+We first explore how different quartiles of students perform before and after using the tool. These quartiles are drawn from the student’s performance in the ‘before’ test, i.e. Quartile 1 is the bottom 25\% of respondents based on ‘before’ test answers. We see that performance consistently improves for all quartiles, in fact with each quartile’s ‘after’ score beating the next quartile’s ‘before’ score. This performance improvement is statistically significant (p < 0.05) for all quartiles. Average performance increases most in quartile 1, as might be expected as these students have the greatest possible improvement possible.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.874\linewidth]{images/image19.png}
+  \label{figure:Chart}
+\end{figure} \par}
+
+At the beginning of the questionnaire, users were also prompted to self-report how well they believed their understanding of types was (“How would you rate your own understanding of types?”) on a 5-point scale from ‘Very weak’ to ‘Very strong’. No respondents chose ‘Very weak’, and most (27) respondents chose ‘Average’.
+
+We can also show how performance improves based on these groups. These self-reported groups correlate well with performance, showing students have a somewhat accurate idea of their own ability of understanding types. Again, performance improves for all groups, although this increase is not statistically significant for the ‘Weak’ and ‘Very strong’ groups, likely due to their small sample sizes.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.884\linewidth]{images/image26.png}
+  \label{figure:Chart}
+\end{figure} \par}
+\subsection{Analytics}\label{id:h.67g05flyfv0z}
+Anonymised usage data is collected by the web application. Events recorded include page visits, opening and closing the help section and code expressions entered. To avoid recording testing of the site, my own visits are excluded from the analysis. This data directly verifies aim 1, and provides evidence for the tool achieving aims 2 and 3.
+
+We see that in the data that users have been able to access the site, and were able to use the examples and enter in their own expressions, supporting aim 1. This was particularly useful in giving confidence that the site was working correctly while waiting for questionnaire responses to be returned.
+
+Several event streams provide evidence that users are understanding the results of the type inference algorithms, and then debugging their code appropriately to fix errors which supports aims 2 and 3. This can be seen in an extract from a real event stream:
+\begin{enumerate}
+  \item the user loads the page
+  \item the user enters \mintinline{text}{|map od []|} as an expression, which displays a type error as \mintinline{text}{|od|} is not defined
+  \item the user corrects this to \mintinline{text}{|map odd []|}
+  \item the user then builds upon this expression, adding a list of numbers: \mintinline{text}{|map odd [3]|}
+\end{enumerate}
+
+All types of analytics events were fired, which suggests all features of the application were used. Most users selected an example expression and entered their own custom expressions. Relatively few users viewed the help window and those that did usually had it open for less than a minute, which supports the criticism found in the questionnaire that the help could be made more obvious and its content could be changed to be more engaging.
+\subsection{Ethics}\label{id:h.q5st3bb4afm1}
+In conducting the questionnaire and collecting analytics data, participants safety and privacy has been carefully considered.
+
+The questionnaire was completely entirely online, requiring no face-to-face contact. This eliminates the risk of COVID transmission in doing the questionnaire. Online questionnaires also reduce the time investment respondents have to put in and reduce the social commitment to completing it so that participants are less pressured to complete it without feeling fully comfortable. Users were informed that participation was entirely voluntary and that they could discontinue at any time.
+
+The questionnaire kept personal data captured minimised with the respondent’s email address being the only explicitly personal data requested, and only if the user wanted to receive an achievement and be entered to win a voucher. Contact details were made available in case students had any questions or concerns, or wished to exercise any rights relating to their data. No questions or concerns were raised through this.
+
+In addition, as it was promoted through the CS141 module to prevent unintentional undue pressures to complete the survey it was made clear that the questionnaire had no impact on students’ marks, and that before or after test performance would not be shared, and would not be analysed alongside any personal data.
+
+Analytics data is only collected on the type inference tool website. As with completing the questionnaire, use of the website is entirely voluntary. The analytics data collected is anonymised with a randomly generated stream id, and as such under PECR and GDPR, no disclaimer is necessary as the data is not considered ‘personal’. However, to follow best practice the website informs users “Usage data such as button clicks and evaluated expressions may be collected to evaluate and improve the tool.” In addition, the analytics tool follows best practice, obeying the “Do not track” user settings in browsers and collecting only minimal usage data to understand user behaviour and nothing more. Data is automatically deleted after 90 days, and is stored securely in an S3 bucket with access logs enabled and monitored. The analytics tool was specifically built with privacy in mind, to overcome the limitations of existing platforms as discussed in the design chapter.
 \section{Project Management}\label{id:h.3j8xp631ygy}
 TODO: consider whether this section is necessary?
 
