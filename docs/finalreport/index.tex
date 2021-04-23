@@ -1,10 +1,6 @@
-\title{%
-  \Huge{\textbf{Interactive Tool for Teaching Hindley-Milner Type Inference through Visualisation}}
-  \\
-  \Large{Final report\\~\\~\textbf{Adam Jones}\\~Department of Computer Science\\~University of Warwick}
-}
+\documentclass[a4paper,fleqn,twoside,12pt]{report}
 
-\documentclass[a4paper,fleqn,12pt]{article}
+%%%%%%%%%%%%%%%%%%%%
 
 \usepackage[]{geometry}
 \usepackage[utf8]{inputenc}
@@ -26,11 +22,14 @@
 \usepackage{natbib}
 \usepackage[dvipsnames]{xcolor}
 \usepackage[sc]{mathpazo}
-\linespread{1.05} 
+\linespread{1.05}
 \usepackage[T1]{fontenc}
 \usepackage{minted}
 \usepackage{ragged2e}
 \usepackage{adjustbox}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
 
 \hypersetup{
 	colorlinks=true,
@@ -51,44 +50,81 @@
 
 \cleanlookdateon
 
+\makeatletter
+\newcommand{\@assignment}[0]{Assignment}
+\newcommand{\assignment}[1]{\renewcommand{\@assignment}{#1}}
+\newcommand{\@supervisor}[0]{}
+\newcommand{\supervisor}[1]{\renewcommand{\@supervisor}{#1}}
+\newcommand{\@yearofstudy}[0]{}
+\newcommand{\yearofstudy}[1]{\renewcommand{\@yearofstudy}{#1}}
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Project-specific configuration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\author{Adam Jones}
+\title{Interactive Tool for Teaching Hindley-Milner Type Inference through Visualisation}
+\supervisor{Michael Gale}
+\yearofstudy{3\textsuperscript{rd}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \pagestyle{plain}
 \renewcommand{\headrulewidth}{0.0pt}
 
 \makeatletter
 \fancypagestyle{plain}{
 	\fancyhf{}
-	\fancyhead[RE,RO]{\thepage}
-	\fancyhead[LE,LO]{\textit{Interactive Tool for Teaching HM Type Inference through Visualisation}}
+	\fancyhead[LE]{\thepage}
+	\fancyhead[RE]{\textit{\@author}}
+	\fancyhead[RO]{\thepage}
+	\fancyhead[LO]{\textit{\@title}}
 }
 \makeatother
+
+%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
 \makeatletter
 \begin{titlepage}
 
-\LARGE \@title \\
-\Large \\[1.5cm]
+	\textbf{\Huge \@title} \\[1.5cm]
+    \Large \textbf{\@author} \\
+    Department of Computer Science \\
+    University of Warwick \\
 
+	Supervised by \@supervisor \\
+	Year of Study: \@yearofstudy \\
+
+    \vfill
 \vfill 
+    \vfill
+\vfill 
+    \vfill
 
-\begin{adjustwidth}{-\oddsidemargin-1in}{-\rightmargin}
-  \centering
-  \includegraphics[width=\paperwidth]{line.png}
-\end{adjustwidth}
+    \today
 
-\vspace*{-3.5cm}
+    \begin{adjustwidth}{-\oddsidemargin-1in}{-\rightmargin}
+        \centering
+        \includegraphics[width=\paperwidth]{./line.png}
+    \end{adjustwidth}
+
+    \vspace*{-3.5cm}
 
 \end{titlepage}
 \makeatother
 
 \pagestyle{plain}
 
+\begin{abstract}
+  Type inference is a process by which types in a program may be determined automatically by a compiler, without the need for explicit type annotations. Understanding of type inference helps programmers debug type errors and better understand type systems, however there are few accessible teaching resources available. We design and implement an interactive type inference teaching tool for a Hindley-Milner based expression language, which visualises and explains the steps taken by the common type inference algorithms W, W’ and M. User testing with undergraduate students shows the tool improves students' test scores on type and type inference (p < 0.001), and general feedback from users is positive. Analytics data provides supporting evidence that the tool’s output aids understanding and allows users to debug type errors.
+\end{abstract}
 
+\tableofcontents
 
-
-TODO: Abstract
-\section{Introduction}\label{id:h.6k9gcmunzldy}
+\chapter{Introduction}\label{id:h.6k9gcmunzldy}
 Types are common features of many programming languages. Generally, types are bounds on program constructs (such as variables, expressions and functions) that limit what valid values they may take and how they should be interpreted within the program, however different languages use types differently. Most type systems include primitive data types such as integers, booleans and characters as well as composite types such functions from one type to another and lists of a type.
 
 Type checking is the process by which a language’s compiler or interpreter validates that a program obeys the rules of the language’s type system. When a violation is detected, such as providing a boolean to a function accepting an integer, a type error is raised.
@@ -108,12 +144,12 @@ An understanding of type inference would help computer scientists write cleaner 
 The goal of this project is develop a system to visualise the type inference process, with the aim of improving undergraduate students’ knowledge about it.
 
 To achieve this, we develop a teaching resource that explains how type inference algorithms work for functional languages. An interactive web application allows students to enter expressions and view the results of a type inference algorithm, along with the steps taken to get to that result. This is particularly useful in the context of modules teaching functional languages such as Haskell which perform similar type inference.
-\subsection{Related work}\label{id:h.2mwaav7jkal4}
+\section{Related work}\label{id:h.2mwaav7jkal4}
 There have been previous attempts to build visualisation and teaching tools related to type systems.
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.770\linewidth]{images/image28.png}
+  \includegraphics[width=0.770\linewidth]{images/image29.png}
   \caption{Screenshot of results from TypeTool, taken from their paper}
 \end{figure} \par}
 
@@ -137,22 +173,22 @@ NiMo \citep{ref8} is a graphical programming language related to functional data
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image24.png}
+  \includegraphics[width=0.960\linewidth]{images/image25.png}
   \caption{A diagram showing the types of some variables in NiMo, taken from their paper}
 \end{figure} \par}
 
 \cite{ref9} implemented a successful teaching tool, named TILC, for visualising lambda-calculus parse trees in order to help with teaching lambda-calculus to undergraduate students. They noted that to develop an intuitive understanding, students would benefit from experimenting with lambda-calculus and that “a tool that deals with all these aspects in a friendly and graphical manner incentivises [experimentation]”. TILC was successful, with the module organisers of ‘programming paradigms’ at the Universitat de Girona having a “good experience of using this tool in the course lectures and as a downloadable tool for students”. The authors suggested extending TILC to show types and type inference would have pedagogical value.
 
 To summarise, types aid the construction of correct programs and type checking can detect issues in programs, either at compile-time or runtime. Type inference is a method often used alongside compile-time type checking to determine types in a program, an understanding of which could benefit computer scientists in writing and debugging programs. Some solutions exist which give students a better idea about types, however they either have significant limitations or do not explicitly cover type inference. In this report, we present an interactive web application for teaching type inference.
-\section{Background}\label{id:h.ebjyqi73zdyo}
-\subsection{$\lambda$-calculus}\label{id:h.odw4vku9eizz}
+\chapter{Background}\label{id:h.ebjyqi73zdyo}
+\section{$\lambda$-calculus}\label{id:h.odw4vku9eizz}
 A $\lambda$-calculus is a representation of computation. The first $\lambda$-calculus set out by~\cite{ref10}, often viewed as the canonical $\lambda$-calculus, simply has variables, function abstraction and application.
 
 For this project, we will consider a calculus with five constructs to build expressions from. As a formal grammar:
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.510\linewidth]{images/image27.png}
+  \includegraphics[width=0.510\linewidth]{images/image28.png}
 \end{figure}
     | c constant
 
@@ -193,51 +229,52 @@ Given these rules the set of free variables for any combination of these constru
 TODO: tree diagram of the expression with the sets of free variables at each node.
 
 Most real-world environments define a context which binds some variables by default to in-built values. For example Haskell’s GHC primitives and Prelude includes basic variables like \mintinline{text}{|[]|} (the empty list) and \mintinline{text}{|not|} (a function which inverts booleans). These can be considered bound at the top level and removed from the set of free variables there.
-\subsection{The simply typed $\lambda$-calculus}\label{id:h.w7vj0r89b86n}
+\section{The simply typed $\lambda$-calculus}\label{id:h.w7vj0r89b86n}
 Typed $\lambda$-calculi extend the system with the concept of types.
 
-The simply typed $\lambda$-calculus is one of the simplest typed $\lambda$-calculi, and introduced by~\cite{ref11} is often viewed as the canonical typed $\lambda$-calculus. It has the \mintinline{text}{|var|}, \mintinline{text}{|abs|}, \mintinline{text}{|app|} and \mintinline{text}{|con|} constructs. Types in this system are either base types (often in the literature Greek letters $\alpha$, $\beta$, $\gamma$ are used, but these can be thought of similar to numbers, booleans, characters etc.) or functions between other types (such as \mintinline{text}{|Int \rightarrow Bool|}, or \mintinline{text}{|Int \rightarrow (Bool \rightarrow Bool)|}).
+The simply typed $\lambda$-calculus is one of the simplest typed $\lambda$-calculi, and introduced by~\cite{ref11} is often viewed as the canonical typed $\lambda$-calculus. It has the \mintinline{text}{|var|}, \mintinline{text}{|abs|}, \mintinline{text}{|app|} and \mintinline{text}{|con|} constructs. Types in this system are either base types (often in the literature Greek letters $\alpha$, $\beta$, $\gamma$ are used, but these can be thought of similar to numbers, booleans, characters etc.) or functions between other types (such as $Int \rightarrow Bool$, or $Int \rightarrow (Bool \rightarrow Bool)$).
 
-The syntax adds type annotations to \mintinline{text}{|var|}, \mintinline{text}{|abs|} and \mintinline{text}{|con|} constructs, for example ($\lambda$x: Int. odd\textsuperscript{Int \rightarrow Bool} x\textsuperscript{Int}) 3\textsuperscript{Int} (although often for simplicity the types of \mintinline{text}{|var|} and \mintinline{text}{|con|} subexpressions, those in superscript, are left out).
-\subsection{Hindley-Milner type system}\label{id:h.gsouq2axz3k}
+The syntax adds type annotations to \mintinline{text}{|var|}, \mintinline{text}{|abs|} and \mintinline{text}{|con|} constructs, for example ($\lambda$x: Int. odd\textsuperscript{Int $\rightarrow$ Bool} x\textsuperscript{Int}) 3\textsuperscript{Int} (although often for simplicity the types of \mintinline{text}{|var|} and \mintinline{text}{|con|} subexpressions, those in superscript, are left out).
+
+\section{Hindley-Milner type system}\label{id:h.gsouq2axz3k}
 Hindley-Milner (HM) is a typed $\lambda$-calculus which allows for the types of programs to be inferred and no type annotations are required \citep{ref12,ref13}. It extends the simply typed $\lambda$-calculus by adding \mintinline{text}{|let|} bindings and a richer type system that includes \textit{type functions} and \textit{polymorphism}.
 
-Like expressions, types can be considered to be built from \mintinline{text}{|var|} variables and \mintinline{text}{|app|} function applications. Type variables are either base types like \mintinline{text}{|Bool|} and \mintinline{text}{|Int|} or type functions. Type functions can be applied, taking types as parameters to construct composite types.
+Like expressions, types can be considered to be built from \mintinline{text}{|var|} variables and \mintinline{text}{|app|} function applications. Type variables are either base types like $Bool$ and $Int$ or type functions. Type functions can be applied, taking types as parameters to construct composite types.
 
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.467\linewidth]{images/image17.png}
 \end{figure}
-where C is a set of type functions such as \mintinline{text}{|->|}, \mintinline{text}{|List|} and \mintinline{text}{|Maybe|}.
+where C is a set of type functions such as $\rightarrow$, $List$ and $Maybe$.
 
 TODO: latexify the above, replace alpha with tn
 
-For a type to be valid all functions must be fully applied, unlike expressions where the final expression may be a function. As with expressions, we can again assume a global context that binds the basics variables like \mintinline{text}{|Bool|} and \mintinline{text}{|Int|}. In Hindley’s original paper only \mintinline{text}{|->|} was considered as a type function (i.e. $C = \{ \rightarrow \}$), however here we explore several type functions that have been found useful in practice.
+For a type to be valid all functions must be fully applied, unlike expressions where the final expression may be a function. As with expressions, we can again assume a global context that binds the basics variables like $Bool$ and $Int$. In Hindley’s original paper only $\rightarrow$ was considered as a type function (i.e. $C = \{ \rightarrow \}$), however here we explore several type functions that have been found useful in practice.
 
-The type function we’ve already been using is \mintinline{text}{|->|} (the \textit{function} type function). It takes two types as arguments and represents a function from the first type to the second. A function from \mintinline{text}{|Int|} to \mintinline{text}{|Bool|} is represented by \mintinline{text}{|(->) Bool Int|} in prefix notation, although would more commonly be written infix as \mintinline{text}{|Bool \rightarrow Int|}.
+The type function we’ve already been using is $\rightarrow$ (the \textit{function} type function). It takes two types as arguments and represents a function from the first type to the second. A function from $Int$ to $Bool$ is represented by $(\rightarrow) Bool Int$ in prefix notation, although would more commonly be written infix as $Bool \rightarrow Int$.
 
-The function type function (\mintinline{text}{|->|}) should not be confused with the function type: an expression representing a function has a function type, and that function type is the function type function applied to arguments. For example \mintinline{text}{|$\lambda$x. x + 3|} has a function type \mintinline{text}{|Int \rightarrow Int|}, which is the function type function \mintinline{text}{|->|} applied to arguments \mintinline{text}{|Int|} and \mintinline{text}{|Int|}.
+The function type function (\mintinline{text}{|->|}) should not be confused with the function type: an expression representing a function has a function type, and that function type is the function type function applied to arguments. For example \mintinline{text}{|$\lambda$x. x + 3|} has a function type $Int \rightarrow Int$, which is the function type function $\rightarrow$ applied to arguments $Int$ and $Int$.
 
-The list type function is also very common, which given one type argument represents a list of those types. A list of booleans might be written \mintinline{text}{|List Bool|} or \mintinline{text}{|[] Bool|} in prefix notation, although often the list type is represented by wrapping the type argument in square brackets instead like \mintinline{text}{|[Bool]|}.
+The list type function is also very common, which given one type argument represents a list of those types. A list of booleans might be written $List\text{ }Bool$ or $[]\text{ }Bool$ in prefix notation, although often the list type is represented by wrapping the type argument in square brackets instead like $[Bool]$.
 
-\mintinline{text}{|Maybe|} is another type function commonly used in functional languages like Haskell. A \mintinline{text}{|Maybe|} represents the optional presence of something, similar to Java’s \mintinline{text}{|Optional|} and C++’s \mintinline{text}{|std::optional|}. Applied to a boolean type this may be written \mintinline{text}{|Maybe Bool|}, representing a wrapper around nothing or a boolean. In Java this would be represented with a generic as \mintinline{text}{|Optional<Boolean>|} and in C++ as \mintinline{text}{|std::optional<bool>|}.
+$Maybe$ is another type function commonly used in functional languages like Haskell. A $Maybe$ represents the optional presence of something, similar to Java’s \mintinline{text}{|Optional|} and C++’s \mintinline{text}{|std::optional|}. Applied to a boolean type this may be written $Maybe\text{ }Bool$, representing a wrapper around nothing or a boolean. In Java this would be represented with a generic as \mintinline{text}{|Optional<Boolean>|} and in C++ as \mintinline{text}{|std::optional<bool>|}.
 
-A similar common type function is \mintinline{text}{|Either|}, which takes two type arguments and represents a wrapper around either one of the types. For example, an either for a boolean or integer is written \mintinline{text}{|Either Bool Int|}.
+A similar common type function is $Either$, which takes two type arguments and represents a wrapper around either one of the types. For example, an either for a boolean or integer is written $Either\text{ }Bool\text{ }Int$.
 
-Finally, tuples represent a defined-length sequence of elements of specific types. Tuple constructors are a set of type functions representing a cross product of their type arguments, named \mintinline{text}{|,|}, \mintinline{text}{|,,|}, \mintinline{text}{|,,,|} and so on for different element lengths. A 3-tuple holding a boolean, integer and integer can technically be written in prefix notation as \mintinline{text}{|(,,) Bool Int Int|} but instead generally tuples borrow mathematical syntax with parentheses and commas like \mintinline{text}{|(Bool, Int, Int)|}.
+Finally, tuples represent a defined-length sequence of elements of specific types. Tuple constructors are a set of type functions representing a cross product of their type arguments, named $(,)$, $(,,)$, $(,,,)$ and so on for different element lengths. A 3-tuple holding a boolean, integer and integer can technically be written in prefix notation as $(,,)\text{ }Bool\text{ }Int\text{ }Int$ but instead generally tuples borrow mathematical syntax with parentheses and commas like $(Bool,\text{ }Int,\text{ }Int)$.
 
-The set of types made from \mintinline{text}{|var\_t|} and \mintinline{text}{|app\_t|} are known as monotypes. For example, \mintinline{text}{|Bool|}, \mintinline{text}{|Int|}, \mintinline{text}{|Bool \rightarrow Int|}, and \mintinline{text}{|Bool \rightarrow [(Bool, Int \rightarrow Maybe Bool)]|} are all monotypes.
+The set of types made from \mintinline{text}{|var\textsubscript{t}|} and \mintinline{text}{|app\textsubscript{t}|} are known as monotypes. For example, $Bool$, $Int$, $Bool \rightarrow Int$, and $Bool \rightarrow [(Bool,\text{ }Int \rightarrow Maybe\text{ }Bool)]$ are all monotypes.
 
-Adding zero or more for-all quantified type variables to monotypes forms polymorphic types or polytypes (called principal type schemes by Hindley). This can be thought of as the \mintinline{text}{|abs|} equivalent for types, written as \mintinline{text}{|\forall a. \rho|} where \mintinline{text}{|\rho|} is a polytype. This definition makes monotypes a special case of polytypes: monotypes are polytypes with zero for-all qualified type variables. We can therefore consider ‘type’ to mean ‘polytype’. By convention, we use $t0, t1, t2, \dots$ for free type variables, and $a, b, c, \dots$ for for-all quantified type variables.
+Adding zero or more for-all quantified type variables to monotypes forms polymorphic types or polytypes (called principal type schemes by Hindley). This can be thought of as the \mintinline{text}{|abs|} equivalent for types, written as $\forall a. \rho$ where $\rho$ is a polytype. This definition makes monotypes a special case of polytypes: monotypes are polytypes with zero for-all qualified type variables. We can therefore consider ‘type’ to mean ‘polytype’. By convention, we use $t0$, $t1$, $t2$, $\dots$ for free type variables, and $a$, $b$, $c$, $\dots$ for for-all quantified type variables.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.290\linewidth]{images/image29.png}
+  \includegraphics[width=0.290\linewidth]{images/image30.png}
 \end{figure}
 
 TODO: latexify the above, but use rho instead of sigma and a instead of alpha
 
-Polytypes allow for parametric polymorphism, where a type may be parameterized by a for-all bound quantifier. This allows functions to accept different types as long as they meet certain constraints. For example the \mintinline{text}{|length|} function is polymorphic: it has the polytype \mintinline{text}{|\forall a. [a] \rightarrow Int|}, which accepts a list of any type and returns its length as an integer. It accepts different types such as \mintinline{text}{|[Bool]|} and \mintinline{text}{|[Int]|} as both of these meet the constraint of being a list.
+Polytypes allow for parametric polymorphism, where a type may be parameterized by a for-all bound quantifier. This allows functions to accept different types as long as they meet certain constraints. For example the \mintinline{text}{|length|} function is polymorphic: it has the polytype $\forall a. [a] \rightarrow Int$, which accepts a list of any type and returns its length as an integer. It accepts different types such as $[Bool]$ and $[Int]$ as both of these meet the constraint of being a list.
 
 Correctly inferring polymorphic types can be difficult, and in fact~\cite{ref14} proved that doing so for System F, a type system similar to Hindley-Milner with fewer typing rule constraints, is undecidable. To prevent undecidability, HM avoids overusing polytypes, using only monotypes for \mintinline{text}{|var|}, \mintinline{text}{|con|}, \mintinline{text}{|app|} and \mintinline{text}{|abs|} expressions.
 
@@ -245,8 +282,8 @@ To allow for some polymorphism, \mintinline{text}{|let|} expressions’ paramete
 
 This is the difference between:
 \begin{itemize}
-  \item \mintinline{text}{|let i = (\lambda x \rightarrow x) in (i 3, i True)|} type-checks, as i is generalised to the polytype \mintinline{text}{|\forall a. a \rightarrow a|} within the body \mintinline{text}{|(i 3, i True)|} so can be applied to both an \mintinline{text}{|Int|} and \mintinline{text}{|Bool|}
-  \item \mintinline{text}{|(\lambda i \rightarrow (i 3, i True)) (\lambda x. x)|} does not type-check as the function abstraction \mintinline{text}{|(\lambda x. x)|} has the monotype \mintinline{text}{|t0 \rightarrow t0|}, and \mintinline{text}{|t0|} must take only one type in both tuple parts - it cannot be both an \mintinline{text}{|Int|} and a \mintinline{text}{|Bool|}.
+  \item \mintinline{text}{|let i = ($\lambda$ x $\rightarrow$ x) in (i 3, i True)|} type-checks, as i is generalised to the polytype $\forall a. a \rightarrow a$ within the body \mintinline{text}{(i 3, i True)} so can be applied to both an $Int$ and $Bool$
+  \item \mintinline{text}{($\lambda$ i $\rightarrow$ (i 3, i True)) ($\lambda$ x. x)|} does not type-check as the function abstraction \mintinline{text}{($\lambda$ x. x)} has the monotype $t0 \rightarrow t0$, and $t0$ must take only one type in both tuple parts - it cannot be both an $Int$ and a $Bool$.
 \end{itemize}
 
 Hindley-Milner is the basis for the type system of Standard ML \citep{ref15} (which OCaml and F\# are related to) and was the basis of the type system in Haskell \citep{ref16}. It has influenced the development of Rust and Swift, and more generally type inference is present in many more languages including Java, JavaScript and C++.
@@ -287,12 +324,11 @@ const f: 'cs310cs310' | 620 = a + a; // okay, has type "cs310cs310" | 620
 \end{minted}
 
 TODO: (maybe?) Add section on TypeScript/Elm?
-
 \underline{\href{https://aaltodoc.aalto.fi/bitstream/handle/123456789/42719/master\_Mikkonen\_Juuso\_2020.pdf}{https://aaltodoc.aalto.fi/bitstream/handle/123456789/42719/master\_Mikkonen\_Juuso\_2020.pdf}}
 Talks about statically typed languages in JavaScript-land. Mentions things like TypeScript don’t use HM because JS has a lot of structural typing (i.e. if objects have the right properties it’s fine to call methods that depend on that interface) and subtyping.
 
 While real-world languages don’t work exactly like HM, for the purposes of the teaching tool HM gives a good representation of how type inference works to students. HM avoids being too complex to understand, and is still related to how languages commonly used in practice perform type inference.
-\subsection{Hindley-Milner type inference}\label{id:h.admfqf7bhkct}
+\section{Hindley-Milner type inference}\label{id:h.admfqf7bhkct}
 Various algorithms are available to infer types in Hindley-Milner such as Algorithm W by~\cite{ref26} and Algorithm M by~\cite{ref27}. Algorithm W takes a bottom-up approach, attempting to infer the types of subexpressions up the abstract syntax tree, while Algorithm M takes a top-down approach, inferring types down the tree. Algorithm W’ is a minor extension to Algorithm W, by~\cite{ref28} which can improve the quality of type errors raised.
 
 Substitutions are a key concept from logic used by the algorithms. These are maps from variables to terms. When applied to an expression, the variables are substituted with their corresponding terms. In the case of type inference, the variables are type variables, the terms are monotypes and expressions are types.
@@ -325,7 +361,7 @@ Inferring types is done in a typing context. Languages often have a global conte
 
 Typing contexts can be seen as maps from variable names to their corresponding types, and are represented with the symbol $\Gamma$. For example a context with some common functions may be written $\Gamma = \{ not: Bool \rightarrow Bool, odd: Int \rightarrow Bool, id: \forall a. a \rightarrow a \}$.
 
-Constructs that bind variables like \mintinline{text}{|let|} and \mintinline{text}{|abs|} add entries to a local context for these additional bindings, used in the construct bodies. For example, in \mintinline{text}{|let x = 3 in odd x|} the binding $x: Int$ may be added to the context used to perform type inference on the body subexpression \mintinline{text}{|odd x|}. Similarly in \mintinline{text}{|\x \rightarrow not x|} the binding $x: t0$ may be added to the context for inferring the type of the function body \mintinline{text}{|not x|}. Adding a binding to the context is represented by a $+$, so given $\Gamma = \{ x: Bool \}$ then $\Gamma + y: Int$ is $\{ x: Bool, y: Int \}$.
+Constructs that bind variables like \mintinline{text}{|let|} and \mintinline{text}{|abs|} add entries to a local context for these additional bindings, used in the construct bodies. For example, in \mintinline{text}{|let x = 3 in odd x|} the binding $x: Int$ may be added to the context used to perform type inference on the body subexpression \mintinline{text}{|odd x|}. Similarly in \mintinline{text}{|\\x $\rightarrow$ not x|} the binding $x: t0$ may be added to the context for inferring the type of the function body \mintinline{text}{|not x|}. Adding a binding to the context is represented by a $+$, so given $\Gamma = \{ x: Bool \}$ then $\Gamma + y: Int$ is $\{ x: Bool, y: Int \}$.
 
 Applying a substitution to a context is to apply the substitution to every type in the context, or effectively every ‘value’ in the key-value map. For example, applying the substitution $S = \{ t0 \mapsto t1, t2 \mapsto Int \}$ to the context $\Gamma = \{ x: t0, y: t1, z: t2 \}$, results in a new context $S(\Gamma) = \{ x: t1, y: t1, z: Int \}$.
 
@@ -379,7 +415,7 @@ $\dots$
 
 The type inference algorithms W, W’ and M effectively are methods to select typing rules to determine a type for the expression, or detect the expression is incorrectly typed. While they don’t apply the typing rules directly, they are close and their respective authors prove they give equivalent results and can be implemented directly.
 
-The algorithms are applied to abstract syntax trees, which represent the expressions in a structured way. For example, an abstract syntax tree for \mintinline{text}{|let y = (\x \rightarrow (odd x)) 3 in not y|} may be visualised as:
+The algorithms are applied to abstract syntax trees, which represent the expressions in a structured way. For example, an abstract syntax tree for \mintinline{text}{|let y = (\\x $\rightarrow$ (odd x)) 3 in not y|} may be visualised as:
 
 TODO: tree diagram of expression
 
@@ -396,7 +432,7 @@ The algorithm is set out below, for each of the five language constructs. There 
   \includegraphics[width=0.987\linewidth]{images/image4.png}
 \end{figure}
 
-TODO: latexify the above (taken from Lee), replace () with constants, replace TypeEnv with Context, replace Expr with Expression, replace Subst with Substitution, replace Type with MonoType, replace Clos with generalise, add brackets around applying substitutions, add explicit combines, number the statements, replace id with \{\}, flip ordering of abs and app, replace var rule with let S\_1 = \{ a \mapsto t0, b \mapsto t1, … \}, new t0, t1, … in (id, S\_1\tau) where \Gamma(x) = \forall a \forall b … \tau
+% TODO: latexify the above (taken from Lee), replace () with constants, replace TypeEnv with Context, replace Expr with Expression, replace Subst with Substitution, replace Type with MonoType, replace Clos with generalise, add brackets around applying substitutions, add explicit combines, number the statements, replace id with \{\}, flip ordering of abs and app, replace var rule with let S\_1 = \{ a \mapsto t0, b \mapsto t1, … \}, new t0, t1, … in (id, S\_1\tau) where \Gamma(x) = \forall a \forall b … \tau
 
 The notation $new tn$ specifies that the type variable $tn$ is new (or ‘fresh’), so its name has not been used before. Using globally unique type variables avoids reuse which may incorrectly mix constraints between different types. Most implementations use a global counter, incremented each time a new type variable is needed with names like $t0, t1, t2, \dots$.
 
@@ -412,7 +448,7 @@ Also consider \mintinline{text}{|odd x|} in the context $\Gamma = \{ odd: Int \r
 
 Case (3abs) for function abstraction first infers the type of the function body expression, $e$, by calling W recursively. It passes the current context with an additional binding for the function parameter $x$, assigned to a new type variable with no constraints. This subcall to W for the function body returns the substitution $S\_1$ and type $\tau\_1$. Finally, the substitution $S\_1$ and type $S\_1(tn \rightarrow \tau\_1)$ is returned as the final result for the function abstraction. The type arises from the fact that the function abstraction takes the parameter with the new type $tn$ and returns the type of the body, $\tau\_1$. We apply the substitution $S\_1$ to it to reflect any constraints on the function parameter picked up in the function body.
 
-For an example examine calling W on \mintinline{text}{|\x \rightarrow odd x|} with $\Gamma = \{ odd: Int \rightarrow Bool \}$. The subcall to W calls $W(\Gamma + x: t0, odd x)$ which returns $(S\_1, \tau\_1) = (\{ t0: Int \}, Bool)$. Then $(S\_1, S\_1(tn \rightarrow \tau\_1)) = (\{ t0 \mapsto Int \}, \{ t0 \mapsto Int \}(t0 \rightarrow Bool)) = (\{ t0 \mapsto Int \}, Int \rightarrow Bool)$ is returned as the result.
+For an example examine calling W on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ odd: Int \rightarrow Bool \}$. The subcall to W calls $W(\Gamma + x: t0, odd x)$ which returns $(S\_1, \tau\_1) = (\{ t0: Int \}, Bool)$. Then $(S\_1, S\_1(tn \rightarrow \tau\_1)) = (\{ t0 \mapsto Int \}, \{ t0 \mapsto Int \}(t0 \rightarrow Bool)) = (\{ t0 \mapsto Int \}, Int \rightarrow Bool)$ is returned as the result.
 
 Case (5let) for let statements first infers the type $\tau\_1$ of the parameter definition, $e\_1$. The parameter type $\tau\_1$ is then generalised with respect to the context to allow for polymorphism as per HM’s type system, before being added to the context as a binding and used to infer the let body $e\_2$. The substitutions $S\_1$ and $S\_2$ are then combined to collect the constraints, and are returned with the let body’s type $\tau\_2$.
 
@@ -420,7 +456,7 @@ Algorithm W’ is a slightly altered variant of Algorithm W, only changing rule 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.782\linewidth]{images/image21.png}
+  \includegraphics[width=0.782\linewidth]{images/image22.png}
 \end{figure}
 
 TODO: write out algorithm in Lee format for W’, 1-index, replace S’ with S\_3, V with S\_4
@@ -456,7 +492,7 @@ For example, consider \mintinline{text}{|odd 3|} in the context $\Gamma = \{ odd
 
 In rule (3abs) for function abstraction, we verify the expected type unifies with a new function type. This gives a substitution mapping the variables $t1$ and $t2$ to the expected function types, if any. This is applied to the context, along with adding the parameter $x$’s type as $t1$. We then use M to infer the type of the function body, expecting it to have the unified return type $t2$. We return the combined substitution from both parts.
 
-For an example we look at applying M on \mintinline{text}{|\x \rightarrow odd x|} with $\Gamma = \{ odd: Int \rightarrow Bool \}$ and expected type $t0$. We first unify $t0$ with the new type $t1 \rightarrow t2$, resulting in $S\_1 = \{ t0: t1 \rightarrow t2 \}$. We then make the recursive call to M with the function body \mintinline{text}{|odd x|}, context $\{ odd: Int \rightarrow Bool, x: t1 \}$ and expected type $t2$. This results in the substitution $S\_2 = \{ t1: Int, t2: Bool \}$, which we combine with $S\_1$ to get $combine(S\_2, S\_1) = \{ t0: Int \rightarrow Bool, t1: Int, t2: Bool \}$. As in W’s function application, the new type variables will be unused outside of this expression so we can equivalently exclude $t1$ and $t2$ from the substitution.
+For an example we look at applying M on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ odd: Int \rightarrow Bool \}$ and expected type $t0$. We first unify $t0$ with the new type $t1 \rightarrow t2$, resulting in $S\_1 = \{ t0: t1 \rightarrow t2 \}$. We then make the recursive call to M with the function body \mintinline{text}{|odd x|}, context $\{ odd: Int \rightarrow Bool, x: t1 \}$ and expected type $t2$. This results in the substitution $S\_2 = \{ t1: Int, t2: Bool \}$, which we combine with $S\_1$ to get $combine(S\_2, S\_1) = \{ t0: Int \rightarrow Bool, t1: Int, t2: Bool \}$. As in W’s function application, the new type variables will be unused outside of this expression so we can equivalently exclude $t1$ and $t2$ from the substitution.
 
 Finally, let expressions infer the type of their parameter $e\_1$ with a new type, then infer the type of their body $e\_2$ expecting it to have the overall expected type $\tau\_e$. Similarly to function abstraction, the substitution from the parameter is passed when inferring the body, and combined with the body’s substitution to give an overall result.
 
@@ -479,9 +515,9 @@ A Practical Framework for Type Inference Error Explanation
 
 \underline{\href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.5050\&rep=rep1\&type=pdf}{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.5050\&rep=rep1\&type=pdf}}
 PhD thesis which talks about hindley milner and type inference errors a lot
-\section{Design}\label{id:h.7ggvdxb04tzm}
+\chapter{Design}\label{id:h.7ggvdxb04tzm}
 The design of the teaching tool is split into two parts, working backwards from the end product in mind: designing the user interface and experience, and designing the architecture to support that.
-\subsection{User interface and experience}\label{id:h.dr046u473e01}
+\section{User interface and experience}\label{id:h.dr046u473e01}
 Before designing the new teaching tool, we explore the existing available resources to see what works well, and what is missing. The current resources for learning about type inference can be generally categorised into three categories: programming language documentation, formal resources and informal resources. These resources were found by examining the pages returned by the first 5 pages of Google search on the query ‘type inference’. The following is a summary of what was found from reading these resources with the aim of determining their strengths and weaknesses.
 
 Programming language documentation are pages written to explain how type inference works in a specific language, as part of that language’s official documentation. For example, TypeScript, Java and Golang all have official websites where they discuss how type inference works in their language.
@@ -516,7 +552,7 @@ Programming language documentation and informal resources both are generally aim
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=1.000\linewidth]{images/image23.png}
+  \includegraphics[width=1.000\linewidth]{images/image24.png}
   \caption{Rust's page on type inference is short, but has a well-commented and insightful example that can be run and edited inline in the browser.}
 \end{figure}
 
@@ -560,7 +596,7 @@ A basic UI mockup is shown below that takes an input expression and displays the
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.756\linewidth]{images/image20.png}
+  \includegraphics[width=0.756\linewidth]{images/image21.png}
   \caption{Recreation of an initial sketch of the UI for the teaching tool.}
 \end{figure} \par}
 
@@ -586,7 +622,7 @@ To make it clear what part of the expression each step relates to, a representat
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.357\linewidth]{images/image30.png}
+  \includegraphics[width=0.357\linewidth]{images/image31.png}
   \caption{The expression \mintinline{text}{|let x = 3 in odd x|} may be represented by this vertical AST.}
 \end{figure} \par}
 
@@ -605,12 +641,16 @@ To help relate the ASTs to the entered expression, when a user hovers over a par
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.884\linewidth]{images/image25.png}
+  \includegraphics[width=0.884\linewidth]{images/image26.png}
   \caption{Hovering ove r the 'function application' node highlights the corresponding subexpression in the entered program.}
 \end{figure} \par}
 
-TODO: explain why web interface over desktop program
-\subsection{Architecture}\label{id:h.l33hnjbawceh}
+A web interface was chosen over a desktop program to maximise compatibility across devices, so the resource was accessible to as many students as possible. This allows the resource to work on platforms including Windows, Mac, Linux, iOS and Android. In addition, a web interface makes the tool easier to share and setup, as users simply need to navigate to the site rather than install a native application. It is also easier to copy and is more likely to be compatible with future platforms, increasing the tool’s longevity, a characteristic highlighted as important earlier in this section.
+
+While access to certain APIs is more limited in a web application compared to native applications, this did not limit any of the application’s proposed features so was not a concern.
+
+A native application would be likely to have better performance (in terms of computation time), however it was believed that the web application would not encounter serious performance problems on reasonable inputs. In later performance testing few concerns were raised about the applications performance, and those that were could be mitigated (as detailed in the implementation chapter). Feedback from user testing supports this, with one respondent commenting that the application felt “very fast”.
+\section{Architecture}\label{id:h.l33hnjbawceh}
 The design of the software aims to promote interchangeable, loosely-coupled modules to make it easy to adapt and extend. This also gives the project freedom to change over time in response to feedback, without having to redevelop common functionality.
 
 TODO: insert module diagram
@@ -621,7 +661,7 @@ TODO: insert alternate module diagrams
 
 The main downside to splitting the project up into several modules is the tooling is a little more complex. Modules must be built separately and in the correct order which is slightly slower than compiling one larger app, and IDEs have to be set up to understand how to navigate between the modules. However, this is outweighed by the maintainability and extensibility benefits of keeping functionality in separate modules.
 
-\subsubsection{Choice of programming language}\label{id:h.dj2rwwqr30vu}
+\subsection{Choice of programming language}\label{id:h.dj2rwwqr30vu}
 All of the modules are written in the same language, so they are all compatible and easy to get working together. Additionally, using one typed language allows for type-checking to ensure module APIs are correctly called and their results are used sensibly. To write a modern web application, a JavaScript-compatible language is the obvious choice as it is supported and promoted by all major browsers. TypeScript was chosen for this for several reasons.
 
 TypeScript is a statically-typed language similar to JavaScript which transcompiles to JavaScript that can be run in the browser. As a typed language, it provides the benefits of types listed earlier, which is especially important when dealing with a sizable codebase with several modules so was chosen over plain JavaScript.
@@ -631,7 +671,7 @@ Elm, CoffeeScript, PureScript and Dart are other languages that compile to JavaS
 Of the browser-compatible languages, TypeScript is the most used after JavaScript itself (according to the StackOverflow developers survey) and so developing and publishing packages in TypeScript may be useful for a wider audience.
 
 Lastly, my own previous experiences with both TypeScript and the other languages informed the decision. Familiarity with TypeScript played a key role in choosing it over other languages targeting the browser.
-\subsubsection{Language core}\label{id:h.hggmfighusoc}
+\subsection{Language core}\label{id:h.hggmfighusoc}
 The base module of the software, which all other parts depend on is the language core.
 
 The language core contains key types and models, which are used throughout the rest of the software. These types and models are used in representing AST nodes, types, contexts, substitutions and other results from type inference algorithms. They also include function signatures which define the interfaces for modules containing type inference algorithms.
@@ -645,13 +685,13 @@ Lastly, the language core contains a lexer and parser. Together, these take an i
 A parser combinator library is used to perform the lexing and parsing. A parser combinator library was chosen over a recursive descent parser or an LL, LR or LALR parser generator as it was recommended by my project supervisor and several online sources discussing implementing functional language parsers. In addition the software needs to be compatible with running in the browser which most LL, LR and LALR generators do not support. In addition, none of these types of generators provides output that is easy to implement for the browser or debug manually, whereas parser combinators are relatively easier to implement by hand.
 
 The library chosen for lexing and parsing is Masala, one of the few parser combinator libraries implemented in JavaScript. Masala is based on Haskell’s Parsec library, is tested for the browser and is well-maintained. In addition, it has strong TypeScript definitions which support its integration into the language module. Other libraries including Parjs, Parsimmon and Chevrotrain have weaker documentation, and Parsimmon lacks full TypeScript type definitions. Some other libraries like Jison and Nearley cannot easily and directly output the custom AST node classes, while Masala can. This helps extract the location of nodes in the source program to support being able to highlight where in the input expression an AST node has come from.
-\subsubsection{Type inference algorithms}\label{id:h.75leuokwbltp}
+\subsection{Type inference algorithms}\label{id:h.75leuokwbltp}
 On top of this language core are type inference algorithms W, W’ and M. Given an AST representing an expression, they return either a type or an error explaining why they were not able to infer the type. Along with these, they can also optionally return a sequence of steps taken as part of the algorithm. Each step includes a message and AST to be displayed, with appropriate parts of the AST highlighted.
 
 Each type inference algorithm shares the same interface, allowing them to be used interchangeably. This means new algorithms conforming to this interface can be added to tools using the type inference algorithms, such as the web application, by simply changing the type inference library installed. Sharing the same interface also means that high-level module tests that call only the common function signature and assert on the final type can be shared across all the inference algorithms as they should all return the same type result, even if they take different steps to get there. This makes the development of tests easier so more can be written, and asserting the final types are the same across a number of varied cases improves confidence that the algorithms are implemented correctly.
 
 Publishing the type inference algorithms separately helps keep the code clean and maintainable, and allows developers to only install the algorithms they need. While this does result in some code duplication, particularly between algorithm W and W’, the benefits from keeping the modules small and easier to maintain individually make this trade-off worthwhile. Most of the common helper functions are already in the language core, which means the code duplication in the type inference modules is not excessive.
-\subsubsection{Web interface}\label{id:h.q67ivlz7h61r}
+\subsection{Web interface}\label{id:h.q67ivlz7h61r}
 Finally, depending on both the language core and the type inference algorithms is the web interface itself. This is the end-product that users interact with, implementing the user interface. Here users can type in a program, and view the steps the type inference algorithm took to infer its type. To do this, the web application passes the program to the language core which lexes and parses it into an AST, then passes that AST to a type inference library. The results of this are then shown to the user.
 
 TODO: diagram of pipeline: user enters program as string, lexer lexes as tokens, parser parses to AST, type inference algorithm returns steps, web application displays them
@@ -671,7 +711,7 @@ TODO: insert bar graph comparing average laptop, average phone, average server-c
 Avoiding dynamic calculations on the server means free static hosting sites such as GitHub pages can be used to serve the website. This significantly reduces running costs when compared to running a custom server to respond to requests.
 
 The teaching tool’s longevity is increased by serving a static artifact, as opposed to having dynamic server and client parts. A static website can easily be copied and archived, and as it can be run for free there is no incentive to shut the service down. TypeTool, a related work that also aimed to explain type inference, was client-server based. However, the server has since been taken down and so is no longer accessible. As the lexing, parsing and type inference process was done server-side, archive websites like the Internet Archive’s Wayback Machine are unable to keep a copy of it, as they only store the static website content.
-\subsection{Analytics}\label{id:h.60njhv340fb0}
+\section{Analytics}\label{id:h.60njhv340fb0}
 To help evaluate the main teaching tool and understand user behaviour, a system to collect and store behavioural analytics data is required. This tool should respect user privacy settings, minimize personal data collected (ideally data collected should be anonymous) and be able to view a single event stream to understand how a user is using the application.
 
 Several of the most popular existing analytics solutions were explored, including Google Analytics, Matomo, W3Counter, Simple Analytics, Angelfish, Open Web Analytics and AWStats.
@@ -686,27 +726,25 @@ Finally the most practical concern is their running cost. Google Analytics and W
 
 These factors can be summarised in a comparison table:
 
-
-
 \begin{adjustbox}{center}\begin{tabular}{ |l|l|l|l|l| }
   \hline
   \textbf{Service} & \textbf{Obeys DNT} & \textbf{Anonymous} & \textbf{Event streams} & \textbf{Cost} \\
   \hline
-  Google Analytics & ✗ & ✗ & ✗ & Free \\
+  Google Analytics & \xmark & \xmark & \xmark & Free \\
   \hline
-  Matomo Cloud & ✓ & ✓ & ✓ & £348/year \\
+  Matomo Cloud & \cmark & \cmark & \cmark & £348/year \\
   \hline
-  Matomo (self-hosted) & ✓ & ✓ & ✓ & Server hosting \\
+  Matomo (self-hosted) & \cmark & \cmark & \cmark & Server hosting \\
   \hline
-  W3Counter & ✗ & ✗ & ✓ & Free \\
+  W3Counter & \xmark & \xmark & \cmark & Free \\
   \hline
-  Simple Analytics & ✓ & ✓ & ✓ & £276/year \\
+  Simple Analytics & \cmark & \cmark & \cmark & £276/year \\
   \hline
-  Angelfish & ✗ & ✗ & ✓ & £1123/year + server hosting \\
+  Angelfish & \xmark & \xmark & \cmark & £1123/year + server hosting \\
   \hline
-  Open Web Analytics & ✗ & ✗ & ✓ & Server hosting \\
+  Open Web Analytics & \xmark & \xmark & \cmark & Server hosting \\
   \hline
-  AWStats & ✗ & ✗ & ✗ & Server hosting \\
+  AWStats & \xmark & \xmark & \xmark & Server hosting \\
   \hline
 \end{tabular}\end{adjustbox}\\
 
@@ -741,10 +779,10 @@ The custom event streams are then viewed in an analytics viewer. To keep the imp
 \end{figure}
 
 The viewer shows analytics events by stream, which can be navigated simply using the left sidebar which represents a list of streams. The main view shows a list of events within that stream, ordered by timestamp.
-\section{Implementation}\label{id:h.igepudpadp49}
+\chapter{Implementation}\label{id:h.igepudpadp49}
 As detailed in the design section, the application is broken into several loosely-coupled modules, written in TypeScript. This chapter details their implementation, examining specific features of the code at a lower level.
 
-\subsection{Language core}\label{id:h.o3ngfa303saw}
+\section{Language core}\label{id:h.o3ngfa303saw}
 The language core contains models, utility and helper functions, and a lexer and parser. Together these comprise all the basics for interpreting and representing the expression language, and support implementing the type inference algorithm upon it.
 
 For clarity, in this section the term ‘models’ will be used to mean TypeScript types, function signatures, interfaces and classes. The term ‘types’ will be used exclusively to refer to the type objects, used for example as the result of type inference algorithms. For example the TypeScript expression in the implementation:
@@ -754,14 +792,14 @@ new TypeVar(‘t0’)
 \end{minted}
 
 instantiates a TypeVar \textit{model} that represents the \textit{type} $t0$.
-\subsubsection{Models}\label{id:h.f0aymht9bwx3}
+\subsection{Models}\label{id:h.f0aymht9bwx3}
 TypeScript models are used to represent abstract syntax trees, types, contexts, substitutions, results and errors.
-\subsubsubsection{Abstract syntax trees}\label{id:h.26q0jf334v10}
-Abstract syntax trees are represented by their nodes alone. Each node corresponds to a subexpression, and contains the relevant information about itself and has references to its direct children. For example, the AST for the expression \mintinline{text}{|\x -> not x|} may be represented by the node:
+\subsubsection{Abstract syntax trees}\label{id:h.26q0jf334v10}
+Abstract syntax trees are represented by their nodes alone. Each node corresponds to a subexpression, and contains the relevant information about itself and has references to its direct children. For example, the AST for the expression \mintinline{text}{|\\x $\rightarrow$ not x|} may be represented by the node:
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.863\linewidth]{images/image18.png}
+  \includegraphics[width=0.863\linewidth]{images/image19.png}
 \end{figure} \par}
 
 Here we see the tree is effectively just an \mintinline{text}{|Abs|} node, with a \textit{parameter} by the name of “x” and \textit{body} with a reference to another AST node. This body node is an \mintinline{text}{|App|} node, which has two properties: a \textit{function} and \textit{argument}, each being AST nodes of type \mintinline{text}{|Var|}. These \mintinline{text}{|Var|} nodes have a single property \textit{name}, the name of the variable referenced.
@@ -775,7 +813,7 @@ interface Abs \{
 \}
 \end{minted}
 
-To expand upon this model, we add the position in the original source program it was found at. This can be represented by a simple start and end index into the string of the source program, where the start is the index of the first character (0-indexed) and the end is the index of the last character plus one. For example, the \mintinline{text}{|Var|} node representing \mintinline{text}{|not|} in \mintinline{text}{|\x -> not x|} starts at index 6 and ends at index 9. This indexing scheme is convenient as the length of the expression in the original source code can be calculated by simple subtraction, and the standard TypeScript string methods \mintinline{text}{|slice|} uses this convention. Therefore \mintinline{text}{|code.slice(p.start, p.end)|} will result in the source code specified by a position \mintinline{text}{|p|}. Positions are represented by the simple model:
+To expand upon this model, we add the position in the original source program it was found at. This can be represented by a simple start and end index into the string of the source program, where the start is the index of the first character (0-indexed) and the end is the index of the last character plus one. For example, the \mintinline{text}{|Var|} node representing \mintinline{text}{|not|} in \mintinline{text}{|\\x $\rightarrow$ not x|} starts at index 6 and ends at index 9. This indexing scheme is convenient as the length of the expression in the original source code can be calculated by simple subtraction, and the standard TypeScript string methods \mintinline{text}{|slice|} uses this convention. Therefore \mintinline{text}{|code.slice(p.start, p.end)|} will result in the source code specified by a position \mintinline{text}{|p|}. Positions are represented by the simple model:
 
 \begin{minted}[breaklines]{typescript}
 interface Position \{
@@ -801,8 +839,6 @@ TODO: diagram
 
 Finally, immutability can improve performance when using front-end frameworks like React, which is used to implement the web application. With immutability, front-end frameworks can be sure objects have not changed on subsequent renders if they have referential equality (they point to the same object). Without immutability, objects may have changed between render calls so the front-end framework must re-render the page or perform deep value equality comparisons which require traversing the entire object. These are both potentially costly operations, so avoiding them through immutability brings performance benefits.
 
-TODO: discuss use of const and let
-
 Given the benefits of immutability, models are updated to generally be immutable, marked with the \mintinline{text}{|readonly|} modifier in TypeScript:
 
 \begin{minted}[breaklines]{typescript}
@@ -813,6 +849,8 @@ interface Abs \{
   readonly notes?: string;
 \}
 \end{minted}
+
+As well as the use of readonly properties on class properties, the keyword \mintinline{text}{|const|} was preferred to \mintinline{text}{|let|} or \mintinline{text}{|var|} when declaring variables. The \mintinline{text}{|const|} keyword ensures these variables are immutable and cannot be redefined (although by itself does not prevent their properties from being modified). The \mintinline{text}{|let|} keyword in TypeScript allows variables to be redefined, while \mintinline{text}{|var|} allows variables to be redefined and overwrites them in the global scope which can be particularly dangerous.
 
 To make constructing these models easier, we convert these TypeScript interfaces into classes. This allows us to use the \textit{new} keyword to construct instances of these models, and we can use the \textit{instanceof} operator to verify an AST node is of a specific type more easily. These are not possible with TypeScript interfaces alone.
 
@@ -847,7 +885,7 @@ This structure is used for all the AST node models, including:
   \item \mintinline{text}{|CharLiteral|} and \mintinline{text}{|NumberLiteral|} for literal constants
 \end{itemize}
 
-\subsubsubsection{Types}\label{id:h.bzdo56ibho4h}
+\subsubsection{Types}\label{id:h.bzdo56ibho4h}
 As discussed in the background chapter, monotypes are constructed from type variables and type function applications. We consider basic types (such as $Bool$ or $Int$) to be type function applications on zero arguments. Polytypes are monotypes with zero or more for-all quantifier variables.
 
 For simplicity when modelling polytypes, we consider type variables bound at the highest level. Any type that can be expressed with for-all quantifiers at lower levels, is equivalent to moving those bindings to the top level. For example, $\forall a. (a \rightarrow (\forall b. (b \rightarrow (a, b)))$ is equivalent to $\forall a \forall b. (a \rightarrow b \rightarrow (a, b))$.
@@ -883,7 +921,7 @@ class PolyType \{
 While PolyType’s \mintinline{text}{|quantifiedVars|} property could be modelled with \mintinline{text}{|TypeVar[]|}, for simplicity \mintinline{text}{|string[]|} was chosen as the methods on these type variables are never called.
 
 The constructors are all trivial, and simply set the corresponding properties in the object. The \mintinline{text}{|toString|} methods are fairly simple for \mintinline{text}{|TypeVar|} and \mintinline{text}{|PolyType|}, however \mintinline{text}{|TypeFuncApp|} has additional logic to pretty-format some types. For example, it formats types like $[(Bool, Int)] \rightarrow Int$ rather than $\rightarrow ([] (, (Bool) (Int))) (Int)$ which would be the result if it treated all type functions equivalently in prefix notation with explicit bracketing. To do this it uses case matching, with different rules depending on the type function used.
-\subsubsubsection{Contexts and substitutions}\label{id:h.ux3btyb2wvh8}
+\subsubsection{Contexts and substitutions}\label{id:h.ux3btyb2wvh8}
 A context, as defined in the background chapter, is a mapping from variable names to their corresponding types. This informs the type inference algorithm what variables are in scope, and what their types are.
 
 This is modelled in TypeScript as a simple object which has string keys (variable names) and type values. Specifically these type values are polytypes, because as stated before monotypes can be considered polytypes with zero for-all quantified variables. This is written:
@@ -897,7 +935,7 @@ Substitutions can be seen as mappings from type variable names to corresponding 
 \begin{minted}[breaklines]{typescript}
 interface Substitution \{ [name: string]: MonoType | undefined \}
 \end{minted}
-\subsubsubsection{Results and errors}\label{id:h.5yk2zijb0axq}
+\subsubsection{Results and errors}\label{id:h.5yk2zijb0axq}
 The parser and type inference algorithms use response models to return their results. A \mintinline{text}{|Response|} from one of these methods may either be a \mintinline{text}{|Rejected|} or \mintinline{text}{|Accepted|}, indicating the input was invalid or valid respectively.
 
 For example, if a syntax error is present in the program passed to the parser, it may return a \mintinline{text}{|Rejected|} model with the location of the error and a message explaining the issue. Alternatively if a valid program is passed to the parser, it returns an \mintinline{text}{|Accepted|} model with the AST representation as its value. Similarly, the type inference algorithms return \mintinline{text}{|Rejected|} if type inference fails, and \mintinline{text}{|Accepted|} if it succeeds.
@@ -940,7 +978,7 @@ Response<TypeResult, Omit<TypeResult, 'type'>>
 TODO: consider cutting/moving the following paragraph
 
 In addition to these result wrappers, the parser and type inference algorithms also offer an alternative simple interface where just the AST or type is returned without any wrappers. In this case, if an error is found with the input a \mintinline{text}{|ParseError|} or \mintinline{text}{|TypeInferenceError|} is raised, which should be caught by the caller. These errors are also used internally by the methods returning result wrappers.
-\subsubsection{Helper functions and type utilities}\label{id:h.sw77qek8b49p}
+\subsection{Helper functions and type utilities}\label{id:h.sw77qek8b49p}
 Several helper functions are implemented in the language core that are relevant to the parser and type inference algorithms. These perform the functions by the same name defined in the background chapter:
 \begin{itemize}
   \item \mintinline{text}{|apply|} applies a substitution to a type or context
@@ -971,7 +1009,7 @@ f(list(boolean), char)
 These type utilities make developing tests significantly easier, and improve readability of the code.
 
 As the helper functions and type utilities are widely-used it is critical that their correctness can be depended upon. To verify correctness, many automated unit tests are run against them using the Jest framework. Jest is a simple to set-up test runner and is recommended by the authors of React for testing React projects. To reduce tooling complexity Jest is used for all automated testing throughout the project.
-\subsubsection{Lexer and Parser}\label{id:h.qbtwwllp8tw6}
+\subsection{Lexer and Parser}\label{id:h.qbtwwllp8tw6}
 The lexer and parser use the Masala library, as explained in the design chapter.
 
 The GenLex class from the library is used to generate a lexer, which is in turn used for lexing. An instance of GenLex is used to define different tokens, such as identifiers, parentheses, numeric literals and keywords such as ‘let’. For example, the left parenthesis token is defined:
@@ -1016,7 +1054,7 @@ At the end of the construct-specific parsers, in the main parser we then call \m
 The overall lexer and parser is then wrapped in a function that maps results from the Masala library into consistent \mintinline{text}{|Response|} models. The wrapping function also handles pre-processing the code before passing it to the lexer, and eliminates some special cases to do with disambiguating let-statement related keywords and identifiers.
 
 Many tests are written against the parser, both verifying valid expressions are parsed correctly and invalid expressions are rejected. Assertions are made on the correctness of parse results, ensuring they return the corresponding AST for the program with nodes being given the expected properties, including their position.
-\subsubsection{Type inference algorithms}\label{id:h.flyu66glh76t}
+\section{Type inference algorithms}\label{id:h.flyu66glh76t}
 The three type algorithms W, W’ and M are implemented in separate packages, as per the design chapter. While by their nature they have differing rules, they all follow a similar overall structure.
 
 Each algorithm exposes a simple public interface, just one method: \mintinline{text}{|infer|}. This is a polymorphic function which has two possible type signatures. It always takes an AST, but may also take an optional boolean toggle to return a \mintinline{text}{|Response|} model and a custom \mintinline{text}{|Context|}. If the optional boolean toggle is false, just a monotype is returned. If the optional boolean toggle is true, a \mintinline{text}{|Response<TypeResult, Omit<TypeResult, 'type'>>|} is instead returned which represents either a typing result if successful (steps and a final type), or a typing result without a type if unsuccessful (just the steps up to the type error).
@@ -1073,7 +1111,7 @@ Both assertion matchers pretty-print output on failure, clearly highlighting whe
   \includegraphics[width=0.769\linewidth]{images/image9.png}
   \caption{Example test framework output to the command line showing a failing custom assertion}
 \end{figure} \par}
-\subsubsection{Web application}\label{id:h.jqmg1n3w35mp}
+\section{Web application}\label{id:h.jqmg1n3w35mp}
 The React web application is broken down in several different reusable components. These components are managed by React, which injects the \mintinline{text}{|Main|} component as the root node of the application.
 
 This \mintinline{text}{|Main|} component is responsible for rendering most of the application, through creating child components and managing the state used to configure the user’s input (such as the algorithm selected and the program entered).
@@ -1111,7 +1149,7 @@ The help window explains the language’s type constructors and lists the availa
 TODO: screenshot of the help window
 
 The web application again uses the Jest framework for testing. In addition, it uses the React Testing Library to simulate browser events, such as clicking buttons and entering text into the input box. Some of these tests are effectively end-to-end tests as they simulate a certain user journey. Some may also be considered integration tests, as assertions are made on the behaviour of the web application in combination with the language core and type inference algorithms, ensuring all the modules work correctly together.
-\subsubsection{Analytics}\label{id:h.39bhrrv1fi5p}
+\section{Analytics}\label{id:h.39bhrrv1fi5p}
 Recording analytics is built into the web application, which makes calls to a RESTful HTTP endpoint to record events. This is guarded by a check of the “Do not track” browser flag to ensure user preferences regarding privacy are respected.
 
 Each event is sent along with a randomised identifier per page session, which allows them to be viewed in an event stream. However, by using a randomised identifier the data is not tied to any specific person and is therefore not considered personal data.
@@ -1121,7 +1159,7 @@ The RESTful API offers one simple endpoint which saves valid JSON events sent to
 Events can then be later retrieved from S3 by authorised users, who can visualise them using the analytics viewer. S3 is configured to automatically delete events after a period of 90 days, to follow best practices on data retention.
 
 These cloud products are all considered ‘serverless’, in that they do not require the explicit management of servers. This significantly reduces running and maintenance costs as the code only needs to be executed when users are using the application. It also improves scalability, as more capacity can automatically be provisioned for the analytics tool to meet user demand.
-\section{Evaluation}\label{id:h.e6letww4nhn0}
+\chapter{Evaluation}\label{id:h.e6letww4nhn0}
 User testing aims to evaluate whether the teaching tool works and is effective in its current form. These aims can be summarised by:
 \begin{enumerate}
   \item the tool is accessible and users can enter input
@@ -1132,7 +1170,7 @@ User testing aims to evaluate whether the teaching tool works and is effective i
 From 1 to 3, these increase in scope and in how difficult they are to measure. However, the key goal of the project is 3, as if the tool meets the first two aims but does not improve student understanding it is still not helpful as a teaching resource.
 
 To verify whether the project meets these aims, a questionnaire was distributed to students and analytics data from the web application was reviewed.
-\subsection{Questionnaire}\label{id:h.yqiowsgjmohq}
+\section{Questionnaire}\label{id:h.yqiowsgjmohq}
 The questionnaire was composed of three parts: a short test on types and type inference before using the application, introducing users to the application and asking usage questions, then a final test to see if student’s performance improves after using the tool.
 
 This addresses and allows for measurement against all three aims. The tool’s performance on aims 1 and 2 are measured in the middle part, where users are asked to access the tool, enter input and interpret the results. Aim 3 is measured by looking at the relative difference in test results from before and after using the tool.
@@ -1143,14 +1181,14 @@ To incentivise students to fill out the questionnaire with detailed and accurate
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.882\linewidth]{images/image31.png}
+  \includegraphics[width=0.882\linewidth]{images/image32.png}
   \caption{The trivial quality-control question to ensure users were reading and answering questions properly}
 \end{figure} \par}
 
 In addition to the WAAT achievement, vouchers were given out to 4 respondents selected at random and to 2 respondents giving detailed constructive feedback on the tool. Finally, students were also reminded that learning about type inference could improve their functional programming skills, which would help them with the CS141 courseworks and final exam. While students were encouraged to complete the questionnaire, it was made clear that it was optional, it would have no direct effect on any of their assessments and that they could choose to stop taking the questionnaire at any time.
 
 The questionnaire had 48 unique responses, of which 46 were valid (where the respondent had fully completed all questions, and answered the quality control check question correctly). Percentages given here are with respect to the number of valid responses.
-\subsubsection{Direct questions}\label{id:h.abykou9pzwwh}
+\subsection{Direct questions}\label{id:h.abykou9pzwwh}
 The second part of the questionnaire asks direct questions about the tool. There are two types of questions in this part. The first type asks users to try accessing the tool, inputting results and interpreting the results. These questions are:
 \begin{itemize}
   \item Try entering: map odd []. Try to understand the steps. What is the unifying substitution performed in step 3?
@@ -1224,7 +1262,7 @@ Several users mentioned that they would prefer to click through the steps, rathe
 While users praised the AST visualisation in the first question, some thought the way function application was shown could be improved, with one suggesting “just showing "Function Application" is a bit opaque, maybe add the function being applied for clarity?”. Some of this feedback may have been due to a misunderstanding of what the “Function application” node represents: it applies the first child (the function) to the second child (the argument). However, this view could potentially be improved by showing the text representing the function being applied in the function application node, or having a function and argument prefix on the child nodes.
 
 Some less commonly raised feedback, for example making it clearer that the expression box was an input and fixing the typo ‘instatiate’ could be directly fixed in the web application. For example, by autofocusing and displaying a cursor in the input box, and updating the website copy respectively. Other larger extensions such as add applicative and functor support (which would require adding typeclasses) or adding a quiz mode would be useful extensions to the project, but due to project time constraints have not been implemented.
-\subsubsection{Test performance}\label{id:h.cn0p90nrqrmi}
+\subsection{Test performance}\label{id:h.cn0p90nrqrmi}
 The first and third parts of the questionnaire were tests on types and type inference. While the two tests were not identical to avoid commitment bias and choosing the same answers in the tests without thinking, they were very similar and of equal difficulty. The intention of these tests is to evaluate the tool against aim 3, measured by the difference in performance before and after using the tool. To make the tests easy to fill out and mark without bias, all questions were multiple-choice.
 
 {\centering \begin{figure}[h!]
@@ -1237,7 +1275,7 @@ Average test scores improved by 15\% from 54\% to 69\% after using the tool. Thi
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.845\linewidth]{images/image22.png}
+  \includegraphics[width=0.845\linewidth]{images/image23.png}
   \label{figure:Chart}
 \end{figure} \par}
 
@@ -1252,7 +1290,7 @@ We first explore how different quartiles of students perform before and after us
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.874\linewidth]{images/image19.png}
+  \includegraphics[width=0.874\linewidth]{images/image20.png}
   \label{figure:Chart}
 \end{figure} \par}
 
@@ -1262,10 +1300,10 @@ We can also show how performance improves based on these groups. These self-repo
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.884\linewidth]{images/image26.png}
+  \includegraphics[width=0.884\linewidth]{images/image27.png}
   \label{figure:Chart}
 \end{figure} \par}
-\subsection{Analytics}\label{id:h.67g05flyfv0z}
+\section{Analytics}\label{id:h.67g05flyfv0z}
 Anonymised usage data is collected by the web application. Events recorded include page visits, opening and closing the help section and code expressions entered. To avoid recording testing of the site, my own visits are excluded from the analysis. This data directly verifies aim 1, and provides evidence for the tool achieving aims 2 and 3.
 
 We see that in the data that users have been able to access the site, and were able to use the examples and enter in their own expressions, supporting aim 1. This was particularly useful in giving confidence that the site was working correctly while waiting for questionnaire responses to be returned.
@@ -1278,8 +1316,20 @@ Several event streams provide evidence that users are understanding the results 
   \item the user then builds upon this expression, adding a list of numbers: \mintinline{text}{|map odd [3]|}
 \end{enumerate}
 
+We can also see other users composing more complicated example expressions from the samples for example:
+\begin{enumerate}
+  \item the user loads the page, and tries several examples
+  \item the user tries the \mintinline{text}{|map not []|} sample
+  \item the user tries the \mintinline{text}{|let x = 3 in (+, x)|} sample
+  \item the user tries their own \mintinline{text}{|(+) 3 1|} expression
+  \item the user tries composes this following the \mintinline{text}{|map|} example, trying \mintinline{text}{|map (+4) int|}, which displays a type error as \mintinline{text}{|+4|} is not a function so is not a valid argument for \mintinline{text}{|map|}
+  \item the user adjusts this to \mintinline{text}{|map (+ 4) int|}, which displays a different type error saying that \mintinline{text}{|int|} is not in scope
+  \item the user finally corrects the final type error in the expression to get \mintinline{text}{|map (+ 4) []|}, and the type \mintinline{text}{|[Int]|} is displayed
+  \item the user remains on this derivation for some time, suggesting they are reading the steps in detail, then clears the input and tries other expressions
+\end{enumerate}
+
 All types of analytics events were fired, which suggests all features of the application were used. Most users selected an example expression and entered their own custom expressions. Relatively few users viewed the help window and those that did usually had it open for less than a minute, which supports the criticism found in the questionnaire that the help could be made more obvious and its content could be changed to be more engaging.
-\subsection{Ethics}\label{id:h.q5st3bb4afm1}
+\section{Ethics}\label{id:h.q5st3bb4afm1}
 In conducting the questionnaire and collecting analytics data, participants safety and privacy has been carefully considered.
 
 The questionnaire was completely entirely online, requiring no face-to-face contact. This eliminates the risk of COVID transmission in doing the questionnaire. Online questionnaires also reduce the time investment respondents have to put in and reduce the social commitment to completing it so that participants are less pressured to complete it without feeling fully comfortable. Users were informed that participation was entirely voluntary and that they could discontinue at any time.
@@ -1289,62 +1339,63 @@ The questionnaire kept personal data captured minimised with the respondent’s 
 In addition, as it was promoted through the CS141 module to prevent unintentional undue pressures to complete the survey it was made clear that the questionnaire had no impact on students’ marks, and that before or after test performance would not be shared, and would not be analysed alongside any personal data.
 
 Analytics data is only collected on the type inference tool website. As with completing the questionnaire, use of the website is entirely voluntary. The analytics data collected is anonymised with a randomly generated stream id, and as such under PECR and GDPR, no disclaimer is necessary as the data is not considered ‘personal’. However, to follow best practice the website informs users “Usage data such as button clicks and evaluated expressions may be collected to evaluate and improve the tool.” In addition, the analytics tool follows best practice, obeying the “Do not track” user settings in browsers and collecting only minimal usage data to understand user behaviour and nothing more. Data is automatically deleted after 90 days, and is stored securely in an S3 bucket with access logs enabled and monitored. The analytics tool was specifically built with privacy in mind, to overcome the limitations of existing platforms as discussed in the design chapter.
-\section{Project Management}\label{id:h.3j8xp631ygy}
-TODO: consider whether this section is necessary?
+\chapter{Project Management}\label{id:h.3j8xp631ygy}
+\section{Research process}\label{id:h.ew85fk610kqt}
+Throughout the project, a list of resources and notes were developed. This supported the writing of this report’s background chapter, and also for referring back to refresh my memory of certain topics when implementing the type models and type inference algorithms.
 
-Version control with Git, Git hosting on GitHub, backups (can probably take some stuff from spec/progress report?)
+Additionally, this list contained a backlog of resources to explore. This ensured my research stayed organised and avoided missing potentially important papers. A wide range of resources were consulted about including formal papers, informal writing and programming language documentation. Some of these are analysed as type inference teaching resources themselves in the design chapter.
 
-Developed gdoc2latex
+In addition to my own independent research, insights and recommendations from my supervisor helped push the project forwards at points when it was stuck with particular technical issues understanding the theory of type systems.
+\section{Development process}\label{id:h.3r2hzi490wg9}
+Development took an agile approach, for three reasons: flexibility, early and frequent delivery and the individual nature of the project.
 
-Set up CI system to build latex docs
+The approach had to be flexible as the project scope adapted, as a better understanding of the area was achieved and user testing informed future development. Additionally, one of the goals of the CS310 module is to be innovative and creative and so allowing for change over time provides the freedom to do this.
 
-Tried using Docker to run latex compilation step in GitHub actions, but found it was significantly slower (2 mins vs 45 seconds) than installing texlive-latex-extra and texlive-bibtex-extra on the runner directly.
-\section{Conclusions}\label{id:h.fc67ipatea73}
-TODO: further work: lazy loading of libraries, adding custom type environments
-\subsection{Further Work}\label{id:h.60yvcrl0lpu}
-\subsection{Acknowledgements}\label{id:h.xqaef57orpsv}
-This document was typeset using a derivative of the CS310 starter pack\footnote{\href{https://github.com/mbg/cs310}{https://github.com/mbg/cs310}} by Michael Gale, licensed under CC BY 4.0.
+The approach provided working software early and new versions frequently, as for evaluation purposes it was better to have a functioning prototype lacking certain features over just incomplete parts. This supported getting user feedback early, which combined with being flexible means the project was able to be adjusted to better serve user needs. Lastly, it was easier for my supervisor to see the state of the software when fully functioning as a web application, and therefore be able to advise me on the project.
 
+As the project is an individual one, no coordination between developers is necessary. This reduces the need to precisely plan and document how the components will integrate with each other, and the order components need to be delivered in. Therefore, waterfall or other heavily plan-based methods would not have been beneficial over agile methods.
 
+Automated unit, component and integration tests were written while developing the software. Good testing not only catches bugs, but enables confidence in making changes as they can be made while being sure the software still functions correctly. This supports the flexible agile software development approach. Tests can also act as proof that software requirements have been met, useful for my project supervisor to see progress made and for verifying the functionalities of the libraries. The following tests that the front-end integrates with the type checking algorithm to correctly display a final result:
 
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=1.000\linewidth]{images/image18.png}
+  \caption{An automated test for the web application, which simulatenously tests many components of the system at once.}
+\end{figure}
 
+Git was used for version control, as it is robust, well-used and familiar to me. Version control allows rolling back to previous working versions of the software if necessary, and acts as a change log of how the project has evolved. While this was not used, being able to do so allowed making potentially drastic changes with confidence, which could not have been done without version control. Git also makes diffing versions of the code and reports easy, so my supervisor could easily determine what has changed since last view.
 
+GitHub was used for git hosting, which allowed me to easily sync changes between machines, and allowed sharing the code with my supervisor easily. GitHub also acted as an external backup of the code. This ensures my work would not be lost if my personal computer was. However, a bad force push could theoretically cause data loss, so at major milestones I stored snapshots of the code on Google Cloud Platform (avoiding AWS and Azure to maximise resiliency, as GitHub runs on a combination of AWS and Azure).
 
+In my project specification, GitHub was considered for project, issue and pull request management. However after evaluating the project needs this was found to be unnecessary. As a single developer I am able to understand the overall structure of the code having written all of it, and a simple notepad has sufficed for task tracking.
 
+GitHub Actions provided continuous integration (CI). At each commit to the GitHub repository, the changes would be built and automatically tested. If the CI failed, an automated email would be sent giving build and test failure visibility. If the CI passed, the web application was automatically re-deployed to be kept up to date with any changes. In this way, my supervisor and other users are always able to easily try out the latest version of the application.
 
+Most of the system is written in TypeScript, a programming language developed by Microsoft, for reasons explained in the design chapter. The VS Code editor was used to write code, as it is the most popular editor for TypeScript, with strong language features such as autocomplete and automatic sugegstions from an in-built linting tool. Additionally, I have used VS code in the past, and it is multi-purpose, allowing me to also edit the LaTeX sources for the project specification and reports.
 
+Draft reports have been written in Google Docs, as it is easy to use, version-controlled and offers good reviewing features. At major milestones this is synced with the git repository, so is included in the git backup on GitHub and Google Cloud Platform. For more control over typesetting, the purpose-built tool gdoc2latex\footnote{\href{https://github.com/domdomegg/gdoc2latex}{https://github.com/domdomegg/gdoc2latex}} was developed to convert a Google Docs document to a LaTeX document. GitHub actions automatically uses this tool to keep the Google Docs and LaTeX versions in sync within the repository, as well as automatically build the LaTeX sources to a PDF. It was found through performance comparisons that to run the LaTeX commands it was significantly faster to reinstall them to the runner for each CI run rather than use a pre-built Docker container.
+\section{Communication and meetings}\label{id:h.k8ippxnoat7q}
+Due to the ongoing COVID-19 pandemic, all communication and meetings took place online. Throughout the project’s lifetime the UK has gone through several changes in restrictions, including the Tier 3 rules applied to Coventry and the national lockdown. However, this has not significantly disrupted the project as appropriate risk-mitigation strategies were in place to continue meeting online through Microsoft Teams and chatting via Slack.
 
+Weekly supervisor meetings during term-time and the Easter holidays kept my supervisor updated on the project progress and helped to resolve any issues encountered that week. In particular, the beginning of the project required the most guidance as understanding existing resources on type systems was particularly challenging. It is of course hoped that this teaching tool will make understanding these complex topics I initially struggled with significantly easier.
+\chapter{Conclusions}\label{id:h.90axtam6qk9n}
+Knowledge of type inference can help programmers debug their code, and use types effectively in their programs. Static typing eliminates type errors, acts as a form of documentation, and supports IDEs in increasing developer productivity.
 
+Through this project we develop a teaching tool for type inference, that visualises the steps several type inference algorithms W, W’ and M take on the Hindley-Milner system. Its design strives to overcome issues found in exploring existing type inference resources, ensuring the tool is a useful and long-lasting teaching resource. The tool is composed of several loosely coupled TypeScript modules and the React web application runs entirely in the browser. The algorithms themselves are implemented following the definitions of the type inference algorithms, using helper functions from a language core. Each module is extensively tested to ensure correctness, which allowed for the several significant refactorings from classes to functions that took place to reach the final code structure.
 
+The tool is evaluated by examining responses to a questionnaire and exploring analytics data. This questionnaire’s open-ended responses show users think that “the step by step breakdown is really well explained”, and the before and after tests show that using the tool significantly improves students' understanding of type and type inference, no matter what their previous understanding was. Analytics data confirms users are able to use the tool, and suggests users are able to interpret its results to debug type-errors.
 
+The project achieved all of its objectives and completed all potential extensions set out in the original specification. However, it could be extended further given the additional feedback provided by users through the questionnaire. These include adding support for performing inference in custom type environments to the web application, and introducing a tutorial page which introduces users to the Hinldey-Milner type system more gradually. In addition to these suggestions, as the libraries work independent of the tool’s web application, completely different applications could be built relating to type inference allowing for different perspectives with perhaps a more quiz-like gamified experience.
 
+\chapter*{Acknowledsectiongements}\label{id:h.xqaef57orpsv}
 
+This project would not have been possible without the support of my supervisor, Michael Gale. His feedback on drafts and answers to my many questions on type inference have been invaluable throughout.
 
+Evaluation of the tool would not have been possible without the many kind volunteers who offered to try the application and complete the questionnaire. Thanks are due to all those who used the tool, and in particular to any who provided feedback on how it could be improved.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\bibliography{index}
+This document was typeset using a derivative of the CS310 starter pack\footnote{\href{https://github.com/mbg/cs310}{https://github.com/mbg/cs310}} by Michael Gale, licensed under CC BY 4.0. Parts of the introduction and project management sections of this report are adapted from my project specification and progress report.
 
 \bibliographystyle{./plainnat}
+\bibliography{./index}
 
 \end{document}

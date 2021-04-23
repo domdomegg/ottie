@@ -9,6 +9,7 @@
 _minted-index/
 *.fdb_latexmk
 *.fls
+*.synctex.gz
 
 # Don't store generated PDFs (at least for now)
 *.pdf
