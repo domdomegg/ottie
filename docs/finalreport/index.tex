@@ -1,4 +1,4 @@
-\documentclass[a4paper,fleqn,twoside,12pt]{report}
+\documentclass[a4paper,fleqn,oneside,12pt]{report}
 
 %%%%%%%%%%%%%%%%%%%%
 
@@ -28,8 +28,12 @@
 \usepackage{ragged2e}
 \usepackage{adjustbox}
 \usepackage{pifont}
+
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
+\newcommand{\W}{$\mathcal{W}$}
+\newcommand{\M}{$\mathcal{M}$}
+\newcommand{\comment}[1]{}
 
 \hypersetup{
 	colorlinks=true,
@@ -53,6 +57,8 @@
 \makeatletter
 \newcommand{\@assignment}[0]{Assignment}
 \newcommand{\assignment}[1]{\renewcommand{\@assignment}{#1}}
+\newcommand{\@shorttitle}[0]{}
+\newcommand{\shorttitle}[1]{\renewcommand{\@shorttitle}{#1}}
 \newcommand{\@supervisor}[0]{}
 \newcommand{\supervisor}[1]{\renewcommand{\@supervisor}{#1}}
 \newcommand{\@yearofstudy}[0]{}
@@ -65,6 +71,7 @@
 
 \author{Adam Jones}
 \title{Interactive Tool for Teaching Hindley-Milner Type Inference through Visualisation}
+\shorttitle{Interactive Tool for Teaching HM Type Inference through Visualisation}
 \supervisor{Michael Gale}
 \yearofstudy{3\textsuperscript{rd}}
 
@@ -76,10 +83,10 @@
 \makeatletter
 \fancypagestyle{plain}{
 	\fancyhf{}
-	\fancyhead[LE]{\thepage}
-	\fancyhead[RE]{\textit{\@author}}
+	%\fancyhead[LE]{\thepage}
+	%\fancyhead[RE]{\textit{\@author}}
 	\fancyhead[RO]{\thepage}
-	\fancyhead[LO]{\textit{\@title}}
+	\fancyhead[LO]{\textit{\@shorttitle}}
 }
 \makeatother
 
@@ -99,10 +106,6 @@
 	Year of Study: \@yearofstudy \\
 
     \vfill
-\vfill 
-    \vfill
-\vfill 
-    \vfill
 
     \today
 
@@ -119,189 +122,208 @@
 \pagestyle{plain}
 
 \begin{abstract}
-  Type inference is a process by which types in a program may be determined automatically by a compiler, without the need for explicit type annotations. Understanding of type inference helps programmers debug type errors and better understand type systems, however there are few accessible teaching resources available. We design and implement an interactive type inference teaching tool for a Hindley-Milner based expression language, which visualises and explains the steps taken by the common type inference algorithms W, W’ and M. User testing with undergraduate students shows the tool improves students' test scores on type and type inference (p < 0.001), and general feedback from users is positive. Analytics data provides supporting evidence that the tool’s output aids understanding and allows users to debug type errors.
+  Type inference is a process by which types in a program may be determined automatically by a compiler, without the need for explicit type annotations. Understanding of type inference helps programmers debug type errors and better understand type systems, however there are few accessible teaching resources available. We design and implement an interactive type inference teaching tool for a Hindley-Milner based expression language, which visualises and explains the steps taken by the common type inference algorithms \W, \W' and \M. User testing with undergraduate students shows the tool improves students' test scores on type and type inference (p < 0.001), and general feedback from users is positive. Analytics data provides evidence that the tool's output aids understanding and allows users to debug type errors.
 \end{abstract}
 
 \tableofcontents
 
 \chapter{Introduction}\label{id:h.6k9gcmunzldy}
+
 Types are common features of many programming languages. Generally, types are bounds on program constructs (such as variables, expressions and functions) that limit what valid values they may take and how they should be interpreted within the program, however different languages use types differently. Most type systems include primitive data types such as integers, booleans and characters as well as composite types such functions from one type to another and lists of a type.
 
-Type checking is the process by which a language’s compiler or interpreter validates that a program obeys the rules of the language’s type system. When a violation is detected, such as providing a boolean to a function accepting an integer, a type error is raised.
+Type checking is the process by which a language's compiler or interpreter validates that a program obeys the rules of the language's type system. When a violation is detected, such as providing a boolean to a function accepting an integer, a type error is raised.
 
 Type checking is primarily used to catch bugs in program code, preventing unexpected behaviour. A simple example of this is function application: functions’ types specify how they can be called which ensure some pre-conditions are met, such as the arguments being of an expected type. This allows function implementers to safely assume the data is of that type, and prevents function users calling the function with invalid arguments.
 
 Type checking can happen either at compile time (static type checking) or runtime (dynamic type checking).
 
-Compile-time type checking prevents many type errors from occurring at runtime. This is particularly useful when code paths may not be well tested or frequently used, as runtime checks only surface type errors when the problematic code is executed. Additionally, knowing types at compile-time allows for better tooling that improves developer productivity. For example, IDEs may use type information to suggest and perform automated refactorings \citep{ref1}, automatically generate documentation \citep{ref2} and autocomplete statements \citep{ref3}.
+Compile-time type checking prevents type errors from occurring at runtime. This is particularly useful when code paths may not be well tested or frequently used, as runtime type checking only surfaces type errors when the problematic code is executed. Additionally, knowing types at compile-time allows for better tooling that improves developer productivity. For example, IDEs may use type information to suggest and perform automated refactorings \citep{ref1}, automatically generate documentation \citep{ref2} and autocomplete statements \citep{ref3}.
 
 Compile-time type checking requires the program code to have enough information to validate its type safety. This may be in the form of type annotations or typed variable and function declarations. However, specifying types manually can be time-consuming and potentially difficult as it is additional work for the programmer, and large composite types can be especially difficult to determine and tedious to repeatedly write.
 
-A type inference algorithm for a programming language’s type system can determine types automatically, which improves productivity by allowing programmers to get the best of types without having to explicitly specify them. Because of this, type inference is used in many popular programming languages with expressive type systems including Haskell, Rust and TypeScript.
+A type inference algorithm for a programming language's type system can determine types automatically, which improves productivity by allowing programmers to get the best of types without having to explicitly specify them. Because of this, type inference is used in many popular programming languages with expressive type systems including Haskell, Rust and TypeScript.
 
-An understanding of type inference would help computer scientists write cleaner code and debug type errors. However, few universities have core modules on type systems (although they may be touched on in programming curriculums) and there are limited easy-to-understand teaching resources on type inference. Therefore, many computer science graduates will be missing a useful understanding of how type inference actually works.
+Understanding type inference would help computer scientists write cleaner code and debug type errors. However, few universities have core modules on type systems (although they may be touched on in programming curriculums) and there are limited easy-to-understand teaching resources on type inference. Therefore, many computer science graduates will be missing a useful understanding of how type inference actually works.
 
-The goal of this project is develop a system to visualise the type inference process, with the aim of improving undergraduate students’ knowledge about it.
+The goal of this project is to develop a system to visualise the type inference process, to ultimately improve undergraduate students’ knowledge about it.
 
-To achieve this, we develop a teaching resource that explains how type inference algorithms work for functional languages. An interactive web application allows students to enter expressions and view the results of a type inference algorithm, along with the steps taken to get to that result. This is particularly useful in the context of modules teaching functional languages such as Haskell which perform similar type inference.
+To achieve this, we create a teaching resource that explains how type inference algorithms work for functional languages based on the Hindley-Milner type system. An interactive web application allows students to enter custom expressions and view the results of a type inference algorithm, along with step-by-step explanations of how the algorithm determined that result. This is particularly useful in the context of modules teaching functional languages such as Haskell which perform similar type inference.
+
 \section{Related work}\label{id:h.2mwaav7jkal4}
+
 There have been previous attempts to build visualisation and teaching tools related to type systems.
 
-{\centering \begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.770\linewidth]{images/image29.png}
-  \caption{Screenshot of results from TypeTool, taken from their paper}
-\end{figure} \par}
-
-One example is TypeTool by~\cite{ref4}, which visualises type inference through a web application. Users enter an expression in a custom expression language, submit a request to a server and are redirected to a page displaying an initial syntax tree, a final syntax tree and an overall substitution. By allowing users to enter their own expressions, students can explore how the systems work in different cases to gain an intuitive understanding of the concepts.
-
-TypeTool’s authors found in teaching the University of Porto’s functional programming course that the tool was “especially useful for students, because it helps to understand the type systems of the most common typed functional languages” and that “[presenting] the basis of type inference technology [...] significantly improved the way students deal with type errors because they understand the type system.”
-
-However, TypeTool’s parsing and type inference is done server-side so there is a delay between the user entering an expression and seeing the result. While short, a delay reduces the ease-of-use and may discourage users from trying many different expressions. Both delayed feedback and the lack of step-by-step explanations reduce learning quality \citep{ref5}, particularly in the area of rule learning.~\cite{ref6} showed that immediate explanatory feedback is most effective at learning how to apply rules in computer programming. It also lacks step-by-step explanations, and it is unclear whether it supports processing incorrectly-typed expressions.
-
-In addition, the tool is now inaccessible as the server hosting the application is no longer running and the source code has not been published.
-
-Another tool in the area of visualising type systems was developed by~\cite{ref7}. It is a visual functional programming system which shows types during function application for a subset of Standard ML, used to teach first year undergraduate students. However, this did not explicitly show the type inference process and as a desktop application rather than web app it is less accessible to lecturers and students. It also didn’t support key functional language constructs such as function declarations and let bindings, and required significant explanation before using the tool to understand its output.
+One example is TypeTool by \cite{ref4}, which visualises type inference through a web application. Users enter an expression in a custom expression language, submit a request to a server and are redirected to a page displaying an initial syntax tree, a final syntax tree and an overall substitution. Allowing users to enter their own expressions allows students to explore how the system works under different cases to gain an intuitive understanding of the concepts.
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.797\linewidth]{images/image6.png}
-  \caption{Screenshot of Yung and Michaelson's tool, taken from their paper}
+  \includegraphics[width=0.75\linewidth]{images/image29.png}
+  \caption{Screenshot of results from TypeTool, from their paper}
 \end{figure} \par}
 
-NiMo \citep{ref8} is a graphical programming language related to functional data processing which allows users to reason about the flow of data through a program. The types of data and processes can be inspected in NiMoToons, and type inference is performed over the network of components. However, larger expressions can become complicated and be difficult to interpret. While NiMo performs type inference internally it is not a key focus to the end-user, and as such does not explain its steps. Additionally, it is harder to relate back to more commonly used, textual functional languages like Haskell.
+TypeTool's authors found in teaching the University of Porto's functional programming course that the tool was ``especially useful for students, because it helps to understand the type systems of the most common typed functional languages'' and that ``[presenting] the basis of type inference technology [...] significantly improved the way students deal with type errors because they understand the type system.''
+
+However, TypeTool's parsing and type inference is done server-side so there is a delay between the user entering an expression and seeing the result. While short, a delay reduces the ease-of-use and may discourage users from trying many different expressions. Both delayed feedback and the lack of step-by-step explanations reduce learning quality \citep{ref5}, particularly in the area of rule learning. \cite{ref6} showed that immediate explanatory feedback is most effective at learning how to apply rules in computer programming.
+
+It is unclear whether the tool supports incorrectly-typed expressions, which are important to explain as seeing when the type inference algorithm fails is critical to understanding why type errors are raised and how to go about resolving them.
+
+TypeTool is also now inaccessible as the server hosting the application is no longer running and the source code has not been published.
+
+Another tool in the area of visualising type systems was developed by \cite{ref7}. It is a visual functional programming system which shows types during function application for a subset of Standard ML, used to teach first year undergraduate students.
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image25.png}
-  \caption{A diagram showing the types of some variables in NiMo, taken from their paper}
+  \includegraphics[width=0.75\linewidth]{images/image6.png}
+  \caption{Screenshot of Yung and Michaelson's tool, from their paper}
 \end{figure} \par}
 
-\cite{ref9} implemented a successful teaching tool, named TILC, for visualising lambda-calculus parse trees in order to help with teaching lambda-calculus to undergraduate students. They noted that to develop an intuitive understanding, students would benefit from experimenting with lambda-calculus and that “a tool that deals with all these aspects in a friendly and graphical manner incentivises [experimentation]”. TILC was successful, with the module organisers of ‘programming paradigms’ at the Universitat de Girona having a “good experience of using this tool in the course lectures and as a downloadable tool for students”. The authors suggested extending TILC to show types and type inference would have pedagogical value.
+However, this did not explicitly show the type inference process and as a desktop application rather than web app it is less accessible to lecturers and students. It also didn't support key functional language constructs such as function declarations and let bindings, and required significant explanation before using the tool to understand its output. Like TypeTool, this is no longer available to students.
+
+NiMo \citep{ref8} is a graphical programming language related to functional data processing which allows users to reason about the flow of data through a program. The types of data and processes can be inspected in a software tool named NiMoToons, and type inference is performed over the network of components. However, larger expressions can become complicated and be difficult to interpret. While NiMo performs type inference internally it is not a key focus to the end-user, and as such does not explain its steps. Additionally, it is harder to relate back to more commonly used, textual functional languages like Haskell.
+
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=\linewidth]{images/image25.png}
+  \caption{The types of some variables in NiMo, from their paper}
+\end{figure} \par}
+
+\cite{ref9} implemented a successful teaching tool, named TILC, for visualising $\lambda$-calculus parse trees in order to help with teaching $\lambda$-calculus to undergraduate students. They noted that to develop an intuitive understanding, students would benefit from experimenting with $\lambda$-calculus and that “a tool that deals with all these aspects in a friendly and graphical manner incentivises [experimentation]”. TILC was beneficial for students, with the module organisers of `programming paradigms' at the Universitat de Girona having a ``good experience of using this tool in the course lectures and as a downloadable tool for students''. The authors suggested extending TILC to show types and type inference would have pedagogical value.
 
 To summarise, types aid the construction of correct programs and type checking can detect issues in programs, either at compile-time or runtime. Type inference is a method often used alongside compile-time type checking to determine types in a program, an understanding of which could benefit computer scientists in writing and debugging programs. Some solutions exist which give students a better idea about types, however they either have significant limitations or do not explicitly cover type inference. In this report, we present an interactive web application for teaching type inference.
+
 \chapter{Background}\label{id:h.ebjyqi73zdyo}
-\section{$\lambda$-calculus}\label{id:h.odw4vku9eizz}
+
+\section{\texorpdfstring{$\lambda$-}{Lambda }calculus}\label{id:h.odw4vku9eizz}
+
 A $\lambda$-calculus is a representation of computation. The first $\lambda$-calculus set out by~\cite{ref10}, often viewed as the canonical $\lambda$-calculus, simply has variables, function abstraction and application.
 
-For this project, we will consider a calculus with five constructs to build expressions from. As a formal grammar:
+For this project, we will consider a calculus with five constructs to build expressions from. As a formal grammar, expressions are:
+$$\begin{array}{lcllll}
+  \\
+    \textrm{expression}\ e & ::= & c                       & \hspace{0.25cm} & \mathtt{con} & \textrm{(constant)}\\
+                         & \vert & x                                       & & \mathtt{var} & \textrm{(variable)}\\
+                         & \vert & e_1\ e_2                                & & \mathtt{app} & \textrm{(function application)}\\
+                         & \vert & \lambda x.\ e                           & & \mathtt{abs} & \textrm{(function abstraction)} \\
+                         & \vert & \mathtt{let}\ x = e_1\ \mathtt{in}\ e_2 & & \mathtt{let} & \textrm{(let statement)}\\
+  \\
+\end{array}$$
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.510\linewidth]{images/image28.png}
-\end{figure}
-    | c constant
+For example, consider the expression \mintinline{text}{(|$\lambda$|x. x) y}
 
-TODO: latex-ify the above, move constant to top
+It has variables \mintinline{text}{x} and \mintinline{text}{y}. Variables may be bound or free (unbound). Here \mintinline{text}{|x|} is bound as it is a parameter in the function abstraction, and \mintinline{text}{|y|} is free as there is nothing which binds it. This can be thought of in a similar way to how variables in most imperative programming languages have a scope where they are defined or undefined.
 
-For example, consider the expression \mintinline{text}{|($\lambda$x. x) y|}
+The function abstraction mentioned is the \mintinline{text}{|$\lambda$|x. x} part. This defines a function which given an argument (before the full stop) \mintinline{text}{x} simply returns (after the full stop) \mintinline{text}{x}, i.e. the identity function. A function to add three to an input might be written \mintinline{text}{|$\lambda$x. x + 3|} (although many of the most fundamental $\lambda$-calculi do not have such explicit notions of addition or numbers).
 
-It has variables \mintinline{text}{|x|} and \mintinline{text}{|y|}. Variables may be bound or free (unbound). Here \mintinline{text}{|x|} is bound as it is a parameter in the function abstraction, and \mintinline{text}{|y|} is free as there is nothing which binds it. This can be thought of in a similar way to how variables in most imperative programming languages have a scope where they are defined or undefined.
+Functions may be returned by other functions, which enables them to have the appearance of taking multiple arguments. For example \mintinline{text}{|$\lambda$|x. (|$\lambda$|y. x)} can be viewed as a function which takes two arguments and returns the first one, even though really it is a function taking one argument which returns a function taking another argument for a result. Here explicit brackets have been given for clarity, but they aren’t necessary. Additionally, sometimes multiple arguments like this are written together, so \mintinline{text}{|$\lambda$|x. (|$\lambda$|y. x)}, \mintinline{text}{|$\lambda$|x. |$\lambda$|y. x} and \mintinline{text}{|$\lambda$|xy. x} all mean the same thing.
 
-The function abstraction mentioned is the \mintinline{text}{|$\lambda$x. x|} part. This defines an anonymous function which given an argument (before the full stop) \mintinline{text}{|x|} simply returns (after the full stop) \mintinline{text}{|x|}, i.e. the identity function. A function to add three to an input might be written \mintinline{text}{|$\lambda$x. x + 3|} (although many of the most fundamental $\lambda$-calculi do not have such explicit notions of addition or numbers).
-
-Functions may be returned by other functions, which enables functions to have the appearance of taking multiple arguments. For example \mintinline{text}{|$\lambda$x. ($\lambda$y. x)|} can be viewed as a function which takes two arguments and returns the first one, even though really it is a function taking one argument which returns a function taking another argument for a result. Here explicit brackets have been given for clarity, but they aren’t necessary. Additionally, sometimes multiple arguments like this are written together, so \mintinline{text}{|$\lambda$x. ($\lambda$y. x)|}, \mintinline{text}{|$\lambda$x. $\lambda$y. x|} and \mintinline{text}{|$\lambda$xy. x|} all mean the same thing.
-
-Finally, the function application is actually applying the function \mintinline{text}{|$\lambda$x. x|} to the argument \mintinline{text}{|y|}. In $\lambda$-calculus evaluation is performed via $\beta$-reductions. In our example this could be done by substituting the argument \mintinline{text}{|y|} for parameter \mintinline{text}{|x|} in the body of the function \mintinline{text}{|x|}, resulting in \mintinline{text}{|y|}:
+Finally, the function application is actually applying the function \mintinline{text}{|$\lambda$x. x|} to the argument \mintinline{text}{|y|}. In $\lambda$-calculus evaluation is performed via $\beta$-reductions. In our example this could be done by substituting the argument \mintinline{text}{|y|} for parameter \mintinline{text}{|x|} in the body of the function \mintinline{text}{|x|}, resulting in \mintinline{text}{|y|}.
 
 This expression’s construction can be represented as an abstract syntax tree:
 
 TODO: tree diagram of the expression
 
-In addition to these three constructs, the \mintinline{text}{|let|} construct allows binding a value to a variable in an expression. For example \mintinline{text}{|let x = 3 in x + x|} binds \mintinline{text}{|x|} to the value \mintinline{text}{|3|} in \mintinline{text}{|x + x|}.
+In addition to these three constructs, the let construct allows binding a value to a variable in an expression. For example \mintinline{text}{let x = 3 in x + x} binds \mintinline{text}{x} to the value \mintinline{text}{3} in \mintinline{text}{x + x}.
 
-A \mintinline{text}{|con|} construct is added to represent literal constants, such as numbers or booleans like \mintinline{text}{|3|} and \mintinline{text}{|True|}.
+The con construct is added to represent literal constants, such as numbers or booleans like \mintinline{text}{3} and \mintinline{text}{True}.
 
 $\lambda$-calculi have been extensively studied, often using formal inductive definitions. For example, the inductive definition for the set of free variables (\mintinline{text}{|var|}s not bound by function abstraction or let statements) is:
-\begin{itemize}
-  \item \mintinline{text}{|con|}: $FV(c) = \varnothing$
-  \item \mintinline{text}{|var|}: $FV(x) = \{ x \}$
-  \item \mintinline{text}{|app|}: $FV(e\_1 e\_2) = FV(e\_1) \cup FV(e\_2)$
-  \item \mintinline{text}{|abs|}: $FV(\lambda x. e) = FV(e) - \{ x \}$
-  \item \mintinline{text}{|let|}: $FV(let x = e\_1 in e\_2) = FV(e\_2) - \{ x \}$
-\end{itemize}
-where e is an expression.
 
-TODO: fix latex of above
+$$\begin{array}{lcl}
+  \\
+    FV(c)                                       & = & \varnothing\\
+    FV(x)                                       & = & \{ x \}\\
+    FV(e_1\ e_2)                                & = & FV(e_1) \cup FV(e_2)\\
+    FV(\lambda x.\ e  )                         & = & FV(e) - \{ x \}\\
+    FV(\mathtt{let}\ x = e_1\ \mathtt{in}\ e_2) & = & FV(e_2) - \{ x \}\\
+  \\
+\end{array}$$
 
-Given these rules the set of free variables for any combination of these constructs can be determined. This can be demonstrated for our example expression \mintinline{text}{|($\lambda$x. x) y|}, which is shown in a tree structure below. More generally this is an example of how an inductive definition can tell us something about the entire program which is how some type inference algorithms can be viewed.
+Given these rules the set of free variables for any combination of these constructs can be determined. This can be demonstrated for our example expression \mintinline{text}{(|$\lambda$|x. x) y}, which is shown in a tree structure below. More generally this is an example of how an inductive definition can tell us something about the entire program which is how some type inference algorithms can be viewed.
 
 TODO: tree diagram of the expression with the sets of free variables at each node.
 
 Most real-world environments define a context which binds some variables by default to in-built values. For example Haskell’s GHC primitives and Prelude includes basic variables like \mintinline{text}{|[]|} (the empty list) and \mintinline{text}{|not|} (a function which inverts booleans). These can be considered bound at the top level and removed from the set of free variables there.
-\section{The simply typed $\lambda$-calculus}\label{id:h.w7vj0r89b86n}
+
+\section{The simply typed \texorpdfstring{$\lambda$-}{lambda }calculus}\label{id:h.w7vj0r89b86n}
+
 Typed $\lambda$-calculi extend the system with the concept of types.
 
-The simply typed $\lambda$-calculus is one of the simplest typed $\lambda$-calculi, and introduced by~\cite{ref11} is often viewed as the canonical typed $\lambda$-calculus. It has the \mintinline{text}{|var|}, \mintinline{text}{|abs|}, \mintinline{text}{|app|} and \mintinline{text}{|con|} constructs. Types in this system are either base types (often in the literature Greek letters $\alpha$, $\beta$, $\gamma$ are used, but these can be thought of similar to numbers, booleans, characters etc.) or functions between other types (such as $Int \rightarrow Bool$, or $Int \rightarrow (Bool \rightarrow Bool)$).
+The simply typed $\lambda$-calculus is one of the simplest typed $\lambda$-calculi, and introduced by~\cite{ref11} is often viewed as the canonical typed $\lambda$-calculus. It has the \texttt{var}, \texttt{abs}, \texttt{app} and \texttt{con} constructs. Types in this system are either base types like $Int$s, $Bool$s and $Char$s (often represented in the literature by Greek letters $\alpha$, $\beta$, $\gamma$) or functions between other types such as $Int \rightarrow Bool$ or $Int \rightarrow (Bool \rightarrow Bool)$.
 
-The syntax adds type annotations to \mintinline{text}{|var|}, \mintinline{text}{|abs|} and \mintinline{text}{|con|} constructs, for example ($\lambda$x: Int. odd\textsuperscript{Int $\rightarrow$ Bool} x\textsuperscript{Int}) 3\textsuperscript{Int} (although often for simplicity the types of \mintinline{text}{|var|} and \mintinline{text}{|con|} subexpressions, those in superscript, are left out).
+Compared to the untyped $\lambda$-calculus, the syntax of the simply typed $\lambda$-calculus adds type annotations to \texttt{var}, \texttt{abs} and \texttt{con} constructs, for example an expression may be written ($\lambda x: Int.\ odd^{Int \rightarrow Bool}\ x^{Int})\ 3^{Int}$. Often for simplicity the types of \texttt{var} and \texttt{con} subexpressions, those in superscript, are omitted.
 
 \section{Hindley-Milner type system}\label{id:h.gsouq2axz3k}
-Hindley-Milner (HM) is a typed $\lambda$-calculus which allows for the types of programs to be inferred and no type annotations are required \citep{ref12,ref13}. It extends the simply typed $\lambda$-calculus by adding \mintinline{text}{|let|} bindings and a richer type system that includes \textit{type functions} and \textit{polymorphism}.
 
-Like expressions, types can be considered to be built from \mintinline{text}{|var|} variables and \mintinline{text}{|app|} function applications. Type variables are either base types like $Bool$ and $Int$ or type functions. Type functions can be applied, taking types as parameters to construct composite types.
+Hindley-Milner (HM) is a typed $\lambda$-calculus which allows for the types of entire programs to be inferred with no type annotations required \citep{ref12,ref13}. It extends the simply typed $\lambda$-calculus by adding \texttt{let} bindings and a richer type system that includes \textit{type functions} and \textit{polymorphism}.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.467\linewidth]{images/image17.png}
-\end{figure}
-where C is a set of type functions such as $\rightarrow$, $List$ and $Maybe$.
+Like expressions, types can be considered to be built from \texttt{var\textsubscript{t}} variables and \texttt{app\textsubscript{t}} function applications. Type variables are either base types like $Bool$ and $Int$ or type functions. Type functions can be applied, taking types as parameters to construct composite types. Specifically, types made from \texttt{var\textsubscript{t}} and \texttt{app\textsubscript{t}} are known as \textit{monotypes}.
+$$\begin{array}{lcllll}
+  \\
+    \textrm{monotype}\ \tau & ::= & t_n               & \hspace{0.25cm} & \mathtt{var_t} & \textrm{(type variable)}\\
+                          & \vert & F\ \tau \dots \tau &                 & \mathtt{app_t} & \textrm{(type function application)}\\
+  \\
+\end{array}
+$$
+\vspace{-0.8cm}
+$$
+\textrm{where }F\textrm{ is a type function such as}\rightarrow\textrm{, }List\textrm{ or }Maybe.\\
+$$
+\vspace{0cm} % I don't know why this works but it does
 
-TODO: latexify the above, replace alpha with tn
+For a type to be valid all functions must be fully applied, unlike expressions where the final expression may be a function. As with expressions, we can again assume a global context that binds variables like $Bool$ and $Int$. In Hindley’s original paper only $\rightarrow$ was considered as a type function (i.e. $F = \{ \rightarrow \}$), however here we explore several type functions that have been found useful in practice.
 
-For a type to be valid all functions must be fully applied, unlike expressions where the final expression may be a function. As with expressions, we can again assume a global context that binds the basics variables like $Bool$ and $Int$. In Hindley’s original paper only $\rightarrow$ was considered as a type function (i.e. $C = \{ \rightarrow \}$), however here we explore several type functions that have been found useful in practice.
+The type function we've already been using is $\rightarrow$ (the \textit{function} type function). It takes two types as arguments and represents a function from the first type to the second. A function from $Int$ to $Bool$ is represented by $(\rightarrow)\ Bool\ Int$ in prefix notation, although would more commonly be written infix as $Bool \rightarrow Int$.
 
-The type function we’ve already been using is $\rightarrow$ (the \textit{function} type function). It takes two types as arguments and represents a function from the first type to the second. A function from $Int$ to $Bool$ is represented by $(\rightarrow) Bool Int$ in prefix notation, although would more commonly be written infix as $Bool \rightarrow Int$.
+The function type function ($\rightarrow$) should not be confused with a function type (e.g. $Bool \rightarrow Int$). An expression representing a function has a function type. That function type is the function type function applied to arguments. For example \mintinline{text}{|$\lambda$|x. x + 3} has a function type $Int \rightarrow Int$, which is the function type function $\rightarrow$ applied to arguments $Int$ and $Int$.
 
-The function type function (\mintinline{text}{|->|}) should not be confused with the function type: an expression representing a function has a function type, and that function type is the function type function applied to arguments. For example \mintinline{text}{|$\lambda$x. x + 3|} has a function type $Int \rightarrow Int$, which is the function type function $\rightarrow$ applied to arguments $Int$ and $Int$.
+The list type function is also very common, which given one type argument represents a list of those types. A list of booleans might be written $List\ Bool$ or $[]\ Bool$ in prefix notation, although often the list type is represented by wrapping the type argument in square brackets instead, as in $[Bool]$. A string can be viewed as a list of characters, $[Char]$.
 
-The list type function is also very common, which given one type argument represents a list of those types. A list of booleans might be written $List\text{ }Bool$ or $[]\text{ }Bool$ in prefix notation, although often the list type is represented by wrapping the type argument in square brackets instead like $[Bool]$.
+$Maybe$ is another type function commonly used in functional languages like Haskell. A $Maybe$ represents the optional presence of something, similar to Java’s \mintinline{java}{|Optional|} and C++’s \mintinline{c++}{|std::optional|}. Applied to a $Bool$ this may be written $Maybe\ Bool$, representing a wrapper around nothing or a boolean. In Java this would be represented with a generic as \mintinline{java}{|Optional<Boolean>|} and in C++ as \mintinline{c++}{|std::optional<bool>|}.
 
-$Maybe$ is another type function commonly used in functional languages like Haskell. A $Maybe$ represents the optional presence of something, similar to Java’s \mintinline{text}{|Optional|} and C++’s \mintinline{text}{|std::optional|}. Applied to a boolean type this may be written $Maybe\text{ }Bool$, representing a wrapper around nothing or a boolean. In Java this would be represented with a generic as \mintinline{text}{|Optional<Boolean>|} and in C++ as \mintinline{text}{|std::optional<bool>|}.
+A similar common type function is $Either$, which takes two type arguments and represents a wrapper around either one of the types. For example, an either for a boolean or integer is written $Either\ Bool\ Int$. This is particularly helpful for functions that may fail, as they might return a result or error. For example, a function that returns a integer result or an error message may have the return type $Either\ Int\ [Char]$.
 
-A similar common type function is $Either$, which takes two type arguments and represents a wrapper around either one of the types. For example, an either for a boolean or integer is written $Either\text{ }Bool\text{ }Int$.
+Finally, tuples represent a fixed-length sequence of elements of specific types. Tuple constructors are a set of type functions representing a cross product of their type arguments, named $(,)$ for 2-tuples, $(,,)$ for 3-tuples, $(,,,)$ for 4-tuples and so on for different element lengths. A 3-tuple holding a boolean, integer and integer can be written in prefix notation as $(,,)\ Bool\ Int\ Int$. However instead tuples usually borrow mathematical syntax with parentheses and commas and would be written as $(Bool,\ Int,\ Int)$.
 
-Finally, tuples represent a defined-length sequence of elements of specific types. Tuple constructors are a set of type functions representing a cross product of their type arguments, named $(,)$, $(,,)$, $(,,,)$ and so on for different element lengths. A 3-tuple holding a boolean, integer and integer can technically be written in prefix notation as $(,,)\text{ }Bool\text{ }Int\text{ }Int$ but instead generally tuples borrow mathematical syntax with parentheses and commas like $(Bool,\text{ }Int,\text{ }Int)$.
+$Bool$, $Maybe\ Int$, $Bool \rightarrow Int$, and $[(Bool,\ Int \rightarrow Maybe\ Bool)]$ are all examples of monotypes.
 
-The set of types made from \mintinline{text}{|var\textsubscript{t}|} and \mintinline{text}{|app\textsubscript{t}|} are known as monotypes. For example, $Bool$, $Int$, $Bool \rightarrow Int$, and $Bool \rightarrow [(Bool,\text{ }Int \rightarrow Maybe\text{ }Bool)]$ are all monotypes.
+Adding zero or more for-all quantified type variables to monotypes forms polymorphic types or \textit{polytypes} (called principal type schemes by Hindley). This definition makes monotypes a special case of polytypes: monotypes are polytypes with zero for-all qualified type variables. We can therefore consider `type' in general to mean polytype (which include monotypes). Polytypes can be thought of as the \texttt{abs} equivalent for types. By convention, we represent free type variables with $t_0,\ t_1,\ t_2,\ \dots$ and use $a,\ b,\ c,\ \dots$ for for-all quantified type variables.
 
-Adding zero or more for-all quantified type variables to monotypes forms polymorphic types or polytypes (called principal type schemes by Hindley). This can be thought of as the \mintinline{text}{|abs|} equivalent for types, written as $\forall a. \rho$ where $\rho$ is a polytype. This definition makes monotypes a special case of polytypes: monotypes are polytypes with zero for-all qualified type variables. We can therefore consider ‘type’ to mean ‘polytype’. By convention, we use $t0$, $t1$, $t2$, $\dots$ for free type variables, and $a$, $b$, $c$, $\dots$ for for-all quantified type variables.
+$$\begin{array}{lcllll}
+  \\
+    \textrm{polytype}\ \rho & ::= & \tau            & \hspace{0.25cm} & & \textrm{(monotype)}\\
+                          & \vert & \forall a.\ \rho &                 & \mathtt{abs_t} & \textrm{(type function abstraction)}\\
+  \\
+\end{array}
+$$
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.290\linewidth]{images/image30.png}
-\end{figure}
+Polytypes allow for parametric polymorphism, where functions may accept different types as long as they meet certain constraints. For example the \mintinline{text}{length} function is polymorphic: it has the polytype $\forall a.\ [a] \rightarrow Int$, which accepts a list of any type and returns its length as an integer. \mintinline{text}{length} accepts multiple types such as $[Bool]$ and $[Int]$ as both of these meet the constraint of being a list.
 
-TODO: latexify the above, but use rho instead of sigma and a instead of alpha
+Correctly inferring polymorphic types can be difficult, and in fact \cite{ref14} proved that doing so for System F, a type system similar to Hindley-Milner with fewer typing rule constraints, is undecidable. To prevent undecidability, HM avoids overusing polytypes, using only monotypes for \texttt{var}, \texttt{con}, \texttt{app} and \texttt{abs} expressions.
 
-Polytypes allow for parametric polymorphism, where a type may be parameterized by a for-all bound quantifier. This allows functions to accept different types as long as they meet certain constraints. For example the \mintinline{text}{|length|} function is polymorphic: it has the polytype $\forall a. [a] \rightarrow Int$, which accepts a list of any type and returns its length as an integer. It accepts different types such as $[Bool]$ and $[Int]$ as both of these meet the constraint of being a list.
+To allow for some polymorphism, the parameters of \texttt{let} expressions are polymorphic in the \texttt{let} body. The process by which the monomorphic parameter type is turned into a polymorphic one is known as \textit{generalisation}. The overall type of \texttt{let} expressions themselves are not generalised.
 
-Correctly inferring polymorphic types can be difficult, and in fact~\cite{ref14} proved that doing so for System F, a type system similar to Hindley-Milner with fewer typing rule constraints, is undecidable. To prevent undecidability, HM avoids overusing polytypes, using only monotypes for \mintinline{text}{|var|}, \mintinline{text}{|con|}, \mintinline{text}{|app|} and \mintinline{text}{|abs|} expressions.
-
-To allow for some polymorphism, \mintinline{text}{|let|} expressions’ parameters are polymorphic in the \mintinline{text}{|let|} body. The process by which the monomorphic parameter type is turned into a polymorphic one is known as generalisation. The overall type of \mintinline{text}{|let|} expressions themselves are not generalised.
-
-This is the difference between:
+The difference can be seen by comparing similar \texttt{let} and \texttt{abs} expressions:
 \begin{itemize}
-  \item \mintinline{text}{|let i = ($\lambda$ x $\rightarrow$ x) in (i 3, i True)|} type-checks, as i is generalised to the polytype $\forall a. a \rightarrow a$ within the body \mintinline{text}{(i 3, i True)} so can be applied to both an $Int$ and $Bool$
-  \item \mintinline{text}{($\lambda$ i $\rightarrow$ (i 3, i True)) ($\lambda$ x. x)|} does not type-check as the function abstraction \mintinline{text}{($\lambda$ x. x)} has the monotype $t0 \rightarrow t0$, and $t0$ must take only one type in both tuple parts - it cannot be both an $Int$ and a $Bool$.
+  \item \mintinline{text}{let i = (|$\lambda$|x. x) in (i 3, i True)} type-checks, as i is generalised to the polytype $\forall a.\ a \rightarrow a$ within the body \mintinline{text}{(i 3, i True)} so can be applied to both an $Int$ and $Bool$.
+  \item \mintinline{text}{(|$\lambda$|i. (i 3, i True)) (|$\lambda$|x. x)} does not type-check as the function abstraction \mintinline{text}{(|$\lambda$|x. x)} has the monotype $t_0 \rightarrow t_0$, and $t_0$ must take only one type in both tuple parts as it is not for-all qualified - it cannot be both an $Int$ and a $Bool$.
 \end{itemize}
 
-Hindley-Milner is the basis for the type system of Standard ML \citep{ref15} (which OCaml and F\# are related to) and was the basis of the type system in Haskell \citep{ref16}. It has influenced the development of Rust and Swift, and more generally type inference is present in many more languages including Java, JavaScript and C++.
+Hindley-Milner is the basis for the type system of Standard ML \citep{ref15}, which OCaml and F\# are related to, and was the basis of the type system in Haskell \citep{ref16}. It has influenced the development of Rust and Swift, and more generally type inference is present in many more languages including Java, JavaScript and C++.
 
-Haskell has since been extended with type-class constraints \citep{ref17}, functional dependencies \citep{ref18}, and generalised algebraic data types (GADTs) \citep{ref19}. Haskell’s inference engine was moved onto a new engine, OutsideIn(X), when GHC 7.2 was released November 2011 after~\cite{ref20} proposed a solution to the issues with Hindley-Milner’s poor performance on large programs and difficulty inferring expressions without principal types that arise with type-class constraints and GADTs. In doing this, Haskell stopped automatically generalising variables bound by \mintinline{text}{|let|} expressions after~\cite{ref21} argued that generalising \mintinline{text}{|let|} bindings is complex in type inference engines other than HM and the feature was rarely used in practice, with the change only affecting 0.13\% lines of the GHC core libraries. This change does however take it further away from performing HM-like type inference.
+Haskell's type system has since been extended with type-class constraints \citep{ref17}, functional dependencies \citep{ref18}, and generalised algebraic data types (GADTs) \citep{ref19}. Haskell’s inference engine was moved onto a new engine, OutsideIn(X), when GHC 7.2 was released November 2011 after \cite{ref20} proposed a solution to the issues with Hindley-Milner’s poor performance on large programs and difficulty inferring expressions without principal types that arise with type-class constraints and GADTs. This stopped Haskell automatically generalising variables bound by \texttt{let} expressions after \cite{ref21} argued that generalisation is hard in type inference engines other than HM and the feature was rarely used in practice, with the change only affecting 0.13\% lines of the GHC core libraries. This change does however take it further away from performing HM-like type inference.
 
-Rust’s compiler, rustc, did at one time use a variant of HM for type inference. However,~\cite{ref22} proposed a new scheme which was later implemented to simplify how the compiler reasoned about types. Similarly to Haskell’s move to OutsideIn(X), the new type inference reduces flexibility in some edge cases, although practically this is rare. Both rustc and Rust’s core libraries compiled under the new type inference scheme without changes. Later on,~\cite{ref23} developed chalk, a library designed to be used in rustc to help implement Rust’s generics. This library makes heavy use of unification, a key component of many HM type inference algorithms.
+Rust’s compiler, rustc, previously used a variant of HM for type inference. However, \cite{ref22} proposed a new scheme which was later implemented to simplify how the compiler reasoned about types. Similarly to Haskell’s move to OutsideIn(X), the new type inference reduces flexibility in some edge cases, although practically this is rare. Both rustc and Rust’s core libraries compiled under the new type inference scheme without changes. Later on, \cite{ref23} developed chalk, a library designed for use in rustc to help implement Rust’s generics. This library makes heavy use of unification, a key component of many HM type inference algorithms.
 
-Apple’s Swift heavily uses type inference. It is implemented using a “constraint-based type checker that is reminiscent of the classical Hindley-Milner type inference algorithm” \citep{ref24}. Like other languages it extends HM with additional language features, such as more expressive polymorphic types with additional constraints. To adapt HM to a procedural language, and for improved performance and better error messages, Swift limits type inference to individual statements rather than entire programs.
+Apple's Swift language heavily uses type inference. It is implemented using a ``constraint-based type checker that is reminiscent of the classical Hindley-Milner type inference algorithm'' \citep{ref24}. Like other languages Swift extends HM with additional language features, including more expressive polymorphic types with additional constraints. HM is particularly suited to functional languages, so to adapt it to better suit Swift's procedural style, Swift limits type inference to individual statements rather than entire programs. This also improves performance and provides more specific error messages.
 
-In addition to their own inference engines, many languages allow the programmer to add more type information through explicit type annotations or casting. This is particularly helpful where the programmer knows more than the type inference algorithm about the limits on how a part of a program will be used.
+In addition to inferred types, most languages allow programmers to add more type information through explicit type annotations or casting. These features are particularly helpful where the programmer knows more than the inference algorithm about the limits on how a part of a program will be used.
 
-Java allows casting objects and TypeScript has its \mintinline{text}{|as|} type assertion operator. Programmers can use these sparingly (and often in combination with \mintinline{text}{|instanceof|} and \mintinline{text}{|typeof|} operators respectively) as an escape hatch to work around the type inference algorithm’s limitations. In these situations statements may not be able to be type checked at compile-time so instead runtime checks are performed to maintain type safety.
+Java allows casting and TypeScript has its \mintinline{text}{|as|} type assertion operator. These can be used sparingly (often in combination with \mintinline{text}{instanceof} and \mintinline{text}{typeof} operators respectively) as an escape hatch to work around the limitations of type inference algorithms. These statements may not be able to be type checked at compile-time so instead runtime checks are performed to maintain type safety.
 
 Java allows casting an object to a subclass \citep{ref25}. Runtime checks are performed, which throw a \mintinline{text}{|ClassCastException|} in case the object is not actually an instance of the subclass.
 
 \begin{minted}[breaklines]{java}
-// Dog and Cat extend Animal
+/* Dog and Cat extend Animal */
 
 Animal c1 = new Dog();
 Dog s1 = (Dog) c1; // okay
@@ -310,164 +332,228 @@ Animal c2 = new Cat();
 Dog s2 = (Dog) c2; // throws ClassCastException at runtime
 \end{minted}
 
-TypeScript allows for casting compatible objects with its \mintinline{text}{|as|} operator, or overriding the compile-time type checking completely with a \mintinline{text}{|@ts-ignore|} comment. The following shows that some type-safe code is rejected by the TypeScript type checker, but with several possible workarounds.
+TypeScript can cast compatible objects with its \mintinline{text}{as} operator. Alternatively, compile-time type checking may be overridden completely with a \mintinline{text}{@ts-ignore} comment. The following shows that some type-safe code is rejected by the TypeScript type checker, but has several possible workarounds.
 
 \begin{minted}[breaklines]{typescript}
-const a = Math.random() < 0.5 ? 'cs310' : 310; // has type "cs310" | 310
-const b = a + a; // throws a type error, but b could have type "cs310cs310" | 620
+// has type "cs310" | 310
+const a = Math.random() < 0.5 ? 'cs310' : 310;
 
-const c = a == 'cs141' ? a + a : a + a; // okay, has type number | string
-const d = a as any + a; // okay, has type any
-const e = a as any + a as 'cs310cs310' | 620 // okay, has type "cs310cs310" | 620
-// @ts-ignore
-const f: 'cs310cs310' | 620 = a + a; // okay, has type "cs310cs310" | 620
+// throws a type error, but b could have type "cs310cs310" | 620
+const b = a + a;
+
+// has type number | string
+const c = a == 'cs310' ? a + a : a + a;
+
+// has type any
+const d = a as any + a;
+
+// has type "cs310cs310" | 620
+const e = a as any + a as 'cs310cs310' | 620
+
+// has type "cs310cs310" | 620
+/* @ts-ignore */
+const f: 'cs310cs310' | 620 = a + a;
 \end{minted}
 
 TODO: (maybe?) Add section on TypeScript/Elm?
 \underline{\href{https://aaltodoc.aalto.fi/bitstream/handle/123456789/42719/master\_Mikkonen\_Juuso\_2020.pdf}{https://aaltodoc.aalto.fi/bitstream/handle/123456789/42719/master\_Mikkonen\_Juuso\_2020.pdf}}
 Talks about statically typed languages in JavaScript-land. Mentions things like TypeScript don’t use HM because JS has a lot of structural typing (i.e. if objects have the right properties it’s fine to call methods that depend on that interface) and subtyping.
 
-While real-world languages don’t work exactly like HM, for the purposes of the teaching tool HM gives a good representation of how type inference works to students. HM avoids being too complex to understand, and is still related to how languages commonly used in practice perform type inference.
+While real-world languages don't work exactly like HM, for the purposes of the teaching tool HM gives a good representation of how type inference works to students. HM avoids being too complex to understand, and is still related to how languages commonly used in practice perform type inference.
+
 \section{Hindley-Milner type inference}\label{id:h.admfqf7bhkct}
-Various algorithms are available to infer types in Hindley-Milner such as Algorithm W by~\cite{ref26} and Algorithm M by~\cite{ref27}. Algorithm W takes a bottom-up approach, attempting to infer the types of subexpressions up the abstract syntax tree, while Algorithm M takes a top-down approach, inferring types down the tree. Algorithm W’ is a minor extension to Algorithm W, by~\cite{ref28} which can improve the quality of type errors raised.
 
-Substitutions are a key concept from logic used by the algorithms. These are maps from variables to terms. When applied to an expression, the variables are substituted with their corresponding terms. In the case of type inference, the variables are type variables, the terms are monotypes and expressions are types.
+Various type inference algorithms are available for the Hindley-Milner type system. These include Algorithm \W\ by \cite{ref26} and Algorithm \M\ by \cite{ref27}. \W\ takes a bottom-up approach, attempting to infer the types of subexpressions up the abstract syntax tree, while \M\ takes a top-down approach, inferring types down the tree. Algorithm \W' is a minor extension of \W\ by \cite{ref28} which can improve the quality of type errors raised.
 
-TODO: fix this latex
+\subsection{Substitutions}
 
-Substitutions are represented with curly braces, with each entry separated by a comma and the variables and terms separated with an arrow. For example, $\{ t0 \mapsto t1, t2 \mapsto (Int, Bool) \}$ would replace $t0$ with $t1$, and replace $t2$ with $(Int, Bool)$. Applied to the type $t0 \rightarrow t1 \rightarrow t2$ results in $t1 \rightarrow t1 \rightarrow (Int, Bool)$.
+Substitutions are a key concept from logic used by all three algorithms. These are maps from variables to terms. When applied to a value, the variables are substituted by their corresponding terms. In type inference, the variables are type variables, the terms are monotypes and values are types.
 
-When applying substitutions replacements are performed simultaneously, meaning each variable in the expression may be mapped at most once. For example the substitution $S = \{ t0 \mapsto t1, t1 \mapsto t2 \}$ applied once to the expression $t0$, as $S(t0)$ results in $t1$, not $t2$. Applying the substitution twice, $S(S(t0))$ would result in $t2$.
+Substitutions are represented with curly braces, with each entry separated by a comma and the variables and terms separated with an arrow. For example, the susbtitution $\{ t_0 \mapsto t_1,\ t_2 \mapsto (Int, Bool) \}$ would replace $t_0$ with $t_1$, and replace $t_2$ with $(Int, Bool)$. Applying it to the type $t_0 \rightarrow t_1 \rightarrow t_2$ would result in $t_1 \rightarrow t_1 \rightarrow (Int, Bool)$.
 
-Any number of substitutions may be applied to expressions. For example, given $S\_1 = \{ t0 \mapsto t2, t1 \mapsto t3 \}$ and $S\_2 = \{ t0 \mapsto t1 \}$, we may apply both to an expression $t0$. Note that this is not commutative, $S\_1(S\_2(t0)) = t3$ while $S\_2(S\_1(t0)) = t2$.
+When applying substitutions replacements are performed simultaneously, so each variable in the type may be mapped at most once. For example the substitution $S = \{ t_0 \mapsto t_1,\ t_1 \mapsto t_2 \}$ applied once to the type $t_0$, as $S(t_0)$ results in $t_1$, not $t_2$. Applying the substitution twice, $S(S(t_0))$ results in $t_2$.
 
-Substitutions may be combined to have the same effect as applying them in order to an expression $E$. For example, with $S\_1 = \{ t0 \mapsto t2, t1 \mapsto t3 \}$ and $S\_2 = \{ t0 \mapsto t1 \}$ again, $combine(S\_1, S\_2)(\rho) = S\_1(S\_2(\rho)) = \{ t0 \mapsto t3, t1 \mapsto t3 \}(\rho)$. As application is not commutative, the order substitutions are combined in matters, i.e. $combine(S\_1, S\_2)$ does not necessarily equal $combine(S\_2, S\_1)$. Combining substitutions is however associative, as $combine(S\_1, combine(S\_2, S\_3))(\rho) = S\_1(S\_2(S\_3(\rho))) = combine(combine(S\_1, S\_2), S\_3)(\rho)$.
+Any number of substitutions may be applied to a type. For example, given two substitutions $S_1 = \{ t_0 \mapsto t_2,\ t_1 \mapsto t_3 \}$ and $S_2 = \{ t_0 \mapsto t_1 \}$, we may apply both to a type $t_0$. Note that substitutions are not commutative, $S_1(S_2(t_0)) = t_3$ while $S_2(S_1(t_0)) = t_2$.
 
-A substitution is said to unify two expressions if when applied to both it results in equal expressions. For example, $\{ t0 \mapsto Int, t1 \mapsto Bool \}$ unifies $(t0, Bool)$ and $(Int, t1)$, as when the substitution is applied to either expression the result is $(Int, Bool)$.
+Substitutions may be combined to have the same effect as applying them in order to an type $\rho$. For example, with substitutions $S_1 = \{ t0 \mapsto t2,\ t1 \mapsto t3 \}$ and $S_2 = \{ t0 \mapsto t1 \}$ again, we have:
+$$\mathit{combine}(S_1,\ S_2)(\rho) = S_1(S_2(\rho)) = \{ t0 \mapsto t3,\ t1 \mapsto t3 \}(\rho)$$
 
-Unification is the process of finding unifying substitutions given two expressions, or reporting no such substitution exists.~\cite{ref29} presents a simple algorithm for unification, and~\cite{ref30} and~\cite{ref31} set out linear time unification algorithms.
+As application is not commutative, the order substitutions are combined in matters, i.e. $\mathit{combine}(S_1,\ S_2)$ does not necessarily equal $\mathit{combine}(S_2,\ S_1)$. Combining substitutions is however associative, as:
+\begin{align*}
+  \mathit{combine}(S_1,\ \mathit{combine}(S_2,\ S_3))(\rho) & = S_1(S_2(S_3(\rho)))\\& = \mathit{combine}(\mathit{combine}(S_1,\ S_2),\ S_3)(\rho)
+\end{align*}
 
-In the type inference algorithms W, W’ and M, unification is applied to pairs of monotypes. This results in substitutions which effectively combine the various type constraints giving us a final type.
+\subsection{Unification}
 
-For example, take an expression satisfying two type constraints: it matches the monotype $[Bool] \rightarrow t0$ and it matches with the monotype $[t1] \rightarrow t1$. These constraints might arise in evaluating the type of \mintinline{text}{|head [True]|}. The first constraint is from knowing \mintinline{text}{|[True]|} is a $[Bool]$ so the function should accept a $[Bool]$. The second constraint is based on the known definition of \mintinline{text}{|head|} in the global context. Unification can find the unifying substitution $\{ t0 \mapsto Bool, t1 \mapsto Bool \}$, giving the overall type $[Bool] \rightarrow Bool$. We can then see the resultant type of \mintinline{text}{|head [True]|} is $Bool$.
+A substitution is said to unify two values if when applied to both it results in equal values. For example, $\{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}$ unifies $(t_0,\ Bool)$ and $(Int,\ t_1)$, as it is applied to either expression the result is $(Int,\ Bool)$.
 
-If at any point unification is not possible, the type constraints must be incompatible and so a type error is raised. For example, there is no unifying substitution for $Int \rightarrow t0$ and $Bool \rightarrow t1$ as one is a function accepting an $Int$ and the other accepts a $Bool$.
+Unification is the process of finding unifying substitutions given two values, or reporting no such substitution exists. \cite{ref29} presents a simple algorithm for unification, and both \cite{ref30} and \cite{ref31} set out linear time unification algorithms.
 
-For practical purposes, in type inference algorithms we require unifying substitutions to be finite as infinite types are difficult to represent and reason about. For example \mintinline{text}{|x|} in \mintinline{text}{|$\lambda$x. x x|} needs to be a function that accepts itself. Initially assuming \mintinline{text}{|x|} has type $t0 \rightarrow t1$ and knowing it should accept itself, it also has type $(t0 \rightarrow t1) \rightarrow t1$. It also must accept that, so has type $((t0 \rightarrow t1) \rightarrow t1) \rightarrow t1$, $(((t0 \rightarrow t1) \rightarrow t1) \rightarrow t1) \rightarrow t1$, and so on. This is an infinite type and is not allowed by HM. Note that this does not exclude functions from HM which do accept themselves, such as the identity function \mintinline{text}{|id|} with its finite type $\forall a. a \rightarrow a$, as long as they themselves have finite types.
+In the type inference algorithms \W, \W’ and \M, unification is applied to pairs of monotypes. This results in substitutions which effectively combine the various type constraints giving us a final type.
 
-Detecting infinite types in unification is done by checking whether the types are not equal and one of the types occurs in another. This is known as the occurs check. In the previous example \mintinline{text}{|$\lambda$x. x x|} we might try to unify $t0 \rightarrow t1$ with $t0$. $t0$ occurs in $t0 \rightarrow t1$ so there is no finite unifying substitution (an infinite unifying substitution is $\{ t0 \mapsto ((((t0 \rightarrow t1) \rightarrow t1) \rightarrow infinite t1s \dots) \rightarrow t1) \}$). The occurs check failing necessarily means we have an infinite type: the type contains itself.
+For example, take an expression satisfying two type constraints: it matches the monotype $[Bool] \rightarrow t_0$ and it matches with the monotype $[t_1] \rightarrow t_1$. These constraints might arise in evaluating the type of \mintinline{text}{head [True]}. The first constraint is from knowing \mintinline{text}{[True]} is a $[Bool]$ so the function should accept a $[Bool]$. The second constraint is based on the known definition of \mintinline{text}{head} in the global context. Unification can find the unifying substitution $\{ t_0 \mapsto Bool, t_1 \mapsto Bool \}$, giving the overall type $[Bool] \rightarrow Bool$. We can then see the resultant type of \mintinline{text}{head [True]} is $Bool$.
+
+If unification is not possible, the type constraints must be incompatible and so a type error is raised. For example, there is no unifying substitution for $Int \rightarrow t_0$ and $Bool \rightarrow t_1$ as one is a function accepting an $Int$ and the other accepts a $Bool$.
+
+For practical purposes, type inference algorithms require unifying substitutions to be finite as infinite types are difficult to represent and reason about. For example \mintinline{text}{x} in \mintinline{text}{|$\lambda$|x. x x} needs to be a function that accepts itself. Initially assuming \mintinline{text}{x} has type $t_0 \rightarrow t_1$ and knowing it should accept itself, it also has type $(t_0 \rightarrow t_1) \rightarrow t_1$. It also must accept that, so has type $((t_0 \rightarrow t_1) \rightarrow t_1) \rightarrow t_1$, $(((t_0 \rightarrow t_1) \rightarrow t_1) \rightarrow t_1) \rightarrow t_1$, and so on. This is an infinite type and is not allowed by HM. Note that this does not exclude functions from HM which do accept themselves, such as the identity function \mintinline{text}{id} with its type $\forall a.\ a \rightarrow a$, as long as they have finite types.
+
+Detecting infinite types in unification is done by checking whether the types are not equal and one of the types occurs in another. This is known as the \textit{occurs check}. In the previous example \mintinline{text}{|$\lambda$|x. x x} we might try to unify $t_0 \rightarrow t_1$ with $t_0$. $t_0$ occurs in $t_0 \rightarrow t_1$ so there is no finite unifying substitution (an infinite unifying substitution is $\{ t_0 \mapsto ((((t_0 \rightarrow t_1) \rightarrow t_1) \rightarrow \textrm{infinite }t_1\textrm{s} \dots) \rightarrow t_1) \}$). The occurs check failing necessarily means we have an infinite type: the type contains itself.
+
+\subsection{Contexts}
 
 Inferring types is done in a typing context. Languages often have a global context with built-in functions and their types pre-defined, such as Haskell’s Prelude and JavaScript’s global objects.
 
-Typing contexts can be seen as maps from variable names to their corresponding types, and are represented with the symbol $\Gamma$. For example a context with some common functions may be written $\Gamma = \{ not: Bool \rightarrow Bool, odd: Int \rightarrow Bool, id: \forall a. a \rightarrow a \}$.
+Typing contexts can be seen as maps from variable names to their corresponding types, and are represented with the symbol $\Gamma$. A simple context may be written $\Gamma = \{ \mathtt{not} : Bool \rightarrow Bool,\ \mathtt{odd} : Int \rightarrow Bool,\ \mathtt{id} : \forall a.\ a \rightarrow a \}$.
 
-Constructs that bind variables like \mintinline{text}{|let|} and \mintinline{text}{|abs|} add entries to a local context for these additional bindings, used in the construct bodies. For example, in \mintinline{text}{|let x = 3 in odd x|} the binding $x: Int$ may be added to the context used to perform type inference on the body subexpression \mintinline{text}{|odd x|}. Similarly in \mintinline{text}{|\\x $\rightarrow$ not x|} the binding $x: t0$ may be added to the context for inferring the type of the function body \mintinline{text}{|not x|}. Adding a binding to the context is represented by a $+$, so given $\Gamma = \{ x: Bool \}$ then $\Gamma + y: Int$ is $\{ x: Bool, y: Int \}$.
+Constructs that bind variables like \texttt{let} and \texttt{abs} add entries to a local context for these additional bindings, used in the construct bodies. For example, in \mintinline{text}{let x = 3 in odd x} the binding $\mathtt{x} : Int$ may be added to the context used to perform type inference on the body subexpression \mintinline{text}{odd x}. Similarly in \mintinline{text}{|$\lambda$|x. not x} the binding $\mathtt{x} : t_0$ may be added to the context for inferring the type of the function body \mintinline{text}{not x}. Adding a binding is represented by a $+$, so given $\Gamma = \{ \mathtt{x} : Bool \}$ then $\Gamma + \mathtt{y} : Int$ is $\{ \mathtt{x} : Bool,\ \mathtt{y} : Int \}$.
 
-Applying a substitution to a context is to apply the substitution to every type in the context, or effectively every ‘value’ in the key-value map. For example, applying the substitution $S = \{ t0 \mapsto t1, t2 \mapsto Int \}$ to the context $\Gamma = \{ x: t0, y: t1, z: t2 \}$, results in a new context $S(\Gamma) = \{ x: t1, y: t1, z: Int \}$.
+Applying a substitution to a context is to apply the substitution to every type in the context, or effectively every `value' in the key-value map. To illustrate with an example, applying the substitution $S = \{ t_0 \mapsto t_1,\ t_2 \mapsto Int \}$ to the context $\Gamma = \{ \mathtt{x} : t_0,\ \mathtt{y} : t_1,\ \mathtt{z} : t_2 \}$, results in a new context $S(\Gamma) = \{ \mathtt{x} : t_1,\ \mathtt{y} : t_1,\ \mathtt{z} : Int \}$.
 
-Some types are considered more general than others. A type $\rho\_a$ is more general than a type $\rho\_b$ if there exists a substitution from $\rho\_a$ to $\rho\_b$ whose variables are for-all quantified in $\rho\_a$. This is denoted by $\sqsubseteq$, for example $\forall a. a \rightarrow a$ is more general than $Int \rightarrow Int$ by the substitution $\{ a \mapsto Int \}$, written $\forall a. a \rightarrow a \sqsubseteq Int \rightarrow Int$. Substitutions may (and often do) substitute quantified type variables with free type variables like $t0$ and $t1$, rather than concrete types like $Int$ and $Bool$. As an example, $\forall a \forall b. (a \rightarrow b) \rightarrow [a] \rightarrow [b] \subseteq \forall a. (a \rightarrow Bool) \rightarrow [a] \rightarrow [Bool] \subseteq (t0 \rightarrow Bool) \rightarrow [t0] \rightarrow [Bool]$, following substitutions $\{ b: Bool \}$ and $\{ a: t0 \}$.
+\subsection{Instantiation and generalisation}
 
-For any type $\rho \subseteq \rho$, as the substitution may be empty. A type is strictly less general ($\sqsubset$) than another if and only if the substitution is non-empty. This means a strictly less general type must have at least one fewer quantified variables as one for-all quantified variable must be substituted away.
+Some types are considered more general than others. A type $\rho_a$ is more general than a type $\rho_b$ if there exists a substitution from $\rho_a$ to $\rho_b$ whose variables are for-all quantified in $\rho_a$. This is denoted by $\sqsubseteq$, for example $\forall a.\ a \rightarrow a$ is more general than $Int \rightarrow Int$ by the substitution $\{ a \mapsto Int \}$, written $\forall a.\ a \rightarrow a \sqsubseteq Int \rightarrow Int$.
 
-TODO: (maybe) partial order diagram of some of $\forall a \forall b. (a \rightarrow b) \rightarrow [a] \rightarrow [b]$’s partial and full instantiations.
+Substitutions may (and often do) substitute quantified type variables with free type variables like $t_0$ and $t_1$, rather than concrete types like $Int$ and $Bool$. For example:
+\begin{align*}
+\hspace{0.75cm}\forall a & \forall b.\ (a \rightarrow b) \rightarrow [a] \rightarrow [b]
+\\& \sqsubseteq \forall a.\ (a \rightarrow Bool) \rightarrow [a] \rightarrow [Bool] &\textrm{by}\ \{ b \mapsto Bool \}
+\\&\sqsubseteq (t_0 \rightarrow Bool) \rightarrow [t_0] \rightarrow [Bool] &\textrm{by}\ \{ a \mapsto t_0 \}
+\end{align*}
 
-An expression with a type $\rho\_1$ more general than another type $\rho\_2$ can be considered to have the less general type $\rho\_2$. This means if an expression with type $\rho\_2$ is needed, providing an expression with type $\rho\_1$ will type-check if and only if $\rho\_1 \sqsubseteq \rho\_2$.
+For any type $\rho \sqsubseteq \rho$, as the substitution may be empty. A type is strictly less general ($\sqsubset$) than another if and only if the substitution is non-empty. This means a strictly less general type must have at least one fewer quantified variable, because one for-all quantified variable must have been substituted away.
 
-The process of giving an expression a less general type is known as instantiation of a type. For example, the type of \mintinline{text}{|id|}, $\forall a. a \rightarrow a$, can be instantiated as all of $Int \rightarrow Int$, $Bool \rightarrow Bool$, $t0 \rightarrow t0$ or even $([t0] \rightarrow (Int, Bool)) \rightarrow ([t0] \rightarrow (Int, Bool))$ and more.
+TODO: (maybe) partial order diagram of some of $\forall a \forall b.\ (a \rightarrow b) \rightarrow [a] \rightarrow [b]$’s partial and full instantiations.
 
-The ‘opposite’ to instantiation is generalisation, where an expression with a certain type can be considered to have a more general type, adding a for-all quantification of a variable. This is allowed where the type variable is not free in any of the types in the context. Not being free in the context means the type variable does not appear unbound anywhere except in the type being generalised itself, so it does not have any other type constraints. Being free of any type constraints, it may be any type and therefore for-all quantified.
+An expression with a type $\rho_a$ more general than another type $\rho_b$ can be considered to have the less general type $\rho_b$. This means if an expression with type $\rho_b$ is needed, providing an expression with type $\rho_a$ will type-check if and only if $\rho_a \sqsubseteq \rho_b$. The process of giving an expression a less general type is known as \textit{instantiation}. For example, the type of \mintinline{text}{id}, $\forall a.\ a \rightarrow a$, can be instantiated as all of $Int \rightarrow Int$, $Bool \rightarrow Bool$, $t_0 \rightarrow t_0$ or even $([t_0] \rightarrow (Int,\ Bool)) \rightarrow ([t_0] \rightarrow (Int,\ Bool))$.
 
-Given a type $t0 \rightarrow t1 \rightarrow t2 \rightarrow t3$ and a context $\{ x : t1, y : [t2] \rightarrow Int, z: \forall t3. t3 \}$ we may generalise to $\forall t0 \forall t3. t0 \rightarrow t1 \rightarrow t2 \rightarrow t3$. $t0$ is not in any of the types in the context, and $t3$ is only found bound as a for-all quantified variable. Therefore both of these may be for-all quantified. Both $t1$ and $t2$ are free in the context, so may not be generalised. (Note we’re disregarding our convention of using $a, b, c, \dots$ for for-all quantified variables here, to be strict to the typing rules. Renaming the type variables with $\alpha$-conversions could be done after generalisation to maintain the type variable naming conventions.) Given a context and type, the function $generalise$ returns the fully generalized type possible in that context.
+The `opposite' of instantiation is generalisation, where an expression with a certain type can be considered to have a more general type, adding a for-all quantification to a variable. This is allowed where the type variable is not free in any of the types in the context. Not being free in the context means the type variable does not appear unbound anywhere except in the type being generalised itself, so it does not have any other type constraints. Being free of any type constraints, it may be any type and therefore for-all quantified.
 
-Our five key syntax rules plus instatitation and generalisation give us nine typing rules. Many presentations of Hindley-Milner do not include literal constants in their syntax, or do not explicitly type them given their triviality. Here we give them for completeness.
+Given a type $t_0 \rightarrow t_1 \rightarrow t_2 \rightarrow t_3$ and a context $\{ \mathtt{x} : t_1,\ \mathtt{y} : [t_2] \rightarrow Int,\ \mathtt{z} : \forall t_3.\ t_3 \}$ we may generalise to $\forall t_0 \forall t_3.\ t_0 \rightarrow t_1 \rightarrow t_2 \rightarrow t_3$. $t_0$ is not in any of the types in the context, and $t_3$ is only found bound as a for-all quantified variable. Therefore both of these may be for-all quantified. Both $t_1$ and $t_2$ are free in the context, so may not be generalised. (Note we are disregarding our convention of using $a,\ b,\ c,\ \dots$ for for-all quantified variables here, to be strict to the typing rules. Renaming the type variables with $\alpha$-conversions could be done after generalisation to maintain the type variable naming conventions.) Given a context and type, the function \textit{generalise} returns the fully generalized type possible in that context.
 
- \begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.505\linewidth]{images/image12.png}
-\end{figure}
+\subsection{Typing rules}
 
----------- [Const\_i]
-c\_i : Int
+Our key syntax rules plus instatitation and generalisation lead to nine typing rules. Many presentations of Hindley-Milner do not include literal constants in their syntax, or do not explicitly type them given their triviality. Here we give them for completeness.
 
--------------- [Const\_c]
-c\_c : Char
+$$
+\begin{array}{ccl}
+  \displaystyle\frac{}{\vdash c_{Int} : Int} & \hspace{0.25cm} & \mathtt{con_{Int}}\\ \\
+  \displaystyle\frac{}{\vdash c_{Char} : Char} & & \mathtt{con_{Char}}\\ \\
+  \displaystyle\frac{}{\vdash c_{Bool} : Bool} & & \mathtt{con_{Bool}}\\ \\
+  \displaystyle\frac{x : \rho \in \Gamma}{\Gamma \vdash x : \rho} & & \mathtt{var}\\ \\
+%\end{array}
+%$$
+%$$
+%\begin{array}{ccl}
+  \displaystyle\frac{\Gamma \vdash e_0 : \tau \rightarrow \tau' \quad\quad \Gamma \vdash e_1 : \tau }{\Gamma \vdash e_0\ e_1 : \tau'} & & \mathtt{app}\\ \\
+  \displaystyle\frac{\Gamma,\ x : \tau\vdash e : \tau'}{\Gamma \vdash \lambda x.\ e : \tau \rightarrow \tau'} & & \mathtt{abs}\\ \\
+  \displaystyle\frac{\Gamma \vdash e_0 : \rho \quad\quad \Gamma,\ x:\rho \vdash e_1 : \tau}{\Gamma \vdash \mathtt{let}\ x = e_0\ \mathtt{in}\ e_1 : \tau} & & \mathtt{let}\\ \\
+  \displaystyle\frac{\Gamma \vdash e : \rho' \quad\quad \rho' \sqsubseteq \rho}{\Gamma \vdash e : \rho} & & \mathtt{instantiate}\\ \\
+  \displaystyle\frac{\Gamma \vdash e : \rho \quad\quad a \notin \text{free}(\Gamma)}{\Gamma \vdash e : \forall a.\ \rho} & & \mathtt{generalise}\\ \\
+\end{array}
+$$
 
--------------- [Const\_b]
-c\_b : Bool
+These typing rules can be used to deduce and prove the types of expressions. For example, the expression \mintinline{text}{|not True|} in a context $\Gamma = \{ \mathtt{not} : Bool \rightarrow Bool \}$:
 
-TODO: latexify the above, replacing sigma with rho
+$$
+\begin{array}{lclc}
+  \Gamma \vdash \mathtt{not} : Bool \rightarrow Bool & \hspace{0.25cm} & \textrm{by}\ \mathtt{var}        & \hspace{4cm} \\
+  \vdash \mathtt{True} : Bool                        &                 & \textrm{by}\ \mathtt{con_{Bool}} & \\
+  \Gamma \vdash \mathtt{not\ True} : Bool            &                 & \textrm{by}\ \mathtt{app}        & \\
+\end{array}
+$$
 
-These typing rules can be used to deduce and prove the types of expressions. For example, the expression \mintinline{text}{|not True|} in a context $\Gamma = \{ not: Bool \rightarrow Bool \}$:
+Despite this, the typing rules themselves aren't an algorithm as they do not specify an order to be applied in. While only one syntax rule can apply to a subexpression, it may be unclear when to apply instantiation and generalisation. Arbitrarily applying rules does not necessarily converge to a solution, as generalisation and instantiation can both continue infinitely. For example repeatedly applying instantiation and generalisation on \mintinline{text}{id} with $\Gamma = \{ \mathtt{id} : \forall a.\ a \rightarrow a \}$:
 
-$\Gamma \vdash not : Bool \rightarrow Bool [Var]$
-$\vdash True : Bool [Const\_b]$
-$\Gamma \vdash not True : Bool [App]$
+$$
+\begin{array}{lclc}
+  \Gamma \vdash \mathtt{id} : \forall a.\ a \rightarrow a & \hspace{0.25cm} & \textrm{by}\ \mathtt{var} & \\
+  \Gamma \vdash \mathtt{id} : [t_0] \rightarrow [t_0] & & \textrm{by}\ \mathtt{instantiate}\ \textrm{with}\ \{ a \mapsto [t_0] \}& \\
+  \Gamma \vdash \mathtt{id} : \forall b. [b] \rightarrow [b] & & \textrm{by}\ \mathtt{generalise} & \\
+  \Gamma \vdash \mathtt{id} : [[t_1]] \rightarrow [[t_1]] & & \textrm{by}\ \mathtt{instantiate}\ \textrm{with}\ \{ b \mapsto [t_1] \} & \\
+  \Gamma \vdash \mathtt{id} : \forall c. [[c]] \rightarrow [[c]] & & \textrm{by}\ \mathtt{generalise} & \\
+  \Gamma \vdash \mathtt{id} : [[t_2]] \rightarrow [[t_2]] & & \textrm{by}\ \mathtt{instantiate}\ \textrm{with}\ \{ c \mapsto [t_2] \} & \\
+  \dots & & & \\
+\end{array}
+$$
 
-Despite this, the typing rules themselves aren’t an algorithm as they do not specify an order to be applied in. While only one syntax rule can apply to a subexpression, it may be unclear when to apply instantiation and generalisation. Arbitrarily applying rules does not necessarily converge to a solution, as generalisation and instantiation can both continue infinitely. For example repeatedly applying instantiation and generalisation on \mintinline{text}{|id|} with $\Gamma = \{ id: \forall a. a \rightarrow a \}$.
+The type inference algorithms \W, \W’ and \M\ effectively are methods to select typing rules to determine a type for the expression, or detect the expression is incorrectly typed. While they don't apply the typing rules directly, they are close and their respective authors prove they give equivalent results and can be implemented directly.
 
-$\Gamma \vdash id : \forall a. a \rightarrow a [Var]$
-$\Gamma \vdash id : [t0] \rightarrow [t0] [Inst] (a/[t0])$
-$\Gamma \vdash id : \forall b. [b] \rightarrow [b] [Gen]$
-$\Gamma \vdash id : [[t1]] \rightarrow [[t1]] [Inst] (b/[t1])$
-$\Gamma \vdash id : \forall c. [[c]] \rightarrow [[c]] [Gen]$
-$\Gamma \vdash id : [[[t2]]] \rightarrow [[[t2]]] [Inst] (c/[t2])$
-$\dots$
-
-The type inference algorithms W, W’ and M effectively are methods to select typing rules to determine a type for the expression, or detect the expression is incorrectly typed. While they don’t apply the typing rules directly, they are close and their respective authors prove they give equivalent results and can be implemented directly.
-
-The algorithms are applied to abstract syntax trees, which represent the expressions in a structured way. For example, an abstract syntax tree for \mintinline{text}{|let y = (\\x $\rightarrow$ (odd x)) 3 in not y|} may be visualised as:
+The algorithms are applied to abstract syntax trees (ASTs), which represent expressions in a structured way. For example, an AST for the expression \mintinline{text}{let y = (|$\lambda$|x. (odd x)) 3 in not y} may be visualised as:
 
 TODO: tree diagram of expression
 
-The type inference algorithms are therefore tree traversal algorithms. Generally, they call themselves recursively on subtrees to process subexpressions, and then combine these results to determine a final type (the type of the root node).
+The type inference algorithms are therefore tree traversal algorithms. They generally call themselves recursively on subtrees to process subexpressions, and then combine these results to determine a final type (the type of the root node).
 
-Algorithm W is often seen as \textit{the} Hindley-Milner type inference algorithm. Given a context and an expression represented as an abstract syntax tree, W returns a substitution and a monotype.
+\subsection{Algorithm \texorpdfstring{\W}{W}}
 
-The purpose of returning the type is obvious, but the purpose of the substitution is less clear. The substitution is a representation of constraints on type variables that have arisen from performing type inference on the expression. For example, given a context $\{ f: t0, not: Bool \rightarrow Bool \}$ and an expression \mintinline{text}{|not (f 3)|} we might return the type $Bool$ and the substitution $\{ t0 \mapsto Int \rightarrow Bool \}$. This substitution is important because if \mintinline{text}{|f|}\mintinline{text}{| |}or the type variable $t0$ are used elsewhere in the same expression we need to type-check those occurrences for consistency with this usage. In a wider expression such as \mintinline{text}{|[not (f 3), f True]|} the substitution from our first subexpression tells us type $t0$ is $Int \rightarrow Bool$. When examining the application of the second \mintinline{text}{|f|}, we find its type from the context which is $t0$, or equivalently now $Int \rightarrow Bool$. We can then raise a type error as we have applied it on a $Bool$.
+Algorithm \W\ is often seen as \textit{the} Hindley-Milner type inference algorithm. Given a context and an expression represented as an abstract syntax tree, it returns a substitution and a monotype.
 
-The algorithm is set out below, for each of the five language constructs. There is a case for each type of node in the abstract syntax tree, so the rule applied at each point is deterministic and easily-chosen based on the node type. Explanations of the more complex cases are given below the algorithm.
+The purpose of returning the type is obvious, but the substitution's purpose is less so. The substitution represents constraints on type variables that have arisen from performing type inference on the expression. For example, given a context $\{ \mathtt{f} : t_0, \mathtt{not} : Bool \rightarrow Bool \}$ and an expression \mintinline{text}{not (f 3)} we might return the type $Bool$ and the substitution $\{ t_0 \mapsto Int \rightarrow Bool \}$. This substitution is important because if \mintinline{text}{f} or the type variable $t_0$ are used elsewhere in the same expression we need to type-check those occurrences for consistency with this usage. In a wider expression such as \mintinline{text}{|[not (f 3), f True]|} the substitution from our first subexpression tells us type $t_0$ is $Int \rightarrow Bool$. When examining the application of the second \mintinline{text}{|f|}, we find its type from the context which is $t_0$, or equivalently now $Int \rightarrow Bool$. We can then raise a type error as we have applied it on a $Bool$.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.987\linewidth]{images/image4.png}
-\end{figure}
+Algorithm \W\ is set out below, for each of the five language constructs. There is a case for each type of node in the abstract syntax tree, so the rule applied at each point is deterministic and easily-chosen based on the node type. Explanations of the more complex cases are given below the algorithm.
 
-% TODO: latexify the above (taken from Lee), replace () with constants, replace TypeEnv with Context, replace Expr with Expression, replace Subst with Substitution, replace Type with MonoType, replace Clos with generalise, add brackets around applying substitutions, add explicit combines, number the statements, replace id with \{\}, flip ordering of abs and app, replace var rule with let S\_1 = \{ a \mapsto t0, b \mapsto t1, … \}, new t0, t1, … in (id, S\_1\tau) where \Gamma(x) = \forall a \forall b … \tau
+$$
+\mathcal{W}: (\mathrm{Context}, \mathrm{Expression}) \rightarrow (\mathrm{Substitution}, \mathrm{Type})
+$$$$
+\begin{array}{lclc}
+  \\
+    \mathcal{W}(\Gamma,\ c_{\tau})                                & = & (\{\},\ \tau) & (1)\vspace{0.25cm}\\
+    \mathcal{W}(\Gamma,\ x)                                       & = & \textrm{let}\ S_1 = \{ a \mapsto t_0,\ b \mapsto t_1,\ \dots \},& (2)\\
+                                                                  &   & \phantom{\textrm{let}}\ \textrm{new}\ t_0,\ t_1,\ \dots &\\
+                                                                  &   & \phantom{\textrm{let}}\ \textrm{where}\ x : \forall a \forall b\ \dots\ \tau \in \Gamma &\\
+                                                                  &   & \textrm{in}\ (\{\},\ S_1(\tau)) &\vspace{0.25cm}\\
+    \mathcal{W}(\Gamma,\ e_1\ e_2)                                & = & \textrm{let}\ (S_1, \tau_1) = \mathcal{W}(\Gamma,\ e_1) & (3)\\
+                                                                  &   & \phantom{\textrm{let}}\ (S_2, \tau_2) = \mathcal{W}(S_1(\Gamma),\ e_2) &\\
+                                                                  &   & \phantom{\textrm{let}}\ S_3 = \mathit{unify}(S_2(\tau_1),\ \tau_2 \rightarrow t_0),\ \textrm{new}\ t_0 &\\
+                                                                  &   & \textrm{in}\ (\mathit{combine}(S_3,\ S_2,\ S_1),\ S_3(t_0)) &\vspace{0.25cm}\\
+    \mathcal{W}(\Gamma,\ \lambda x.\ e  )                         & = & \textrm{let}\ (S_1,\ \tau_1) = \mathcal{W}(\Gamma + x : t_0, e),\ \textrm{new} t_0 & (4)\\
+                                                                  &   & \textrm{in}\ (S_1,\ S_1(t_0 \rightarrow \tau_1)) &\vspace{0.25cm}\\
+    \mathcal{W}(\Gamma,\ \mathtt{let}\ x = e_1\ \mathtt{in}\ e_2) & = & \textrm{let}\ (S_1, \tau_1) = \mathcal{W}(\Gamma, e_1) & (5)\\
+                                                                  &   & \phantom{\textrm{let}}\ (S_2, \tau_2) = &\\
+                                                                  &   & \phantom{\textrm{let}}\ \quad \mathcal{W}(S_1(\Gamma) + \mathit{generalise}(S_1(\Gamma), \tau_1),\ e_2) &\\
+                                                                  &   & \textrm{in}\ (\mathit{combine}(S_2,\ S_1),\ \tau_2) &\\
+  \\
+\end{array}
+$$
 
-The notation $new tn$ specifies that the type variable $tn$ is new (or ‘fresh’), so its name has not been used before. Using globally unique type variables avoids reuse which may incorrectly mix constraints between different types. Most implementations use a global counter, incremented each time a new type variable is needed with names like $t0, t1, t2, \dots$.
+The notation $\textrm{new}\ t_n$\ specifies that the type variable $t_n$ is new (or `fresh'), so its name has not been used before. Using globally unique type variables avoids reuse which may incorrectly mix constraints between different types. Most implementations use a global counter, incremented each time a new type variable is needed with names like $t_0,\ t_1,\ t_2,\ \dots$.
 
-The general structure of Algorithm W is to recursively call itself on subexpressions, until the subexpressions are simple leaf nodes. At this point, constant nodes have their assigned type and variable nodes have their type retrieved from the context. The subexpression types are passed back up, where their substitutions are either combined or fed into inferring other subexpressions, and a resultant type is returned.
+The general structure of Algorithm \W\ is to recursively call itself on subexpressions, until the subexpressions are simple leaf nodes. At this point, constant nodes have their assigned type and variable nodes have their type retrieved from the context. The subexpression types are passed back up, where their substitutions are either combined or fed into inferring other subexpressions, and a resultant type is returned.
 
-Case (4app) for function application infers the types of the two subexpressions. It first infers the left one, $e\_1$, then applies the resultant substitution to the context before inferring the right subexpression, $e\_2$. This ensures constraints arising from the $e\_1$ are considered when inferring the second subexpression, so if $e\_1$ and $e\_2$ have conflicting constraints this is detected and a type error is raised. However, this does introduce a left-to-right bias where the type error is raised in the right subexpression if a conflict is found.
+Case (4) for function application infers the types of the two subexpressions. It first infers the left one, $e_1$, then applies the resultant substitution to the context before inferring the right subexpression, $e_2$. This ensures constraints arising from the $e_1$ are considered when inferring the second subexpression, so if $e_1$ and $e_2$ have conflicting constraints this is detected and a type error is raised. However, this does introduce a left-to-right bias where the type error is raised in the right subexpression if a conflict is found.
 
-Given we know $e\_1$ is a function that should accept $e\_2$’s type, $\tau\_2$, we should be able to unify $\tau\_2 \rightarrow tn$ (a function accepting $\tau\_2$ and returning $tn$ i.e. anything) with the function type $\tau\_1$. We apply the substitution $S\_2$ to $\tau\_1$ when doing this to ensure no constraints have arisen in inferring $e\_2$ that would prevent this unification. Finding a unifying substitution confirms the function application is valid, and we are able to determine the return type (and thus the overall type of this expression) by applying the unifying substitution to the type variable $tn$ used as the return type. If no unifying substitution can be found, the function application is invalid (as the argument type $\tau\_2$ cannot be substituted to reach an accepted type for the function’s type $\tau\_1$) and a type error is raised. Invalid function application (4app) and undefined variables (1var) are the only possible sources of type errors from Algorithm W.
+Given we know $e_1$ is a function that should accept $e_2$'s type, $\tau_2$, we should be able to unify $\tau_2 \rightarrow tn$ (a function accepting $\tau_2$ and returning $tn$ i.e. anything) with the function type $\tau_1$. We apply the substitution $S_2$ to $\tau_1$ when doing this to ensure no constraints have arisen in inferring $e_2$ that would prevent this unification. Finding a unifying substitution confirms the function application is valid, and we are able to determine the return type (and thus the overall type of this expression) by applying the unifying substitution to the type variable $tn$ used as the return type. If no unifying substitution can be found, the function application is invalid (as the argument type $\tau_2$ cannot be substituted to reach an accepted type for the function’s type $\tau_1$) and a type error is raised. Invalid function application (4) and undefined variables (1) are the only possible sources of type errors from Algorithm \W.
 
-To illustrate, consider \mintinline{text}{|odd 3|} in the context $\Gamma = \{ odd: Int \rightarrow Bool \}$. We find the types of \mintinline{text}{|odd|} and \mintinline{text}{|3|} as $Int \rightarrow Bool$ and $Int$ respectively, unify $Int \rightarrow Bool$ with $Int \rightarrow t0$ to get the substitution $S\_3 = \{ t0 \mapsto Bool \}$ and return the overall type $S\_3(tn) = \{ t0 \mapsto Bool \}t0 = Bool$.
+To illustrate, consider \mintinline{text}{odd 3} in the context $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \}$. We find the types of \mintinline{text}{odd} and \mintinline{text}{3} as $Int \rightarrow Bool$ and $Int$ respectively, unify $Int \rightarrow Bool$ with $Int \rightarrow t_0$ to get the substitution $S_3 = \{ t_0 \mapsto Bool \}$ and return the overall type $S_3(tn) = \{ t_0 \mapsto Bool \}(t_0) = Bool$.
 
-Also consider \mintinline{text}{|odd x|} in the context $\Gamma = \{ odd: Int \rightarrow Bool, x: t0 \}$. Here we find the types of \mintinline{text}{|odd|} and \mintinline{text}{|x|} as $Int \rightarrow Bool$ and $t0$ respectively, unify $Int \rightarrow Bool$ with $t0 \rightarrow t1$ to get the substitution $S\_3 = \{ t0 \mapsto Int, t1 \mapsto Bool \}$ and return the overall type $S\_3(tn) = \{ t0 \mapsto Int, t1 \mapsto Bool \}t1 = Bool$. In this we also return the substitution $\{ t0: Int, t1: Bool \}$, constraining the external type $t0$ to an $Int$. Given we created $t1$ as a new type variable, it won’t be found elsewhere so does not need to be considered in other expressions so the substitution $\{ t0 \mapsto Int \}$ could equivalently have been returned.
+Also consider \mintinline{text}{odd x} in the context $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool,\ \mathtt{x} : t_0 \}$. Here we find the types of \mintinline{text}{|odd|} and \mintinline{text}{|x|} as $Int \rightarrow Bool$ and $t_0$ respectively, unify $Int \rightarrow Bool$ with $t_0 \rightarrow t_1$ to get the substitution $S_3 = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}$ and return the overall type $S_3(tn) = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}(t_1) = Bool$. In this we also return the substitution $\{ t_0: Int,\ t_1: Bool \}$, constraining the external type $t_0$ to an $Int$. Given we created $t_1$ as a new type variable, it won’t be found elsewhere so does not need to be considered in other expressions so the substitution $\{ t_0 \mapsto Int \}$ could equivalently have been returned.
 
-Case (3abs) for function abstraction first infers the type of the function body expression, $e$, by calling W recursively. It passes the current context with an additional binding for the function parameter $x$, assigned to a new type variable with no constraints. This subcall to W for the function body returns the substitution $S\_1$ and type $\tau\_1$. Finally, the substitution $S\_1$ and type $S\_1(tn \rightarrow \tau\_1)$ is returned as the final result for the function abstraction. The type arises from the fact that the function abstraction takes the parameter with the new type $tn$ and returns the type of the body, $\tau\_1$. We apply the substitution $S\_1$ to it to reflect any constraints on the function parameter picked up in the function body.
+Case (3) for function abstraction first infers the type of the function body expression, $e$, by calling \W\ recursively. It passes the current context with an additional binding for the function parameter $x$, assigned to a new type variable with no constraints. This subcall to W for the function body returns the substitution $S_1$ and type $\tau_1$. Finally, the substitution $S_1$ and type $S_1(tn \rightarrow \tau_1)$ is returned as the final result for the function abstraction. The type arises from the fact that the function abstraction takes the parameter with the new type $tn$ and returns the type of the body, $\tau_1$. We apply the substitution $S_1$ to it to reflect any constraints on the function parameter picked up in the function body.
 
-For an example examine calling W on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ odd: Int \rightarrow Bool \}$. The subcall to W calls $W(\Gamma + x: t0, odd x)$ which returns $(S\_1, \tau\_1) = (\{ t0: Int \}, Bool)$. Then $(S\_1, S\_1(tn \rightarrow \tau\_1)) = (\{ t0 \mapsto Int \}, \{ t0 \mapsto Int \}(t0 \rightarrow Bool)) = (\{ t0 \mapsto Int \}, Int \rightarrow Bool)$ is returned as the result.
+For an example examine calling W on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \}$. The subcall to W calls $W(\Gamma + \mathtt{x} : t_0, \mathtt{odd x})$ which returns $(S_1, \tau_1) = (\{ t_0: Int \}, Bool)$. Then $(S_1, S_1(t_n \rightarrow \tau_1)) = (\{ t_0 \mapsto Int \}, \{ t_0 \mapsto Int \}(t_0 \rightarrow Bool)) = (\{ t_0 \mapsto Int \}, Int \rightarrow Bool)$ is returned as the result.
 
-Case (5let) for let statements first infers the type $\tau\_1$ of the parameter definition, $e\_1$. The parameter type $\tau\_1$ is then generalised with respect to the context to allow for polymorphism as per HM’s type system, before being added to the context as a binding and used to infer the let body $e\_2$. The substitutions $S\_1$ and $S\_2$ are then combined to collect the constraints, and are returned with the let body’s type $\tau\_2$.
+Case (5) for let statements first infers the type $\tau_1$ of the parameter definition, $e_1$. The parameter type $\tau_1$ is then generalised with respect to the context to allow for polymorphism as per HM’s type system, before being added to the context as a binding and used to infer the let body $e_2$. The substitutions $S_1$ and $S_2$ are then combined to collect the constraints, and are returned with the let body’s type $\tau_2$.
 
-Algorithm W’ is a slightly altered variant of Algorithm W, only changing rule (4app) for function application to avoid left-to-right bias.
+\subsection{Algorithm \texorpdfstring{\W}{W}'}
+
+Algorithm W’ is a slightly altered variant of Algorithm W, only changing rule (4) for function application to avoid left-to-right bias.
 
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.782\linewidth]{images/image22.png}
 \end{figure}
 
-TODO: write out algorithm in Lee format for W’, 1-index, replace S’ with S\_3, V with S\_4
+% TODO: write out algorithm in Lee format for W’, 1-index, replace S’ with S_3, V with S_4
 
-Algorithm W’ performs substitution unification, introduced in the same paper as W’. Like type unification, substitution unification attempts to find a unifying substitution to unify two values. Unlike type unification, substitution unification attempts to make two substitutions, not types, equal. It returns a unifying substitution, which when combined with either substitution gives the same result, i.e. $combine(unify(S\_1, S\_2), S\_1) = combine(unify(S\_1, S\_2), S\_2)$. Both type and substitution unification is commutative and associative, and may fail if no such substitution exists.
+Algorithm W’ performs substitution unification, introduced in the same paper as W’. Like type unification, substitution unification attempts to find a unifying substitution to unify two values. Unlike type unification, substitution unification attempts to make two substitutions, not types, equal. It returns a unifying substitution, which when combined with either substitution gives the same result, i.e. $combine(unify(S_1, S_2), S_1) = combine(unify(S_1, S_2), S_2)$. Both type and substitution unification is commutative and associative, and may fail if no such substitution exists.
 
 If substitutions share no type variables, finding a unifying substitution can be done by simply combining the substitutions. For example, $unify(\{ t0 \mapsto Int \}, \{ t1 \mapsto Bool \}) = combine(\{ t0 \mapsto Int \}, \{ t1 \mapsto Bool \}) = \{ t0 \mapsto Int, t1 \mapsto Bool \}$.
 
-However, substitution unification generally is different to substitution combination. Combination only simulates the effect of applying consecutive substitutions, so is not concerned with unifying substitution types or maintaining constraints. For example, given $S\_1 = \{ t0 \mapsto t1 \rightarrow Bool \}$ and $S\_2 = \{ t0 \mapsto Int \rightarrow t2 \}$, then $S\_3 = unify(S\_1, S\_2) = \{ t1 \mapsto Int, t2 \mapsto Bool \}$, which is not the same as combining the substitutions. Note the resultant unifying substitution may have a non-empty domain disjoint from both the given substitutions, as in this example. We can see that $combine(S\_3, S\_1) = combine(S\_3, S\_2) = \{ t0 \mapsto Int \rightarrow Bool, t1 \mapsto Int, t2 \mapsto Bool \}$.
+However, substitution unification generally is different to substitution combination. Combination only simulates the effect of applying consecutive substitutions, so is not concerned with unifying substitution types or maintaining constraints. For example, given $S_1 = \{ t0 \mapsto t1 \rightarrow Bool \}$ and $S_2 = \{ t0 \mapsto Int \rightarrow t2 \}$, then $S_3 = unify(S_1, S_2) = \{ t1 \mapsto Int, t2 \mapsto Bool \}$, which is not the same as combining the substitutions. Note the resultant unifying substitution may have a non-empty domain disjoint from both the given substitutions, as in this example. We can see that $combine(S_3, S_1) = combine(S_3, S_2) = \{ t0 \mapsto Int \rightarrow Bool, t1 \mapsto Int, t2 \mapsto Bool \}$.
 
-Having defined substitution unification, case (4app) in W’ is fairly straightforward. It independently infers the two subexpressions $e\_1$ and $e\_2$, rather than applying $e\_1$’s substitution $S\_1$ to the context before inferring $e\_2$ as in W. The substitutions are then unified and then applied to both subexpression types, ensuring all constraints are applied to both types. The function type and the argument to new type can then be unified in the same way as W.
+Having defined substitution unification, case (4) in W’ is fairly straightforward. It independently infers the two subexpressions $e\_1$ and $e\_2$, rather than applying $e\_1$’s substitution $S_1$ to the context before inferring $e\_2$ as in W. The substitutions are then unified and then applied to both subexpression types, ensuring all constraints are applied to both types. The function type and the argument to new type can then be unified in the same way as W.
+
+\subsection{Algorithm \texorpdfstring{\M}{M}}
 
 Algorithm M is a top-down approach to type inference. Implemented as part of an early ML compiler by~\cite{ref32}, it was known as a ‘folklore’ algorithm until~\cite{ref33} formalised it as in the figure below.
 
@@ -484,17 +570,19 @@ TODO: latexify the above (taken from Lee), make replacements as per W alg, repla
 
 M has some similarities to W, however where W applies unification in function application, M instead pushes this down the tree and performs unification in the leaf nodes and function abstraction.
 
-In rules (1con) and (2var) for constant and variable expressions, we are given an expected type $\tau\_e$ and are verifying it can unify with the literal constant’s type or the type from the context respectively. Unifying in this way returns the type in the substitution, for example $M(\{\}, 3, t0) = unify(Int, t0) = \{ t0: Int \}$ and $M(\{ odd: Int \rightarrow Bool \}, odd, t0 \rightarrow t1) = unify(Int \rightarrow Bool, t0 \rightarrow t1) = \{ t0: Int, t1: Bool \}$, which is passed back up the tree.
+In rules (1) and (2) for constant and variable expressions, we are given an expected type $\tau_e$ and are verifying it can unify with the literal constant’s type or the type from the context respectively. Unifying in this way returns the type in the substitution, for example $M(\{\}, 3, t0) = unify(Int, t0) = \{ t0: Int \}$ and $M(\{ odd: Int \rightarrow Bool \}, odd, t0 \rightarrow t1) = unify(Int \rightarrow Bool, t0 \rightarrow t1) = \{ t0: Int, t1: Bool \}$, which is passed back up the tree.
 
-Rule (4app) shows function application in M has no unification step. Instead, M is simply called recursively for each expression. The first expression, $e\_1$, is expected to be a function taking a new type variable $tn$ and returning the expected type $\tau\_e$ for the overall application. The second expression should have the argument type for the function, $tn$, after applying substitution $S\_1$ to collect type constraints.
+Rule (4) shows function application in M has no unification step. Instead, M is simply called recursively for each expression. The first expression, $e\_1$, is expected to be a function taking a new type variable $tn$ and returning the expected type $\tau_e$ for the overall application. The second expression should have the argument type for the function, $tn$, after applying substitution $S_1$ to collect type constraints.
 
-For example, consider \mintinline{text}{|odd 3|} in the context $\Gamma = \{ odd: Int \rightarrow Bool \}$ with expected type $t0$. We call M with the expected type $t1 \rightarrow t0$ on \mintinline{text}{|odd|} to get the substitution $S\_1 = \{ t1: Int, t0: Bool \}$. We then call M with the expected type $S\_1(t1) = Int$ on \mintinline{text}{|3|}, which is validated and returns an empty substitution $S\_2 = \{\}$. Finally, we return the combined substitution $\{ t1: Int, t0: Bool \}$.
+For example, consider \mintinline{text}{|odd 3|} in the context $\Gamma = \{ odd: Int \rightarrow Bool \}$ with expected type $t0$. We call M with the expected type $t1 \rightarrow t0$ on \mintinline{text}{|odd|} to get the substitution $S_1 = \{ t1: Int, t0: Bool \}$. We then call M with the expected type $S_1(t1) = Int$ on \mintinline{text}{|3|}, which is validated and returns an empty substitution $S_2 = \{\}$. Finally, we return the combined substitution $\{ t1: Int, t0: Bool \}$.
 
-In rule (3abs) for function abstraction, we verify the expected type unifies with a new function type. This gives a substitution mapping the variables $t1$ and $t2$ to the expected function types, if any. This is applied to the context, along with adding the parameter $x$’s type as $t1$. We then use M to infer the type of the function body, expecting it to have the unified return type $t2$. We return the combined substitution from both parts.
+In rule (3) for function abstraction, we verify the expected type unifies with a new function type. This gives a substitution mapping the variables $t1$ and $t2$ to the expected function types, if any. This is applied to the context, along with adding the parameter $x$’s type as $t1$. We then use M to infer the type of the function body, expecting it to have the unified return type $t2$. We return the combined substitution from both parts.
 
-For an example we look at applying M on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ odd: Int \rightarrow Bool \}$ and expected type $t0$. We first unify $t0$ with the new type $t1 \rightarrow t2$, resulting in $S\_1 = \{ t0: t1 \rightarrow t2 \}$. We then make the recursive call to M with the function body \mintinline{text}{|odd x|}, context $\{ odd: Int \rightarrow Bool, x: t1 \}$ and expected type $t2$. This results in the substitution $S\_2 = \{ t1: Int, t2: Bool \}$, which we combine with $S\_1$ to get $combine(S\_2, S\_1) = \{ t0: Int \rightarrow Bool, t1: Int, t2: Bool \}$. As in W’s function application, the new type variables will be unused outside of this expression so we can equivalently exclude $t1$ and $t2$ from the substitution.
+For an example we look at applying M on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ odd: Int \rightarrow Bool \}$ and expected type $t0$. We first unify $t0$ with the new type $t1 \rightarrow t2$, resulting in $S_1 = \{ t0: t1 \rightarrow t2 \}$. We then make the recursive call to M with the function body \mintinline{text}{|odd x|}, context $\{ odd: Int \rightarrow Bool, x: t1 \}$ and expected type $t2$. This results in the substitution $S_2 = \{ t1: Int, t2: Bool \}$, which we combine with $S_1$ to get $combine(S_2, S_1) = \{ t0: Int \rightarrow Bool, t1: Int, t2: Bool \}$. As in W’s function application, the new type variables will be unused outside of this expression so we can equivalently exclude $t1$ and $t2$ from the substitution.
 
-Finally, let expressions infer the type of their parameter $e\_1$ with a new type, then infer the type of their body $e\_2$ expecting it to have the overall expected type $\tau\_e$. Similarly to function abstraction, the substitution from the parameter is passed when inferring the body, and combined with the body’s substitution to give an overall result.
+Finally, let expressions infer the type of their parameter $e\_1$ with a new type, then infer the type of their body $e\_2$ expecting it to have the overall expected type $\tau_e$. Similarly to function abstraction, the substitution from the parameter is passed when inferring the body, and combined with the body’s substitution to give an overall result.
+
+\subsection{Limitations}
 
 These type inference algorithms do have limitations. They all sometimes produce poor type error messages; Algorithm W often detects errors late, highlighting too large of a subexpression to be useful and Algorithm M often detects too specific of a term without context as to what original definition it violates. Algorithm W has the left-to-right bias which Algorithm W’ attempts to correct for, however this can sometimes exacerbate the problem with highlighting large subexpressions. Poor error messages make it difficult for the programmer to understand how to fix the problem.
 
@@ -515,9 +603,13 @@ A Practical Framework for Type Inference Error Explanation
 
 \underline{\href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.5050\&rep=rep1\&type=pdf}{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.5050\&rep=rep1\&type=pdf}}
 PhD thesis which talks about hindley milner and type inference errors a lot
+
 \chapter{Design}\label{id:h.7ggvdxb04tzm}
+
 The design of the teaching tool is split into two parts, working backwards from the end product in mind: designing the user interface and experience, and designing the architecture to support that.
+
 \section{User interface and experience}\label{id:h.dr046u473e01}
+
 Before designing the new teaching tool, we explore the existing available resources to see what works well, and what is missing. The current resources for learning about type inference can be generally categorised into three categories: programming language documentation, formal resources and informal resources. These resources were found by examining the pages returned by the first 5 pages of Google search on the query ‘type inference’. The following is a summary of what was found from reading these resources with the aim of determining their strengths and weaknesses.
 
 Programming language documentation are pages written to explain how type inference works in a specific language, as part of that language’s official documentation. For example, TypeScript, Java and Golang all have official websites where they discuss how type inference works in their language.
@@ -650,7 +742,9 @@ A web interface was chosen over a desktop program to maximise compatibility acro
 While access to certain APIs is more limited in a web application compared to native applications, this did not limit any of the application’s proposed features so was not a concern.
 
 A native application would be likely to have better performance (in terms of computation time), however it was believed that the web application would not encounter serious performance problems on reasonable inputs. In later performance testing few concerns were raised about the applications performance, and those that were could be mitigated (as detailed in the implementation chapter). Feedback from user testing supports this, with one respondent commenting that the application felt “very fast”.
+
 \section{Architecture}\label{id:h.l33hnjbawceh}
+
 The design of the software aims to promote interchangeable, loosely-coupled modules to make it easy to adapt and extend. This also gives the project freedom to change over time in response to feedback, without having to redevelop common functionality.
 
 TODO: insert module diagram
@@ -888,7 +982,7 @@ This structure is used for all the AST node models, including:
 \subsubsection{Types}\label{id:h.bzdo56ibho4h}
 As discussed in the background chapter, monotypes are constructed from type variables and type function applications. We consider basic types (such as $Bool$ or $Int$) to be type function applications on zero arguments. Polytypes are monotypes with zero or more for-all quantifier variables.
 
-For simplicity when modelling polytypes, we consider type variables bound at the highest level. Any type that can be expressed with for-all quantifiers at lower levels, is equivalent to moving those bindings to the top level. For example, $\forall a. (a \rightarrow (\forall b. (b \rightarrow (a, b)))$ is equivalent to $\forall a \forall b. (a \rightarrow b \rightarrow (a, b))$.
+For simplicity when modelling polytypes, we consider type variables bound at the highest level. Any type that can be expressed with for-all quantifiers at lower levels, is equivalent to moving those bindings to the top level. For example, $\forall a.\ (a \rightarrow (\forall b. (b \rightarrow (a, b)))$ is equivalent to $\forall a \forall b. (a \rightarrow b \rightarrow (a, b))$.
 
 From this, and following the same reasoning about using classes with readonly properties we can develop simple models for types. Here we remove constructors and toString methods for simplicity.
 
@@ -1387,7 +1481,7 @@ The tool is evaluated by examining responses to a questionnaire and exploring an
 
 The project achieved all of its objectives and completed all potential extensions set out in the original specification. However, it could be extended further given the additional feedback provided by users through the questionnaire. These include adding support for performing inference in custom type environments to the web application, and introducing a tutorial page which introduces users to the Hinldey-Milner type system more gradually. In addition to these suggestions, as the libraries work independent of the tool’s web application, completely different applications could be built relating to type inference allowing for different perspectives with perhaps a more quiz-like gamified experience.
 
-\chapter*{Acknowledsectiongements}\label{id:h.xqaef57orpsv}
+\chapter*{Acknowledgements}\label{id:h.xqaef57orpsv}
 
 This project would not have been possible without the support of my supervisor, Michael Gale. His feedback on drafts and answers to my many questions on type inference have been invaluable throughout.
 
