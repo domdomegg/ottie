@@ -428,7 +428,7 @@ An expression with a type $\rho_a$ more general than another type $\rho_b$ can b
 
 The `opposite' of instantiation is generalisation, where an expression with a certain type can be considered to have a more general type, adding a for-all quantification to a variable. This is allowed where the type variable is not free in any of the types in the context. Not being free in the context means the type variable does not appear unbound anywhere except in the type being generalised itself, so it does not have any other type constraints. Being free of any type constraints, it may be any type and therefore for-all quantified.
 
-Given a type $t_0 \rightarrow t_1 \rightarrow t_2 \rightarrow t_3$ and a context $\{ \mathtt{x} : t_1,\ \mathtt{y} : [t_2] \rightarrow Int,\ \mathtt{z} : \forall t_3.\ t_3 \}$ we may generalise to $\forall t_0 \forall t_3.\ t_0 \rightarrow t_1 \rightarrow t_2 \rightarrow t_3$. $t_0$ is not in any of the types in the context, and $t_3$ is only found bound as a for-all quantified variable. Therefore both of these may be for-all quantified. Both $t_1$ and $t_2$ are free in the context, so may not be generalised. (Note we are disregarding our convention of using $a,\ b,\ c,\ \dots$ for for-all quantified variables here, to be strict to the typing rules. Renaming the type variables with $\alpha$-conversions could be done after generalisation to maintain the type variable naming conventions.) Given a context and type, the function \textit{generalise} returns the fully generalized type possible in that context.
+Given a type $t_0 \rightarrow t_1 \rightarrow t_2 \rightarrow t_3$ and a context $\{ \mathtt{x} : t_1,\ \mathtt{y} : [t_2] \rightarrow Int,\ \mathtt{z} : \forall t_3.\ t_3 \}$ we may generalise to $\forall t_0 \forall t_3.\ t_0 \rightarrow t_1 \rightarrow t_2 \rightarrow t_3$. $t_0$ is not in any of the types in the context, and $t_3$ is only found bound as a for-all quantified variable. Therefore both of these may be for-all quantified. Both $t_1$ and $t_2$ are free in the context, so may not be generalised. (Note we are disregarding our convention of using $a,\ b,\ c,\ \dots$ for for-all quantified variables here, to be strict to the typing rules. Renaming the type variables with $\alpha$-conversions could be done after generalisation to maintain the type variable naming conventions.) Given a context and type, the function $\mathit{generalise}$ returns the fully generalized type possible in that context.
 
 \subsection{Typing rules}
 
@@ -493,7 +493,7 @@ The purpose of returning the type is obvious, but the substitution's purpose is 
 Algorithm \W\ is set out below, for each of the five language constructs. There is a case for each type of node in the abstract syntax tree, so the rule applied at each point is deterministic and easily-chosen based on the node type. Explanations of the more complex cases are given below the algorithm.
 
 $$
-\mathcal{W}: (\mathrm{Context}, \mathrm{Expression}) \rightarrow (\mathrm{Substitution}, \mathrm{Type})
+\mathcal{W}: (\mathrm{Context},\ \mathrm{Expression}) \rightarrow (\mathrm{Substitution},\ \mathrm{Monotype})
 $$$$
 \begin{array}{lclc}
   \\
@@ -520,15 +520,15 @@ The notation $\textrm{new}\ t_n$\ specifies that the type variable $t_n$ is new 
 
 The general structure of Algorithm \W\ is to recursively call itself on subexpressions, until the subexpressions are simple leaf nodes. At this point, constant nodes have their assigned type and variable nodes have their type retrieved from the context. The subexpression types are passed back up, where their substitutions are either combined or fed into inferring other subexpressions, and a resultant type is returned.
 
-Case (4) for function application infers the types of the two subexpressions. It first infers the left one, $e_1$, then applies the resultant substitution to the context before inferring the right subexpression, $e_2$. This ensures constraints arising from the $e_1$ are considered when inferring the second subexpression, so if $e_1$ and $e_2$ have conflicting constraints this is detected and a type error is raised. However, this does introduce a left-to-right bias where the type error is raised in the right subexpression if a conflict is found.
+Case (3) for function application infers the types of the two subexpressions. It first infers the left one, $e_1$, then applies the resultant substitution to the context before inferring the right subexpression, $e_2$. This ensures constraints arising from the $e_1$ are considered when inferring the second subexpression, so if $e_1$ and $e_2$ have conflicting constraints this is detected and a type error is raised. However, this does introduce a left-to-right bias where the type error is raised in the right subexpression if a conflict is found.
 
-Given we know $e_1$ is a function that should accept $e_2$'s type, $\tau_2$, we should be able to unify $\tau_2 \rightarrow tn$ (a function accepting $\tau_2$ and returning $tn$ i.e. anything) with the function type $\tau_1$. We apply the substitution $S_2$ to $\tau_1$ when doing this to ensure no constraints have arisen in inferring $e_2$ that would prevent this unification. Finding a unifying substitution confirms the function application is valid, and we are able to determine the return type (and thus the overall type of this expression) by applying the unifying substitution to the type variable $tn$ used as the return type. If no unifying substitution can be found, the function application is invalid (as the argument type $\tau_2$ cannot be substituted to reach an accepted type for the function’s type $\tau_1$) and a type error is raised. Invalid function application (4) and undefined variables (1) are the only possible sources of type errors from Algorithm \W.
+Given we know $e_1$ is a function that should accept $e_2$'s type, $\tau_2$, we should be able to unify $\tau_2 \rightarrow tn$ (a function accepting $\tau_2$ and returning $tn$ i.e. anything) with the function type $\tau_1$. We apply the substitution $S_2$ to $\tau_1$ when doing this to ensure no constraints have arisen in inferring $e_2$ that would prevent this unification. Finding a unifying substitution confirms the function application is valid, and we are able to determine the return type (and thus the overall type of this expression) by applying the unifying substitution to the type variable $tn$ used as the return type. If no unifying substitution can be found, the function application is invalid (as the argument type $\tau_2$ cannot be substituted to reach an accepted type for the function’s type $\tau_1$) and a type error is raised. Invalid function application (3) and undefined variables (1) are the only possible sources of type errors from Algorithm \W.
 
 To illustrate, consider \mintinline{text}{odd 3} in the context $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \}$. We find the types of \mintinline{text}{odd} and \mintinline{text}{3} as $Int \rightarrow Bool$ and $Int$ respectively, unify $Int \rightarrow Bool$ with $Int \rightarrow t_0$ to get the substitution $S_3 = \{ t_0 \mapsto Bool \}$ and return the overall type $S_3(tn) = \{ t_0 \mapsto Bool \}(t_0) = Bool$.
 
-Also consider \mintinline{text}{odd x} in the context $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool,\ \mathtt{x} : t_0 \}$. Here we find the types of \mintinline{text}{|odd|} and \mintinline{text}{|x|} as $Int \rightarrow Bool$ and $t_0$ respectively, unify $Int \rightarrow Bool$ with $t_0 \rightarrow t_1$ to get the substitution $S_3 = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}$ and return the overall type $S_3(tn) = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}(t_1) = Bool$. In this we also return the substitution $\{ t_0: Int,\ t_1: Bool \}$, constraining the external type $t_0$ to an $Int$. Given we created $t_1$ as a new type variable, it won’t be found elsewhere so does not need to be considered in other expressions so the substitution $\{ t_0 \mapsto Int \}$ could equivalently have been returned.
+Also consider \mintinline{text}{odd x} in the context $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool,\ \mathtt{x} : t_0 \}$. Here we find the types of \mintinline{text}{|odd|} and \mintinline{text}{|x|} as $Int \rightarrow Bool$ and $t_0$ respectively, unify $Int \rightarrow Bool$ with $t_0 \rightarrow t_1$ to get the substitution $S_3 = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}$ and return the overall type $S_3(tn) = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}(t_1) = Bool$. In this we also return the substitution $\{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}$, constraining the external type $t_0$ to an $Int$. Given we created $t_1$ as a new type variable, it won’t be found elsewhere so does not need to be considered in other expressions so the substitution $\{ t_0 \mapsto Int \}$ could equivalently have been returned.
 
-Case (3) for function abstraction first infers the type of the function body expression, $e$, by calling \W\ recursively. It passes the current context with an additional binding for the function parameter $x$, assigned to a new type variable with no constraints. This subcall to W for the function body returns the substitution $S_1$ and type $\tau_1$. Finally, the substitution $S_1$ and type $S_1(tn \rightarrow \tau_1)$ is returned as the final result for the function abstraction. The type arises from the fact that the function abstraction takes the parameter with the new type $tn$ and returns the type of the body, $\tau_1$. We apply the substitution $S_1$ to it to reflect any constraints on the function parameter picked up in the function body.
+Case (4) for function abstraction first infers the type of the function body expression, $e$, by calling \W\ recursively. It passes the current context with an additional binding for the function parameter $x$, assigned to a new type variable with no constraints. This subcall to W for the function body returns the substitution $S_1$ and type $\tau_1$. Finally, the substitution $S_1$ and type $S_1(tn \rightarrow \tau_1)$ is returned as the final result for the function abstraction. The type arises from the fact that the function abstraction takes the parameter with the new type $tn$ and returns the type of the body, $\tau_1$. We apply the substitution $S_1$ to it to reflect any constraints on the function parameter picked up in the function body.
 
 For an example examine calling W on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \}$. The subcall to W calls $W(\Gamma + \mathtt{x} : t_0, \mathtt{odd x})$ which returns $(S_1, \tau_1) = (\{ t_0: Int \}, Bool)$. Then $(S_1, S_1(t_n \rightarrow \tau_1)) = (\{ t_0 \mapsto Int \}, \{ t_0 \mapsto Int \}(t_0 \rightarrow Bool)) = (\{ t_0 \mapsto Int \}, Int \rightarrow Bool)$ is returned as the result.
 
@@ -536,55 +536,107 @@ Case (5) for let statements first infers the type $\tau_1$ of the parameter defi
 
 \subsection{Algorithm \texorpdfstring{\W}{W}'}
 
-Algorithm W’ is a slightly altered variant of Algorithm W, only changing rule (4) for function application to avoid left-to-right bias.
+Algorithm \W’ is a slightly altered variant of Algorithm \W, only changing rule (3) for function application to avoid left-to-right bias.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.782\linewidth]{images/image22.png}
-\end{figure}
+$$
+\mathcal{W}\textrm{'}: (\mathrm{Context},\ \mathrm{Expression}) \rightarrow (\mathrm{Substitution},\ \mathrm{Monotype})
+$$$$
+\begin{array}{lclc}
+  \\
+    \mathcal{W}\textrm{'}(\Gamma,\ e_1\ e_2) & = & \textrm{let}\ (S_1,\ \tau_1) = \mathcal{W}\textrm{'}(\Gamma,\ e_1) & (3)\\
+                                             &   & \phantom{\textrm{let}}\ (S_2,\ \tau_2) = \mathcal{W}\textrm{'}(\Gamma,\ e_2) &\\
+                                             &   & \phantom{\textrm{let}}\ S_3 = \mathit{unify_S}(S_1,\ S_2) &\\
+                                             &   & \phantom{\textrm{let}}\ S_4 = \mathit{unify}(S_3(\tau_1),\ S_2(\tau_2) \rightarrow t_0),\ \textrm{new}\ t_0 &\\
+                                             &   & \textrm{in}\ (\mathit{combine}(S_4,\ S_3,\ S_1),\ S_4(t_0)) &\\
+  \\
+\end{array}
+$$
 
-% TODO: write out algorithm in Lee format for W’, 1-index, replace S’ with S_3, V with S_4
+Algorithm \W' performs substitution unification, $\mathit{unify_S}$, introduced in the same paper as \W'. Like type unification, substitution unification attempts to find a unifying substitution to unify two values. Unlike type unification, substitution unification attempts to make two substitutions, not types, equal. It returns a unifying substitution, which when combined with either substitution gives the same result:
+$$\mathit{combine}(\mathit{unify_S}(S_1,\ S_2),\ S_1) = \mathit{combine}(\mathit{unify_S}(S_1,\ S_2),\ S_2)$$
 
-Algorithm W’ performs substitution unification, introduced in the same paper as W’. Like type unification, substitution unification attempts to find a unifying substitution to unify two values. Unlike type unification, substitution unification attempts to make two substitutions, not types, equal. It returns a unifying substitution, which when combined with either substitution gives the same result, i.e. $combine(unify(S_1, S_2), S_1) = combine(unify(S_1, S_2), S_2)$. Both type and substitution unification is commutative and associative, and may fail if no such substitution exists.
+Both type and substitution unification is commutative and associative, and may fail if no such substitution exists.
 
-If substitutions share no type variables, finding a unifying substitution can be done by simply combining the substitutions. For example, $unify(\{ t0 \mapsto Int \}, \{ t1 \mapsto Bool \}) = combine(\{ t0 \mapsto Int \}, \{ t1 \mapsto Bool \}) = \{ t0 \mapsto Int, t1 \mapsto Bool \}$.
+If substitutions share no type variables, finding a unifying substitution can be done by simply combining the substitutions. For example:
+\begin{align*}
+  \mathit{unify}(\{ t_0 \mapsto Int \},\ \{ t_1 \mapsto Bool \}) & = \mathit{combine}(\{ t_0 \mapsto Int \},\ \{ t_1 \mapsto Bool \})\\
+                                                                 & = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}
+\end{align*}
 
-However, substitution unification generally is different to substitution combination. Combination only simulates the effect of applying consecutive substitutions, so is not concerned with unifying substitution types or maintaining constraints. For example, given $S_1 = \{ t0 \mapsto t1 \rightarrow Bool \}$ and $S_2 = \{ t0 \mapsto Int \rightarrow t2 \}$, then $S_3 = unify(S_1, S_2) = \{ t1 \mapsto Int, t2 \mapsto Bool \}$, which is not the same as combining the substitutions. Note the resultant unifying substitution may have a non-empty domain disjoint from both the given substitutions, as in this example. We can see that $combine(S_3, S_1) = combine(S_3, S_2) = \{ t0 \mapsto Int \rightarrow Bool, t1 \mapsto Int, t2 \mapsto Bool \}$.
+However, substitution unification generally is not the same as substitution combination. Combination only simulates the effect of applying consecutive substitutions, so is not concerned with unifying types or maintaining type constraints. For example:
+\begin{align*}
+  \mathrm{given}\ S_1                        & = \{ t_0 \mapsto t_1 \rightarrow Bool \}\\
+  \mathrm{and}\ S_2                          & = \{ t_0 \mapsto Int \rightarrow t_2 \}\\[0.25cm]
+  \mathit{unify_S}(S_1,\ S_2)                & = \{ t_1 \mapsto Int,\ t_2 \mapsto Bool \}\\
+                                             & \neq \mathit{combine}(S_1,\ S_2) = S_2\\[0.25cm]
+  combine(\mathit{unify_S}(S_1,\ S_2),\ S_1) & = combine(\mathit{unify_S}(S_1,\ S_2),\ S_2)\\
+                                             & = \{ t_0 \mapsto Int \rightarrow Bool, t_1 \mapsto Int, t_2 \mapsto Bool \}
+\end{align*}
 
-Having defined substitution unification, case (4) in W’ is fairly straightforward. It independently infers the two subexpressions $e\_1$ and $e\_2$, rather than applying $e\_1$’s substitution $S_1$ to the context before inferring $e\_2$ as in W. The substitutions are then unified and then applied to both subexpression types, ensuring all constraints are applied to both types. The function type and the argument to new type can then be unified in the same way as W.
+Note the resultant unifying substitution may have a domain disjoint from both the given substitutions, as in this example.
+
+Having defined substitution unification, case (3) in \W' is fairly straightforward. It independently infers the two subexpressions $e_1$ and $e_2$, rather than applying $e_1$'s substitution $S_1$ to the context before inferring $e_2$ as in \W. The substitutions are then unified and applied, ensuring all constraints are applied to both types. The function type and the argument to the new type $t_0$ can then be unified in the same way as \W.
 
 \subsection{Algorithm \texorpdfstring{\M}{M}}
 
-Algorithm M is a top-down approach to type inference. Implemented as part of an early ML compiler by~\cite{ref32}, it was known as a ‘folklore’ algorithm until~\cite{ref33} formalised it as in the figure below.
+Algorithm \M\ is a top-down approach to type inference. Implemented as part of an early ML compiler by \cite{ref32}, it was known as a `folklore' algorithm until \cite{ref33} formalised it as the algorithm laid out below.
 
-Given a context, expression and type it returns a substitution. When compared to W’s signature, this effectively moves the type from the output of W to the input of M. The input type now represents an expected type for the expression, to be checked and then refined by returning a substitution. Types are refined as they progress down the tree (hence top-down), and if they are found to be incompatible at any point a type error is raised. In some cases this can lead to more specific error messages as type errors are generally raised lower down the tree, rather than at potentially more complex function application expressions as in W. More specific error messages are more useful for developers to identify where the bugs are in their programs.
+Given a context, expression and monotype \M\ returns a substitution. When compared to \W's signature, this effectively moves the type from the output of \W\ to the input of \M. The input type now represents an expected type for the expression, to be checked and then refined by returning a substitution. Types are refined as they progress down the tree (hence top-down), and if they are found to be incompatible at any point a type error is raised. In some cases this can lead to more specific error messages as type errors are generally raised lower down the tree, rather than at potentially more complex function application expressions as in \W. More specific error messages are more useful for developers to identify where the bugs are in their programs.
 
-M is initially started at the root node with a new type, i.e. $M(\Gamma, e, tn), new tn$, and the final type can be determined by applying the returned substitution to $tn$. In this way both type inference algorithms can be wrapped to have the signature $Context \times Expression \rightarrow Type$ which would be naturally expected from type inference algorithms.
+\M\ starts at the root node with a new type, i.e. $S = \mathcal{M}(\Gamma,\ e,\ t_0),\ \mathrm{new}\ t_0$. The root node's final type can be determined by applying the returned substitution $S$ to $t_0$. In this way \W, \W' and \M\ can all be wrapped to have the signature $(\mathrm{Context},\ \mathrm{Expression}) \rightarrow \mathrm{Type}$ which would be naturally expected from type inference algorithms.
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=1.000\linewidth]{images/image7.png}
-\end{figure}
+$$
+\mathcal{M} : (\mathrm{Context},\ \mathrm{Expression},\ \mathrm{Monotype}) \rightarrow \mathrm{Substitution}
+$$$$
+\begin{array}{lclc}
+  \\
+    \mathcal{M}(\Gamma,\ c_{\tau},\ \tau_e)                                & = & \mathit{unify}(\tau_e,\ \tau) & (1)\vspace{0.25cm}\\
+    \mathcal{M}(\Gamma,\ x,\ \tau_e)                                       & = & \textrm{let}\ S_1 = \{ a \mapsto t_0,\ b \mapsto t_1,\ \dots \},& (2)\\
+                                                                           &   & \phantom{\textrm{let}}\ \textrm{new}\ t_0,\ t_1,\ \dots &\\
+                                                                           &   & \phantom{\textrm{let}}\ \textrm{where}\ x : \forall a \forall b\ \dots\ \tau_1 \in \Gamma &\\
+                                                                           &   & \textrm{in}\ \mathit{unify}(\tau_e,\ S_1(\tau_1)) &\vspace{0.25cm}\\
+    \mathcal{M}(\Gamma,\ e_1\ e_2,\ \tau_e)                                & = & \textrm{let}\ S_1 = \mathcal{M}(\Gamma,\ e_1,\ t_0 \rightarrow \tau_e),\ \textrm{new}\ t_0 & (3)\\
+                                                                           &   & \phantom{\textrm{let}}\ S_2 = \mathcal{M}(S_1(\Gamma),\ e_2,\ S_1(t_0)) &\\
+                                                                           &   & \textrm{in}\ \mathit{combine}(S_2,\ S_1) &\vspace{0.25cm}\\
+    \mathcal{M}(\Gamma,\ \lambda x.\ e,\ \tau_e)                           & = & \textrm{let}\ S_1 = \mathit{unify}(\tau_e, t_0 \rightarrow t_1),\ \textrm{new}\ t_0,\ t_1 & (4)\\
+                                                                           &   & \phantom{\textrm{let}}\ S_2 = \mathcal{M}(S_1(\Gamma) + x : S_1(t_0),\ e,\ S_1(t_1)) &\\
+                                                                           &   & \textrm{in}\ \mathit{combine}(S_2,\ S_1) &\vspace{0.25cm}\\
+    \mathcal{M}(\Gamma,\ \mathtt{let}\ x = e_1\ \mathtt{in}\ e_2,\ \tau_e) & = & \textrm{let}\ S_1 = \mathcal{M}(\Gamma, e_1, t_0),\ \textrm{new}\ t_0 & (5)\\
+                                                                           &   & \phantom{\textrm{let}}\ S_2 = \mathcal{M}(S_1(\Gamma) + x : \mathit{generalise}(S_1(\Gamma),&\\
+                                                                           &   & \phantom{\textrm{let}\ S_2 = \mathcal{M}(} S_1(t_0)),\ e_2,\ S_1(\tau_e)) &\\
+                                                                           &   & \textrm{in}\ \mathit{combine}(S_2,\ S_1) &\\
+  \\
+\end{array}
+$$
 
-TODO: latexify the above (taken from Lee), make replacements as per W alg, replace rho with tau\_e
+\M\ has some similarities to \W, however where \W\ applies unification in function application, \M\ instead pushes this down the tree and performs unification in the leaf nodes and function abstraction.
 
-M has some similarities to W, however where W applies unification in function application, M instead pushes this down the tree and performs unification in the leaf nodes and function abstraction.
+In rules (1) and (2) for constant and variable expressions, we are given an expected type $\tau_e$ and are verifying it can unify with the literal constant’s type or the type from the context respectively. Unifying in this way returns the type in the substitution, for example with a \texttt{con} expression:
 
-In rules (1) and (2) for constant and variable expressions, we are given an expected type $\tau_e$ and are verifying it can unify with the literal constant’s type or the type from the context respectively. Unifying in this way returns the type in the substitution, for example $M(\{\}, 3, t0) = unify(Int, t0) = \{ t0: Int \}$ and $M(\{ odd: Int \rightarrow Bool \}, odd, t0 \rightarrow t1) = unify(Int \rightarrow Bool, t0 \rightarrow t1) = \{ t0: Int, t1: Bool \}$, which is passed back up the tree.
+$$\mathcal{M}(\{\},\ \mathtt{3},\ t_0) = \mathit{unify}(Int,\ t_0) = \{ t_0 \mapsto Int \}$$
 
-Rule (4) shows function application in M has no unification step. Instead, M is simply called recursively for each expression. The first expression, $e\_1$, is expected to be a function taking a new type variable $tn$ and returning the expected type $\tau_e$ for the overall application. The second expression should have the argument type for the function, $tn$, after applying substitution $S_1$ to collect type constraints.
+and a \texttt{var} expression:
+\begin{align*}
+\mathcal{M}(\{ \mathtt{odd} : Int \rightarrow Bool \},\ \mathtt{odd},\ t_0 \rightarrow t_1)
+& = \mathit{unify}(Int \rightarrow Bool,\ t_0 \rightarrow t_1)\\
+& = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}
+\end{align*}
 
-For example, consider \mintinline{text}{|odd 3|} in the context $\Gamma = \{ odd: Int \rightarrow Bool \}$ with expected type $t0$. We call M with the expected type $t1 \rightarrow t0$ on \mintinline{text}{|odd|} to get the substitution $S_1 = \{ t1: Int, t0: Bool \}$. We then call M with the expected type $S_1(t1) = Int$ on \mintinline{text}{|3|}, which is validated and returns an empty substitution $S_2 = \{\}$. Finally, we return the combined substitution $\{ t1: Int, t0: Bool \}$.
+These substitutions are then passed back up the tree, which appropriately constrains the usage of the corresponding expression.
 
-In rule (3) for function abstraction, we verify the expected type unifies with a new function type. This gives a substitution mapping the variables $t1$ and $t2$ to the expected function types, if any. This is applied to the context, along with adding the parameter $x$’s type as $t1$. We then use M to infer the type of the function body, expecting it to have the unified return type $t2$. We return the combined substitution from both parts.
+Rule (3) shows function application in \M\ has no unification step. Instead, \M\ is simply called recursively for each expression. The first expression, $e_1$, is expected to be a function taking a new type variable $t_0$ and returning the expected type $\tau_e$ for the overall application. The second expression should have the argument type for the function, $t_0$, after applying substitution $S_1$ to collect type constraints.
 
-For an example we look at applying M on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ odd: Int \rightarrow Bool \}$ and expected type $t0$. We first unify $t0$ with the new type $t1 \rightarrow t2$, resulting in $S_1 = \{ t0: t1 \rightarrow t2 \}$. We then make the recursive call to M with the function body \mintinline{text}{|odd x|}, context $\{ odd: Int \rightarrow Bool, x: t1 \}$ and expected type $t2$. This results in the substitution $S_2 = \{ t1: Int, t2: Bool \}$, which we combine with $S_1$ to get $combine(S_2, S_1) = \{ t0: Int \rightarrow Bool, t1: Int, t2: Bool \}$. As in W’s function application, the new type variables will be unused outside of this expression so we can equivalently exclude $t1$ and $t2$ from the substitution.
+For example, consider \mintinline{text}{odd 3} in the context $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \}$ with expected type $t_0$. We call \M\ with the expected type $t_1 \rightarrow t_0$ on \mintinline{text}{odd} to get the substitution $S_1 = \{ t_1 \mapsto Int,\ t_0 \mapsto Bool \}$. We then call \M\ with the expected type $S_1(t_1) = Int$ on \mintinline{text}{3}, which is validated and returns an empty substitution $S_2 = \{\}$. Finally, we return the combined substitution $\{ t_1 \mapsto Int, t_0 \mapsto Bool \}$.
 
-Finally, let expressions infer the type of their parameter $e\_1$ with a new type, then infer the type of their body $e\_2$ expecting it to have the overall expected type $\tau_e$. Similarly to function abstraction, the substitution from the parameter is passed when inferring the body, and combined with the body’s substitution to give an overall result.
+In rule (4) for function abstraction, we verify the expected type unifies with a new function type. This gives a substitution mapping the variables $t_0$ and $t_1$ to the expected function types, if any. This is applied to the context, along with adding the parameter $x$’s type as $t_0$. We then use \M\ to infer the type of the function body, expecting it to have the return type $S_1(t_1)$. We return the combined substitution from both parts.
+
+For an example we look \M\ on \mintinline{text}{|$\lambda$|x. odd x} with $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \}$ and expected type $t_0$. We first unify $t_0$ with the new type $t_1 \rightarrow t_2$, resulting in $S_1 = \{ t_0 \mapsto t_1 \rightarrow t_2 \}$. We then make the recursive call to M with the function body \mintinline{text}{odd x}, context $\{ \mathtt{odd} : Int \rightarrow Bool,\ \mathtt{x} : t1 \}$ and expected type $t_2$. This results in the substitution $S_2 = \{ t_1 \mapsto Int,\ t2 \mapsto Bool \}$, which we combine with $S_1$ to get $combine(S_2,\ S_1) = \{ t_0 \mapsto Int \rightarrow Bool,\ t_1 \mapsto Int,\ t_2 \mapsto Bool \}$. As in \W's function application, the new type variables will be unused outside of this expression so we can equivalently exclude $t_1$ and $t_2$ from the substitution.
+
+Finally, let expressions (5) infer the type of their parameter $e_1$ with a new type $t_0$, then infer the type of their body $e_2$ expecting it to have the overall expected type $\tau_e$. Similarly to function abstraction, the substitution from the parameter is passed when inferring the body, and combined with the body’s substitution to give an overall result.
 
 \subsection{Limitations}
 
-These type inference algorithms do have limitations. They all sometimes produce poor type error messages; Algorithm W often detects errors late, highlighting too large of a subexpression to be useful and Algorithm M often detects too specific of a term without context as to what original definition it violates. Algorithm W has the left-to-right bias which Algorithm W’ attempts to correct for, however this can sometimes exacerbate the problem with highlighting large subexpressions. Poor error messages make it difficult for the programmer to understand how to fix the problem.
+These type inference algorithms do have limitations. They all sometimes produce poor type error messages; \W\ often detects errors late, highlighting too large of a subexpression to be useful and \M\ often detects too specific of a term without context as to what original definition it violates. Algorithm \W\ has the left-to-right bias which \W' attempts to correct for, however \W' can sometimes exacerbate the problem by highlighting large subexpressions. Both overly-specific and overly-vague error messages make it difficult for the programmer to understand how to fix type errors.
 
 To improve error messaging, hybrid or constraint-based algorithms along with heuristics are often used in practice to provide more informative error messages. Reducing the size of the amount inferred at once can help make errors more precise. For example, Apple’s Swift uses a bi-directional type inference algorithm on single statements \citep{ref34}.
 
