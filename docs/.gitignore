@@ -11,5 +11,6 @@ _minted-index/
 *.fls
 *.synctex.gz
 
-# Don't store generated PDFs (at least for now)
+# Don't store generated PDFs (at least for now) (but allow PDF figures)
 *.pdf
+!*/images/*.pdf

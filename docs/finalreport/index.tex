@@ -218,18 +218,21 @@ The function abstraction mentioned is the \mintinline{text}{|$\lambda$|x. x} par
 
 Functions may be returned by other functions, which enables them to have the appearance of taking multiple arguments. For example \mintinline{text}{|$\lambda$|x. (|$\lambda$|y. x)} can be viewed as a function which takes two arguments and returns the first one, even though really it is a function taking one argument which returns a function taking another argument for a result. Here explicit brackets have been given for clarity, but they aren’t necessary. Additionally, sometimes multiple arguments like this are written together, so \mintinline{text}{|$\lambda$|x. (|$\lambda$|y. x)}, \mintinline{text}{|$\lambda$|x. |$\lambda$|y. x} and \mintinline{text}{|$\lambda$|xy. x} all mean the same thing.
 
-Finally, the function application is actually applying TODOthe function \mintinline{text}{|$\lambda$x. x|} to the argument \mintinline{text}{|y|}. In $\lambda$-calculus evaluation is performed via $\beta$-reductions. In our example this could be done by substituting the argument \mintinline{text}{|y|} for parameter \mintinline{text}{|x|} in the body of the function \mintinline{text}{|x|}, resulting in \mintinline{text}{|y|}.
+Finally, the function application is actually applying the function \mintinline{text}{|$\lambda$x. x|} to the argument \mintinline{text}{|y|}. In $\lambda$-calculus evaluation is performed via $\beta$-reductions. In our example this could be done by substituting the argument \mintinline{text}{|y|} for parameter \mintinline{text}{|x|} in the body of the function \mintinline{text}{|x|}, resulting in \mintinline{text}{|y|}.
 
-This expression’s construction can be represented as an abstract syntax tree:
+This expression's can be represented as an abstract syntax tree (AST):
 
-TODO: tree diagram of the expression
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/ast_abs_id_y.pdf}
+  \caption{Abstract syntax tree that represents the expression \mintinline{text}{(|$\lambda$|x. x) y}}
+\end{figure} \par}
 
 In addition to these three constructs, the let construct allows binding a value to a variable in an expression. For example \mintinline{text}{let x = 3 in x + x} binds \mintinline{text}{x} to the value \mintinline{text}{3} in \mintinline{text}{x + x}.
 
 The con construct is added to represent literal constants, such as numbers or booleans like \mintinline{text}{3} and \mintinline{text}{True}.
 
-$\lambda$-calculi have been extensively studied, often using formal inductive definitions. For example, the inductive definition for the set of free variables (\mintinline{text}{|var|}s not bound by function abstraction or let statements) is:
-
+$\lambda$-calculi have been extensively studied, often resulting in formal inductive definitions. For example, the inductive definition for the set of free variables (variables not bound by function abstraction or let statements) is:
 $$\begin{array}{lcl}
   \\
     FV(c)                                       & = & \varnothing\\
@@ -239,10 +242,15 @@ $$\begin{array}{lcl}
     FV(\mathtt{let}\ x = e_1\ \mathtt{in}\ e_2) & = & FV(e_2) - \{ x \}\\
   \\
 \end{array}$$
+Given these rules the set of free variables for any combination of these constructs can be determined. This can be demonstrated for our example expression \mintinline{text}{(|$\lambda$|x. x) y}, which is shown in a tree structure below.
 
-Given these rules the set of free variables for any combination of these constructs can be determined. This can be demonstrated for our example expression \mintinline{text}{(|$\lambda$|x. x) y}, which is shown in a tree structure below. More generally this is an example of how an inductive definition can tell us something about the entire program which is how some type inference algorithms can be viewed.
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.8\linewidth]{images/ast_abs_id_y_fv.pdf}
+  \caption{The free variables at different nodes in the AST for \mintinline{text}{(|$\lambda$|x. x) y}}
+\end{figure} \par}
 
-TODO: tree diagram of the expression with the sets of free variables at each node.
+More generally this is an example of how an inductive definition can tell us something about the entire program which is how some type inference algorithms can be viewed.
 
 Most real-world environments define a context which binds some variables by default to in-built values. For example Haskell’s GHC primitives and Prelude includes basic variables like \mintinline{text}{|[]|} (the empty list) and \mintinline{text}{|not|} (a function which inverts booleans). These can be considered bound at the top level and removed from the set of free variables there.
 
@@ -318,9 +326,21 @@ Rust’s compiler, rustc, previously used a variant of HM for type inference. Ho
 
 Apple's Swift language heavily uses type inference. It is implemented using a ``constraint-based type checker that is reminiscent of the classical Hindley-Milner type inference algorithm'' \citep{ref24}. Like other languages Swift extends HM with additional language features, including more expressive polymorphic types with additional constraints. HM is particularly suited to functional languages, so to adapt it to better suit Swift's procedural style, Swift limits type inference to individual statements rather than entire programs. This also improves performance and provides more specific error messages.
 
+Microsoft's TypeScript is a statically typed language that uses type inference to improve readability and developer productivity (\cite{ref36}). Its type inference engine is configurable, allowing users to choose how strict the compiler should be. As TypeScript aims to maintain compatibility with JavaScript, a non-statically typed language. This results in certain trade-offs which sometimes allow runtime type errors to occur.
+
+For example, as accessing an array past a valid index returns \mintinline{text}{undefined} in JavaScript, so does in TypeScript. However, as typing all array accesses as potentially undefined would make handling these cases tedious TypeScript does not do this. In this undefined case, a runtime type error may be raised when using the undefined value.
+
+\begin{minted}[breaklines]{typescript}
+const arr = [1, 2, 3];
+const x = arr[100]; // has type number, actually is undefined
+x.toFixed(2); // compiles, but throws runtime type error
+\end{minted}
+
+TypeScript's type system is very different to Hindley-Milner, adding union types, constant types, objects, classes and generics. However, this flexibility limits what types can be inferred, and it requires explicit type annotations on most function parameters.
+
 In addition to inferred types, most languages allow programmers to add more type information through explicit type annotations or casting. These features are particularly helpful where the programmer knows more than the inference algorithm about the limits on how a part of a program will be used.
 
-Java allows casting and TypeScript has its \mintinline{text}{|as|} type assertion operator. These can be used sparingly (often in combination with \mintinline{text}{instanceof} and \mintinline{text}{typeof} operators respectively) as an escape hatch to work around the limitations of type inference algorithms. These statements may not be able to be type checked at compile-time so instead runtime checks are performed to maintain type safety.
+Java allows casting and TypeScript has its \mintinline{text}{as} type assertion operator. These can be used sparingly (often in combination with \mintinline{text}{instanceof} and \mintinline{text}{typeof} operators respectively) as an escape hatch to work around the limitations of type inference algorithms. These statements may not be able to be type checked at compile-time so instead runtime checks are performed to maintain type safety.
 
 Java allows casting an object to a subclass \citep{ref25}. Runtime checks are performed, which throw a \mintinline{text}{|ClassCastException|} in case the object is not actually an instance of the subclass.
 
@@ -356,10 +376,6 @@ const e = a as any + a as 'cs310cs310' | 620
 /* @ts-ignore */
 const f: 'cs310cs310' | 620 = a + a;
 \end{minted}
-
-TODO: (maybe?) Add section on TypeScript/Elm?
-\underline{\href{https://aaltodoc.aalto.fi/bitstream/handle/123456789/42719/master\_Mikkonen\_Juuso\_2020.pdf}{https://aaltodoc.aalto.fi/bitstream/handle/123456789/42719/master\_Mikkonen\_Juuso\_2020.pdf}}
-Talks about statically typed languages in JavaScript-land. Mentions things like TypeScript don’t use HM because JS has a lot of structural typing (i.e. if objects have the right properties it’s fine to call methods that depend on that interface) and subtyping.
 
 While real-world languages don't work exactly like HM, for the purposes of the teaching tool HM gives a good representation of how type inference works to students. HM avoids being too complex to understand, and is still related to how languages commonly used in practice perform type inference.
 
@@ -424,8 +440,6 @@ Substitutions may (and often do) substitute quantified type variables with free 
 
 For any type $\rho \sqsubseteq \rho$, as the substitution may be empty. A type is strictly less general ($\sqsubset$) than another if and only if the substitution is non-empty. This means a strictly less general type must have at least one fewer quantified variable, because one for-all quantified variable must have been substituted away.
 
-TODO: (maybe) partial order diagram of some of $\forall a \forall b.\ (a \rightarrow b) \rightarrow [a] \rightarrow [b]$’s partial and full instantiations.
-
 An expression with a type $\rho_a$ more general than another type $\rho_b$ can be considered to have the less general type $\rho_b$. This means if an expression with type $\rho_b$ is needed, providing an expression with type $\rho_a$ will type-check if and only if $\rho_a \sqsubseteq \rho_b$. The process of giving an expression a less general type is known as \textit{instantiation}. For example, the type of \mintinline{text}{id}, $\forall a.\ a \rightarrow a$, can be instantiated as all of $Int \rightarrow Int$, $Bool \rightarrow Bool$, $t_0 \rightarrow t_0$ or even $([t_0] \rightarrow (Int,\ Bool)) \rightarrow ([t_0] \rightarrow (Int,\ Bool))$.
 
 The `opposite' of instantiation is generalisation, where an expression with a certain type can be considered to have a more general type, adding a for-all quantification to a variable. This is allowed where the type variable is not free in any of the types in the context. Not being free in the context means the type variable does not appear unbound anywhere except in the type being generalised itself, so it does not have any other type constraints. Being free of any type constraints, it may be any type and therefore for-all quantified.
@@ -480,11 +494,7 @@ $$
 
 The type inference algorithms \W, \W’ and \M\ effectively are methods to select typing rules to determine a type for the expression, or detect the expression is incorrectly typed. While they don't apply the typing rules directly, they are close and their respective authors prove they give equivalent results and can be implemented directly.
 
-The algorithms are applied to abstract syntax trees (ASTs), which represent expressions in a structured way. For example, an AST for the expression \mintinline{text}{let y = (|$\lambda$|x. (odd x)) 3 in not y} may be visualised as:
-
-TODO: tree diagram of expression
-
-The type inference algorithms are therefore tree traversal algorithms. They generally call themselves recursively on subtrees to process subexpressions, and then combine these results to determine a final type (the type of the root node).
+The algorithms are applied to abstract syntax trees (ASTs), and are therefore tree traversal algorithms. They generally call themselves recursively on subtrees to process subexpressions, and then combine these results to determine a final type (the type of the root node).
 
 \subsection{Algorithm \texorpdfstring{\W}{W}}
 
@@ -644,20 +654,6 @@ To improve error messaging, hybrid or constraint-based algorithms along with heu
 
 Additionally, despite not being required in all languages, explicit type annotations are often used to help identify errors earlier at locations which are easier to interpret \citep{ref35}. This is especially common for function definitions or program entry points. This also effectively splits up the program into smaller parts which can be inferred against separately, improving performance and making type errors more precise. In some cases, type inference algorithms struggle with (directly or indirectly) recursively defined functions and type annotations can help define these types. Finally, changing a rigidly-typed interface also highlights potential breaking changes to libraries or helper functions. In this way type annotations act as documentation to future programmers using the code. Manually specified, more specific types may be an improvement over automatically inferred types as sometimes the most general type as worked out by a type inference algorithm may not clearly convey the intent of the programmer.
 
-TODO: (maybe?) Add a section on type errors. Resources:
-
-\underline{\href{https://www.researchgate.net/profile/Jurriaan\_Hage/publication/221241370\_Scripting\_the\_Type\_Inference\_Process/links/02e7e51a37f9233c65000000.pdf}{https://www.researchgate.net/profile/Jurriaan\_Hage/publication/221241370\_Scripting\_the\_Type\_Inference\_Process/links/02e7e51a37f9233c65000000.pdf}}
-Improving type error messages
-
-\underline{\href{https://dspace.library.uu.nl/bitstream/handle/1874/7297/full.pdf?sequence=8}{https://dspace.library.uu.nl/bitstream/handle/1874/7297/full.pdf?sequence=8}}
-Top quality type error messages
-
-\underline{\href{https://manu.sridharan.net/files/mycroft-preprint.pdf}{https://manu.sridharan.net/files/mycroft-preprint.pdf}}
-A Practical Framework for Type Inference Error Explanation
-
-\underline{\href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.5050\&rep=rep1\&type=pdf}{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.5050\&rep=rep1\&type=pdf}}
-PhD thesis which talks about hindley milner and type inference errors a lot
-
 \chapter{Design}\label{id:h.7ggvdxb04tzm}
 
 The design of the teaching tool is split into two parts, working backwards from the end product in mind: designing the user interface and experience, and designing the architecture to support that.
@@ -725,8 +721,6 @@ This exploration into existing teaching resources is summarised in the table:
   \textbf{Informal resources} & Contains practical tips, however usually very specific and irrelevant to many programmers. & Written in plain language with many code samples. & Inaccuracies are common, and often go undetected or unresolved. Can become outdated quickly. \\
   \hline
 \end{tabularx}\end{adjustbox}\\
-
-TODO: (maybe?) discuss my exploration of existing teaching tools (wolframalpha, khanacademy, cymath, microsoft math, css diner)
 
 This research into existing resources identifies strengths and weaknesses of different approaches. Given that this project is a one-off piece of work and the end product may not be maintained indefinitely, research into the content, correctness and longevity of resources suggests that the focus should be on the more general type inference concepts rather than specific programming language features. The tool should support error cases, not just correctly-typed expressions. It should be reviewed by my project supervisor tested with users to identify errors that can be resolved before project completion. To aid accessibility text should be written in plain language, the tool should offer several insightful examples and the output should avoid overuse of complex notation.
 
@@ -796,11 +790,19 @@ A native application would be likely to have better performance (in terms of com
 
 The software is designed as interchangeable, loosely-coupled modules to make it easy to adapt and extend. This gives the project freedom to change over time in response to feedback, without having to redevelop common functionality.
 
-TODO: insert module diagram
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.6\linewidth]{images/module_structure.pdf}
+  \caption{The module structure, showing dependents on top of dependencies}
+\end{figure} \par}
 
 The alternative module structure considered was to have the type inference modules standalone, to avoid depending on the language core. They would then be parameterized with methods to extract the necessary data from any AST model, promoting flexibility. However, this would introduce significant complexity and performance overhead for little gain as the language core is fairly lightweight. In addition, it would have meant utility functions, types and models could not be shared in the language core between type inference modules, meaning they would need to either have another separate module for shared utilities or have a large amount of code duplication.
 
-TODO: insert alternate module diagrams
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.65\linewidth]{images/module_structure_alt.pdf}
+  \caption{An alternative module structure, which makes the type inference algorithms independent of the language core}
+\end{figure} \par}
 
 The downside to splitting the project up into several modules is the tooling is a little more complex. Modules must be built separately and in the correct order which is slightly slower than compiling one larger app, and IDEs have to be set up to understand how to navigate between the modules. However, this is outweighed by the maintainability and extensibility benefits of keeping functionality in separate modules.
 
@@ -854,8 +856,11 @@ Publishing the type inference algorithms separately helps keep the code clean an
 
 Finally, depending on both the language core and the type inference algorithms is the web interface itself. This is the end-product that users interact with, implementing the user interface. Here users can type in a program, and view the steps the type inference algorithm took to infer its type. To do this, the web application passes the program to the language core which lexes and parses it into an AST, then passes that AST to a type inference library. The results of this are then shown to the user.
 
-TODO: diagram of pipeline: user enters program as string, lexer lexes as tokens, parser parses to AST, type inference algorithm returns steps, web application displays them
-
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=\linewidth]{images/pipeline.pdf}
+  \caption{Data flow diagram showing how requests are processed}
+\end{figure} \par}
 The web application uses the React framework. Using a framework improves the structure of the code, as the application can be broken down into separate, independent components. These components can be reused to minimise code duplication, and can be individually unit tested with many testing libraries developed specifically for different frameworks. As well as this, using a framework in combination with a module bundler such as webpack makes importing and depending on other modules (such as the language core and type inference algorithms) simple. And in combination with a transcompiler that converts modern JavaScript to be backwards compatible, such as Babel, the application can be made to work for users with older browsers.
 
 React was chosen over the alternative web frameworks Vue, Angular and Svelte. Vue and Angular are other popular frameworks, however for a single page application they are overly complex. In particular, Angular's component and dependency injection system, while useful in very large projects, would add significant unnecessary overhead to developing the system. The Svelte framework is different to React, Vue and Angular in that it avoids complex internal models, but instead compiles directly to simple JavaScript. This gives it better performance, but makes it harder to integrate with existing libraries and tooling. In addition, while Svelte supports TypeScript, this support was only added recently (July 2020) and is much weaker than React’s TypeScript support. Vue, Angular and Svelte are all significantly less popular than React (which is the most popular JavaScript framework). This means they have fewer available compatible packages and less community-developed documentation such as tutorials, guides or forums. In particular, Svelte is a new and much less widely-used framework, with less than 2,000 questions on StackOverflow compared to React’s nearly 300,000.
@@ -865,8 +870,6 @@ Create React App sets up the initial structure of the web application. Its start
 The web application imports the type inference algorithms and the language core, and bundles them as part of the client application to be run entirely in the user’s web browser. A static site doing the processing fully client-side was chosen over a client-server architecture to reduce latency, minimise running costs and maximise the resource’s longevity. It also simplifies communication between modules, which otherwise would either need a manually specified or complex networking layer, such as using the proxy pattern with dependency injection. In addition, potentially complex models representing the AST would need to be reliably serialized and deserialized which is non-trivial when as classes they have member functions.
 
 Performing calculations client side reduces latency as users do not need to wait on the network to transport data back and forth. Parsing and inferring the type of expressions in the browser takes tens of milliseconds, compared to hundreds of milliseconds that would be expected from a RESTful API. However, for particularly complex expressions where users have weak hardware (such as older smartphones), doing calculations client-side may be slightly slower than a client-server architecture. These cases will be rare, but happen when the networking-related overheads are outweighed by the difference in processing speeds between the server and client devices.
-
-TODO: insert bar graph comparing average laptop, average phone, average server-client, older smartphone, high latency server-client
 
 Avoiding dynamic calculations on the server means free static hosting sites such as GitHub pages can be used to serve the website. This significantly reduces running costs when compared to running a custom server to respond to requests, increasing the tools longevity.
 
@@ -1006,7 +1009,11 @@ interface Abs {
 \end{minted}
 Once constructed, properties should be immutable. Immutability prevents properties from being changed, which eliminates some hard-to-detect bugs as all object transformations must be explicit. For example, a method call to an object may not unexpectedly change that object. While immutability may have a small performance and memory usage overhead in some implementations, this may be offset (and in some cases, performance may be improved) by structural sharing. Structural sharing uses existing references to parts of an object when making a slightly changed copy of it. This reduces memory usage and reduces the overhead of creating new objects. This can be done safely given the knowledge objects are immutable as neither reference will attempt to update the child. For example:
 
-TODO: diagram
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=\linewidth]{images/immutability.pdf}
+  \caption{To `change' property 1 on Object A, we create a new Object B, however can reuse the reference for property 2 as we know it will not change and so is safe to be shared}
+\end{figure} \par}
 
 Finally, immutability can improve performance when using front-end frameworks like React, which is used to implement the web application. With immutability, front-end frameworks can be sure objects have not changed on subsequent renders if they have referential equality (they point to the same object). Without immutability, objects may have changed between render calls so the front-end framework must re-render the page or perform deep value equality comparisons which require traversing the entire object. These are both potentially costly operations, so avoiding them through immutability brings performance benefits.
 
@@ -1292,33 +1299,37 @@ State in the application is managed with React hooks, and the components in the 
 
 A key component is the \mintinline{text}{ResultView}, which displays the result of running the type inference algorithm on the user input. It is this component which also calls the parser and type inference algorithm to get the result, and displays any errors if the input is invalid. It in turn calls the \mintinline{text}{ASTView} to display the AST where relevant.
 
-The \mintinline{text}{ASTView} component constructs a visualisation of a given AST. Like the type inference algorithms, there are cases for each type of AST node which may recursively display parts of that node. The \mintinline{text}{NodeView} displays a complete AST node, recursively calling itself, \mintinline{text}{NodeWrapperView} and \mintinline{text}{NodeChildView}. \mintinline{text}{NodeWrapperView} represents a horizontal bar in the AST, wrapping some text content. \mintinline{text}{NodeChildView} adds a level indentation so children appear further to the right than their parents. Together, along with some CSS pseudo-elements they are styled to add lines between parent and child nodes. This implements the design of the AST laid out in the design chapter.
-
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.814\linewidth]{images/image1.png}
-  \caption{Example visualisation of an AST by the ASTView}
+  \includegraphics[width=0.75\linewidth]{images/image1.png}
+  \caption{Example visualisation of an AST by the \mintinline{text}{ASTView}}
 \end{figure} \par}
 
-TODO: annotate the diagram above
+The \mintinline{text}{ASTView} component constructs a visualisation of a given AST. Like the type inference algorithms, there are cases for each type of AST node which may recursively display parts of that node. The \mintinline{text}{NodeView} displays a complete AST node, recursively calling itself, \mintinline{text}{NodeWrapperView} and \mintinline{text}{NodeChildView}. \mintinline{text}{NodeWrapperView} represents a horizontal bar in the AST, wrapping some text content. \mintinline{text}{NodeChildView} adds a level indentation so children appear further to the right than their parents. Together, along with some CSS pseudo-elements they are styled to add lines between parent and child nodes. This implements the design of the AST laid out in the design chapter.
 
 The \mintinline{text}{|ASTView|} takes a callback function, which is triggered when an AST node is hovered over. It is passed the AST node’s corresponding position in the input program, which is used to highlight that part of the input.
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.868\linewidth]{images/image2.png}
-  \caption{The second function application node is hovered here, highlighting the 'map not' part of the expression.}
+  \includegraphics[width=0.9\linewidth]{images/ast_view_hover.png}
+  \caption{The second function application node is hovered here, highlighting the \mintinline{text}{map not} part of the expression}
 \end{figure} \par}
-
-TODO: add cursor position to above screenshot
 
 To improve the performance of the web application, the \mintinline{text}{Main} component memoises renders of \mintinline{text}{ResultView}. This means that on future renders of the \mintinline{text}{Main} component, the \mintinline{text}{ResultView} is only re-rendered (and thus the parser and type inference algorithms are only re-run) if the input expression or the selected algorithm changes. This avoids unnecessary computation when other state in the \mintinline{text}{Main} component changes, for example when the user opens the help window, this updates the \mintinline{text}{Main} component's state but does not cause the \mintinline{text}{ResultView} to re-render.
 
-TODO: show performance flamegraph/render latency comparison with and without useMemo
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\linewidth]{images/useMemo_performance.pdf}
+  \caption{Non-code change performance improves with useMemo}
+\end{figure} \par}
 
 The help window explains the language's type constructors and lists the available variables in the global context. It is implemented as a modal that can be toggled with a button, and can be scrolled independently of the main page. The documentation on the available variables is automatically generated from the context, using the language core's helper functions and its model's \mintinline{text}{toString} methods.
 
-TODO: screenshot of the help window
+{\centering \begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\linewidth]{images/help.png}
+  \caption{The language reference in the help window of the web application}
+\end{figure} \par}
 
 The web application also uses the Jest framework for testing. In addition, it uses the React Testing Library to simulate browser events, such as clicking buttons and entering text into the input box. Some of these tests are effectively end-to-end tests as they simulate a certain user journey. Some may also be considered integration tests, as assertions are made on the behaviour of the web application in combination with the language core and type inference algorithms, ensuring all the modules work correctly together.
 
