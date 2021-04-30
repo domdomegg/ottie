@@ -99,7 +99,7 @@
 \makeatletter
 \begin{titlepage}
 
-	\textbf{\Huge Interactive Tool for Teaching\\Hindley-Milner Type Inference\\through Visualisation} \\[1.5cm]
+	\textbf{\Huge OTTIE: An Interactive Tool for\\Teaching Hindley-Milner Type\\Inference through Visualisation} \\[1.5cm]
     \Large \textbf{\@author} \\
     Department of Computer Science \\
     University of Warwick \\
@@ -124,14 +124,17 @@
 \pagestyle{plain}
 
 \begin{abstract}
-  Type inference is a process by which types in a program may be determined automatically by a compiler, without the need for explicit type annotations. Understanding of type inference helps programmers debug type errors and better understand type systems, however there are few accessible teaching resources available. We design and implement an interactive type inference teaching tool for a Hindley-Milner based expression language, which visualises and explains the steps taken by the common type inference algorithms \W, \W' and \M. User testing with undergraduate students shows the tool improves students' test scores on type and type inference (p < 0.001), and general feedback from users is positive. Analytics data provides evidence that the tool's output aids understanding and allows users to debug type errors.
+  Type inference is a process by which types of a program are determined automatically by a compiler, without needing programmers to supply explicit type annotations. Understanding type inference helps programmers debug type errors and better understand type systems. However, few accessible teaching resources are available. We design and implement an interactive type inference teaching tool, OTTIE, for a Hindley-Milner based expression language. It visualises and explains the steps taken by the common type inference algorithms \W, \W' and \M. User testing with undergraduate students shows that OTTIE improves their test scores in a quiz on types and type inference (p < 0.001), and general feedback from users is positive. Analytics data provides evidence that the tool's output aids understanding and allows users to debug type errors.
+
+  \vspace{0.5cm}
+  \textbf{Keywords:} type systems, type inference, Hindley-Milner, computer science education, undergraduate teaching resources, Algorithm \W, Algorithm \M
 \end{abstract}
 
 \tableofcontents
 
 \chapter{Introduction}\label{id:h.6k9gcmunzldy}
 
-Types are common features of many programming languages. Generally, types are bounds on program constructs (such as variables, expressions and functions) that limit what valid values they may take and how they should be interpreted within the program, however different languages use types differently. Most type systems include primitive data types such as integers, booleans and characters as well as composite types such functions from one type to another and lists of a type.
+Types are common features of many programming languages. Generally, types are bounds on program constructs (such as variables, expressions and functions) that limit what valid values they may take and how they should be interpreted within the program. Although different languages use types differently, most type systems include primitive data types such as integers, booleans and characters as well as composite types such as functions from one type to another and lists of a type.
 
 Type checking is the process by which a language's compiler or interpreter validates that a program obeys the rules of the language's type system. When a violation is detected, such as providing a boolean to a function accepting an integer, a type error is raised.
 
@@ -145,17 +148,13 @@ Compile-time type checking requires the program code to have enough information 
 
 A type inference algorithm for a programming language's type system can determine types automatically, which improves productivity by allowing programmers to get the best of types without having to explicitly specify them. Because of this, type inference is used in many popular programming languages with expressive type systems including Haskell, Rust and TypeScript.
 
-Understanding type inference would help computer scientists write cleaner code and debug type errors. However, few universities have core modules on type systems (although they may be touched on in programming curriculums) and there are limited easy-to-understand teaching resources on type inference. Therefore, many computer science graduates will be missing a useful understanding of how type inference actually works.
-
-The goal of this project is to develop a system to visualise the type inference process, to ultimately improve undergraduate students’ knowledge about it.
-
-To achieve this, we create a teaching resource that explains how type inference algorithms work for functional languages based on the Hindley-Milner type system. An interactive web application allows students to enter custom expressions and view the results of a type inference algorithm, along with step-by-step explanations of how the algorithm determined that result. This is particularly useful in the context of modules teaching functional languages such as Haskell which perform similar type inference.
+Understanding type inference would help computer scientists write cleaner code and debug type errors. However, few universities have core modules on type systems (although they may be touched on in programming curriculums) and there are limited easy-to-understand visualisation and teaching resources on type inference. Therefore, many computer science graduates will be missing a useful understanding of how type inference actually works.
 
 \section{Related work}\label{id:h.2mwaav7jkal4}
 
 There have been previous attempts to build visualisation and teaching tools related to type systems.
 
-One example is TypeTool by \cite{ref4}, which visualises type inference through a web application. Users enter an expression in a custom expression language, submit a request to a server and are redirected to a page displaying an initial syntax tree, a final syntax tree and an overall substitution. Allowing users to enter their own expressions allows students to explore how the system works under different cases to gain an intuitive understanding of the concepts.
+One example is TypeTool by \cite{ref4}, which visualises type inference through a web application. Users enter an expression in a custom expression language, submit a request to a server and are redirected to a page displaying an initial syntax tree, a final syntax tree and an overall substitution. Allowing users to enter their own expressions allows students to explore how the system works in different cases to gain an intuitive understanding of the concepts.
 
 {\centering \begin{figure}[h!]
   \centering
@@ -191,28 +190,49 @@ NiMo \citep{ref8} is a graphical programming language related to functional data
 
 \cite{ref9} implemented a successful teaching tool, named TILC, for visualising $\lambda$-calculus parse trees in order to help with teaching $\lambda$-calculus to undergraduate students. They noted that to develop an intuitive understanding, students would benefit from experimenting with $\lambda$-calculus and that “a tool that deals with all these aspects in a friendly and graphical manner incentivises [experimentation]”. TILC was beneficial for students, with the module organisers of `programming paradigms' at the Universitat de Girona having a ``good experience of using this tool in the course lectures and as a downloadable tool for students''. The authors suggested extending TILC to show types and type inference would have pedagogical value.
 
-To summarise, types aid the construction of correct programs and type checking can detect issues in programs, either at compile-time or runtime. Type inference is a method often used alongside compile-time type checking to determine types in a program, an understanding of which could benefit computer scientists in writing and debugging programs. Some solutions exist which give students a better idea about types, however they either have significant limitations or do not explicitly cover type inference. In this report, we present an interactive web application for teaching type inference.
+\section{Objectives}
+
+The goal of this project is to develop a system to visualise the type inference process that improves undergraduate students' knowledge of it. This system is named OTTIE, the \textit{Online Teaching Type Inference Environment}.
+
+To achieve this, we create and evaluate a teaching resource that explains how type inference algorithms work for functional languages based on the Hindley-Milner type system. An interactive web application allows students to enter custom expressions and view the results of a type inference algorithm, along with step-by-step explanations of how the algorithm determined that result. This is particularly useful in the context of modules teaching functional languages such as Haskell which perform similar type inference.
+
+This is broken down into three main objectives: to understand type inference research and implement key algorithms, to build a web application that allows users to enter expressions and view the results of a type inference algorithm, and to evaluate the effectivness of this web application as a teaching tool.
+
+The first objective, to understand the research into type inference and implement key type inference algorithms, requires a good grasp on the basics of types and type systems, as well as related mathematical background. We focus primarily on type inference in the Hindley-Milner type system as it is a simple starting point in the world of type systems that acts as the basis for languages like ML and Haskell, and has a large amount of literature explaining and analysing it.
+
+The second objective, requires the design, implementation and testing of a web application and its associated depedencies. The web application must solve issues with the existing related work identified as well as other resources explaining type inference. Its key features can be specified as requirements, listed with their corresponding MoSCoW priorities:
+
+\begin{enumerate}
+  \item It is accessible from a web-browser and is compatible with common browsers (must have)
+  \item It is fast and easy-to-use (should have)
+  \item It works without internet access (could have)
+  \item It accepts an expression language that supports all key constructs from the Hinldey-Milner type system (must have)
+  \item It displays the corresponding type to the user when a correctly-typed expression is entered (must have)
+  \item It explains of how a type was inferred when a user enters a:
+    \subitem correctly-typed expression (must have)
+    \subitem incorrectly-typed expression (should have)
+\end{enumerate}
+
+Automated tests verify that functional requirements have been met, however cannot ensure users find the application useful or that OTTIE is effective in improving students' understanding of type inference.
+
+This brings us onto the third and final objective, evaluating the effectiveness of OTTIE as a teaching resource. To prove it is effective, we construct an evaluation methodology to determine what effect using the tool has on students' understanding of type inference.
 
 \chapter{Background}\label{id:h.ebjyqi73zdyo}
 
 \section{\texorpdfstring{$\lambda$-}{Lambda }calculus}\label{id:h.odw4vku9eizz}
 
-A $\lambda$-calculus is a representation of computation. The first $\lambda$-calculus set out by~\cite{ref10}, often viewed as the canonical $\lambda$-calculus, simply has variables, function abstraction and application.
-
-For this project, we will consider a calculus with five constructs to build expressions from. As a formal grammar, expressions are:
+A $\lambda$-calculus is a model of computation. \textit{The} $\lambda$-calculus set out by~\cite{ref10}, simply has variables, function abstraction and application:
 $$\begin{array}{lcllll}
   \\
-    \textrm{expression}\ e & ::= & c                       & \hspace{0.25cm} & \mathtt{con} & \textrm{(constant)}\\
-                         & \vert & x                                       & & \mathtt{var} & \textrm{(variable)}\\
+    \textrm{expression}\ e & ::= & x                       & \hspace{0.25cm} & \mathtt{var} & \textrm{(variable)}\\
                          & \vert & e_1\ e_2                                & & \mathtt{app} & \textrm{(function application)}\\
                          & \vert & \lambda x.\ e                           & & \mathtt{abs} & \textrm{(function abstraction)} \\
-                         & \vert & \mathtt{let}\ x = e_1\ \mathtt{in}\ e_2 & & \mathtt{let} & \textrm{(let statement)}\\
   \\
 \end{array}$$
 
-For example, consider the expression \mintinline{text}{(|$\lambda$|x. x) y}
+For example, consider the expression \mintinline{text}{(|$\lambda$|x. x) y}:
 
-It has variables \mintinline{text}{x} and \mintinline{text}{y}. Variables may be bound or free (unbound). Here \mintinline{text}{|x|} is bound as it is a parameter in the function abstraction, and \mintinline{text}{|y|} is free as there is nothing which binds it. This can be thought of in a similar way to how variables in most imperative programming languages have a scope where they are defined or undefined.
+It contains variables \mintinline{text}{x} and \mintinline{text}{y}. Variables may be bound or free (unbound). Here \mintinline{text}{x} is bound as it is a parameter in the function abstraction, and \mintinline{text}{y} is free as there is nothing which binds it. This can be thought of in a similar way to how variables in most imperative programming languages have a scope where they are defined or undefined.
 
 The function abstraction mentioned is the \mintinline{text}{|$\lambda$|x. x} part. This defines a function which given an argument (before the full stop) \mintinline{text}{x} simply returns (after the full stop) \mintinline{text}{x}, i.e. the identity function. A function to add three to an input might be written \mintinline{text}{|$\lambda$x. x + 3|} (although many of the most fundamental $\lambda$-calculi do not have such explicit notions of addition or numbers).
 
@@ -220,7 +240,7 @@ Functions may be returned by other functions, which enables them to have the app
 
 Finally, the function application is actually applying the function \mintinline{text}{|$\lambda$x. x|} to the argument \mintinline{text}{|y|}. In $\lambda$-calculus evaluation is performed via $\beta$-reductions. In our example this could be done by substituting the argument \mintinline{text}{|y|} for parameter \mintinline{text}{|x|} in the body of the function \mintinline{text}{|x|}, resulting in \mintinline{text}{|y|}.
 
-This expression's can be represented as an abstract syntax tree (AST):
+This expression can be represented as an abstract syntax tree (AST):
 
 {\centering \begin{figure}[h!]
   \centering
@@ -228,18 +248,12 @@ This expression's can be represented as an abstract syntax tree (AST):
   \caption{Abstract syntax tree that represents the expression \mintinline{text}{(|$\lambda$|x. x) y}}
 \end{figure} \par}
 
-In addition to these three constructs, the let construct allows binding a value to a variable in an expression. For example \mintinline{text}{let x = 3 in x + x} binds \mintinline{text}{x} to the value \mintinline{text}{3} in \mintinline{text}{x + x}.
-
-The con construct is added to represent literal constants, such as numbers or booleans like \mintinline{text}{3} and \mintinline{text}{True}.
-
 $\lambda$-calculi have been extensively studied, often resulting in formal inductive definitions. For example, the inductive definition for the set of free variables (variables not bound by function abstraction or let statements) is:
 $$\begin{array}{lcl}
   \\
-    FV(c)                                       & = & \varnothing\\
-    FV(x)                                       & = & \{ x \}\\
-    FV(e_1\ e_2)                                & = & FV(e_1) \cup FV(e_2)\\
-    FV(\lambda x.\ e  )                         & = & FV(e) - \{ x \}\\
-    FV(\mathtt{let}\ x = e_1\ \mathtt{in}\ e_2) & = & FV(e_2) - \{ x \}\\
+    FV(x)               & = & \{ x \}\\
+    FV(e_1\ e_2)        & = & FV(e_1) \cup FV(e_2)\\
+    FV(\lambda x.\ e  ) & = & FV(e) - \{ x \}\\
   \\
 \end{array}$$
 Given these rules the set of free variables for any combination of these constructs can be determined. This can be demonstrated for our example expression \mintinline{text}{(|$\lambda$|x. x) y}, which is shown in a tree structure below.
@@ -250,7 +264,7 @@ Given these rules the set of free variables for any combination of these constru
   \caption{The free variables at different nodes in the AST for \mintinline{text}{(|$\lambda$|x. x) y}}
 \end{figure} \par}
 
-More generally this is an example of how an inductive definition can tell us something about the entire program which is how some type inference algorithms can be viewed.
+More generally this is an example of how an inductive definition can tell us something about the entire program. This is how the type inference algorithms we explore can be viewed.
 
 Most real-world environments define a context which binds some variables by default to in-built values. For example Haskell’s GHC primitives and Prelude includes basic variables like \mintinline{text}{|[]|} (the empty list) and \mintinline{text}{|not|} (a function which inverts booleans). These can be considered bound at the top level and removed from the set of free variables there.
 
@@ -258,15 +272,31 @@ Most real-world environments define a context which binds some variables by defa
 
 Typed $\lambda$-calculi extend the system with the concept of types.
 
-The simply typed $\lambda$-calculus is one of the simplest typed $\lambda$-calculi, and introduced by~\cite{ref11} is often viewed as the canonical typed $\lambda$-calculus. It has the \texttt{var}, \texttt{abs}, \texttt{app} and \texttt{con} constructs. Types in this system are either base types like $Int$s, $Bool$s and $Char$s (often represented in the literature by Greek letters $\alpha$, $\beta$, $\gamma$) or functions between other types such as $Int \rightarrow Bool$ or $Int \rightarrow (Bool \rightarrow Bool)$.
+The simply typed $\lambda$-calculus is one of the simplest typed $\lambda$-calculi, and introduced by~\cite{ref11} is often viewed as the canonical \textit{typed} $\lambda$-calculus. Types in this system are either base types like $Int$s, $Bool$s and $Char$s (often represented in the literature by Greek letters $\alpha$, $\beta$, $\gamma$) or functions between other types such as $Int \rightarrow Bool$ or $Int \rightarrow (Bool \rightarrow Bool)$.
 
-Compared to the untyped $\lambda$-calculus, the syntax of the simply typed $\lambda$-calculus adds type annotations to \texttt{var}, \texttt{abs} and \texttt{con} constructs, for example an expression may be written ($\lambda x: Int.\ odd^{Int \rightarrow Bool}\ x^{Int})\ 3^{Int}$. Often for simplicity the types of \texttt{var} and \texttt{con} subexpressions, those in superscript, are omitted.
+Compared to the untyped $\lambda$-calculus, the syntax of the simply typed $\lambda$-calculus adds type annotations to \texttt{var} and \texttt{abs} constructs. For example an expression may be written ($\lambda x: Int.\ odd^{Int \rightarrow Bool}\ x^{Int})\ y^{Int}$. Often for simplicity the types of \texttt{var} and \texttt{con} subexpressions, those in superscript, are omitted.
 
 \section{Hindley-Milner type system}\label{id:h.gsouq2axz3k}
 
-Hindley-Milner (HM) is a typed $\lambda$-calculus which allows for the types of entire programs to be inferred with no type annotations required \citep{ref12,ref13}. It extends the simply typed $\lambda$-calculus by adding \texttt{let} bindings and a richer type system that includes \textit{type functions} and \textit{polymorphism}.
+Hindley-Milner (HM) is a typed $\lambda$-calculus which allows for the types of entire programs to be inferred with no type annotations required \citep{ref12,ref13}. It extends the simply typed $\lambda$-calculus by adding \texttt{con} (literal constant) and \texttt{let} (let-statement) constructs along with a richer type system that includes \textit{type functions} and \textit{polymorphism}. Its grammar can be represented:
 
-Like expressions, types can be considered to be built from \texttt{var\textsubscript{t}} variables and \texttt{app\textsubscript{t}} function applications. Type variables are either base types like $Bool$ and $Int$ or type functions. Type functions can be applied, taking types as parameters to construct composite types. Specifically, types made from \texttt{var\textsubscript{t}} and \texttt{app\textsubscript{t}} are known as \textit{monotypes}.
+$$\begin{array}{lcllll}
+  \\
+    \textrm{expression}\ e & ::= & c                       & \hspace{0.25cm} & \mathtt{con} & \textrm{(literal constant)}\\
+                         & \vert & x                                       & & \mathtt{var} & \textrm{(variable)}\\
+                         & \vert & e_1\ e_2                                & & \mathtt{app} & \textrm{(function application)}\\
+                         & \vert & \lambda x.\ e                           & & \mathtt{abs} & \textrm{(function abstraction)} \\
+                         & \vert & \mathtt{let}\ x = e_1\ \mathtt{in}\ e_2 & & \mathtt{let} & \textrm{(let statement)}\\
+  \\
+\end{array}$$
+
+The \texttt{con} construct is added to represent literal constants, such as numbers or booleans like \mintinline{text}{3} and \mintinline{text}{True}.
+
+The \texttt{let} construct allows binding a value to a variable in an expression. For example \mintinline{text}{let x = 3 in x + x} binds \mintinline{text}{x} to the value \mintinline{text}{3} in \mintinline{text}{x + x}.
+
+\subsection{Monotypes}
+
+Like expressions, types in Hindley-Milner can be considered to be built from \texttt{var\textsubscript{t}} variables and \texttt{app\textsubscript{t}} function applications. Type variables are either base types like $Bool$ and $Int$ or type functions. Type functions can be applied, taking types as parameters to construct composite types. Specifically, types made from \texttt{var\textsubscript{t}} and \texttt{app\textsubscript{t}} are known as \textit{monotypes}.
 $$\begin{array}{lcllll}
   \\
     \textrm{monotype}\ \tau & ::= & t_n               & \hspace{0.25cm} & \mathtt{var_t} & \textrm{(type variable)}\\
@@ -296,6 +326,8 @@ Finally, tuples represent a fixed-length sequence of elements of specific types.
 
 $Bool$, $Maybe\ Int$, $Bool \rightarrow Int$, and $[(Bool,\ Int \rightarrow Maybe\ Bool)]$ are all examples of monotypes.
 
+\subsection{Polytypes}
+
 Adding zero or more for-all quantified type variables to monotypes forms polymorphic types or \textit{polytypes} (called principal type schemes by Hindley). This definition makes monotypes a special case of polytypes: monotypes are polytypes with zero for-all qualified type variables. We can therefore consider `type' in general to mean polytype (which include monotypes). Polytypes can be thought of as the \texttt{abs} equivalent for types. By convention, we represent free type variables with $t_0,\ t_1,\ t_2,\ \dots$ and use $a,\ b,\ c,\ \dots$ for for-all quantified type variables.
 
 $$\begin{array}{lcllll}
@@ -312,11 +344,13 @@ Correctly inferring polymorphic types can be difficult, and in fact \cite{ref14}
 
 To allow for some polymorphism, the parameters of \texttt{let} expressions are polymorphic in the \texttt{let} body. The process by which the monomorphic parameter type is turned into a polymorphic one is known as \textit{generalisation}. The overall type of \texttt{let} expressions themselves are not generalised.
 
-The difference can be seen by comparing similar \texttt{let} and \texttt{abs} expressions:
+The difference generalisation makes can be seen by comparing similar \texttt{let} and \texttt{abs} expressions:
 \begin{itemize}
   \item \mintinline{text}{let i = (|$\lambda$|x. x) in (i 3, i True)} type-checks, as i is generalised to the polytype $\forall a.\ a \rightarrow a$ within the body \mintinline{text}{(i 3, i True)} so can be applied to both an $Int$ and $Bool$.
   \item \mintinline{text}{(|$\lambda$|i. (i 3, i True)) (|$\lambda$|x. x)} does not type-check as the function abstraction \mintinline{text}{(|$\lambda$|x. x)} has the monotype $t_0 \rightarrow t_0$, and $t_0$ must take only one type in both tuple parts as it is not for-all qualified - it cannot be both an $Int$ and a $Bool$.
 \end{itemize}
+
+\subsection{Related languages}
 
 Hindley-Milner is the basis for the type system of Standard ML \citep{ref15}, which OCaml and F\# are related to, and was the basis of the type system in Haskell \citep{ref16}. It has influenced the development of Rust and Swift, and more generally type inference is present in many more languages including Java, JavaScript and C++.
 
@@ -530,11 +564,11 @@ $$
 
 The notation $\textrm{new}\ t_n$\ specifies that the type variable $t_n$ is new (or `fresh'), so its name has not been used before. Using globally unique type variables avoids reuse which may incorrectly mix constraints between different types. Most implementations use a global counter, incremented each time a new type variable is needed with names like $t_0,\ t_1,\ t_2,\ \dots$.
 
-The general structure of Algorithm \W\ is to recursively call itself on subexpressions, until the subexpressions are simple leaf nodes. At this point, constant nodes have their assigned type and variable nodes have their type retrieved from the context. The subexpression types are passed back up, where their substitutions are either combined or fed into inferring other subexpressions, and a resultant type is returned.
+The general structure of \W\ is to recursively call itself on subexpressions, until it reaches leaf nodes. At this point, constant nodes have their assigned type and variable nodes have their type retrieved from the context. The subexpression types are passed back up, where their substitutions are either combined or fed into inferring other subexpressions, and a resultant type is returned.
 
 Case (3) for function application infers the types of the two subexpressions. It first infers the left one, $e_1$, then applies the resultant substitution to the context before inferring the right subexpression, $e_2$. This ensures constraints arising from the $e_1$ are considered when inferring the second subexpression, so if $e_1$ and $e_2$ have conflicting constraints this is detected and a type error is raised. However, this does introduce a left-to-right bias where the type error is raised in the right subexpression if a conflict is found.
 
-Given we know $e_1$ is a function that should accept $e_2$'s type, $\tau_2$, we should be able to unify $\tau_2 \rightarrow tn$ (a function accepting $\tau_2$ and returning $tn$ i.e. anything) with the function type $\tau_1$. We apply the substitution $S_2$ to $\tau_1$ when doing this to ensure no constraints have arisen in inferring $e_2$ that would prevent this unification. Finding a unifying substitution confirms the function application is valid, and we are able to determine the return type (and thus the overall type of this expression) by applying the unifying substitution to the type variable $tn$ used as the return type. If no unifying substitution can be found, the function application is invalid (as the argument type $\tau_2$ cannot be substituted to reach an accepted type for the function’s type $\tau_1$) and a type error is raised. Invalid function application (3) and undefined variables (1) are the only possible sources of type errors from Algorithm \W.
+Given we know $e_1$ is a function that should accept $e_2$'s type, $\tau_2$, we should be able to unify $\tau_2 \rightarrow t_0$ (a function accepting $\tau_2$ and returning $t_0$ i.e. anything) with the function type $\tau_1$. We apply the substitution $S_2$ to $\tau_1$ when doing this to ensure no constraints have arisen in inferring $e_2$ that would prevent this unification. Finding a unifying substitution confirms the function application is valid, and we are able to determine the return type (and thus the overall type of this expression) by applying the unifying substitution to the type variable $t_0$ used as the return type. If no unifying substitution can be found, the function application is invalid (as the argument type $\tau_2$ cannot be substituted to reach an accepted type for the function’s type $\tau_1$) and a type error is raised. Invalid function application (3) and undefined variables (1) are the only possible sources of type errors from Algorithm \W.
 
 To illustrate, consider \mintinline{text}{odd 3} in the context $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \}$. We find the types of \mintinline{text}{odd} and \mintinline{text}{3} as $Int \rightarrow Bool$ and $Int$ respectively, unify $Int \rightarrow Bool$ with $Int \rightarrow t_0$ to get the substitution $S_3 = \{ t_0 \mapsto Bool \}$ and return the overall type $S_3(tn) = \{ t_0 \mapsto Bool \}(t_0) = Bool$.
 
@@ -542,13 +576,20 @@ Also consider \mintinline{text}{odd x} in the context $\Gamma = \{ \mathtt{odd} 
 
 Case (4) for function abstraction first infers the type of the function body expression, $e$, by calling \W\ recursively. It passes the current context with an additional binding for the function parameter $x$, assigned to a new type variable with no constraints. This subcall to W for the function body returns the substitution $S_1$ and type $\tau_1$. Finally, the substitution $S_1$ and type $S_1(tn \rightarrow \tau_1)$ is returned as the final result for the function abstraction. The type arises from the fact that the function abstraction takes the parameter with the new type $tn$ and returns the type of the body, $\tau_1$. We apply the substitution $S_1$ to it to reflect any constraints on the function parameter picked up in the function body.
 
-For an example examine calling W on \mintinline{text}{|\\x $\rightarrow$ odd x|} with $\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \}$. The subcall to W calls $W(\Gamma + \mathtt{x} : t_0, \mathtt{odd x})$ which returns $(S_1, \tau_1) = (\{ t_0: Int \}, Bool)$. Then $(S_1, S_1(t_n \rightarrow \tau_1)) = (\{ t_0 \mapsto Int \}, \{ t_0 \mapsto Int \}(t_0 \rightarrow Bool)) = (\{ t_0 \mapsto Int \}, Int \rightarrow Bool)$ is returned as the result.
+For example consider $\mathcal{W}(\Gamma = \{ \mathtt{odd} : Int \rightarrow Bool \},\ \lambda\mathtt{x.\ odd\ x})$. The recursive call to \W\ is $\mathcal{W}(\Gamma + \mathtt{x} : t_0,\ \mathtt{odd\ x})$ which returns $(S_1, \tau_1) = (\{ t_0: Int \},\ Bool)$. Then finally the result returned is:
+\begin{align*}
+\hspace{1cm} (S_1,\ S_1(t_0 \rightarrow \tau_1))
+& = (\{ t_0 \mapsto Int \},\ \{ t_0 \mapsto Int \}(t_0 \rightarrow Bool))\\
+& = (\{ t_0 \mapsto Int \},\ Int \rightarrow Bool)
+\end{align*}
 
 Case (5) for let statements first infers the type $\tau_1$ of the parameter definition, $e_1$. The parameter type $\tau_1$ is then generalised with respect to the context to allow for polymorphism as per HM’s type system, before being added to the context as a binding and used to infer the let body $e_2$. The substitutions $S_1$ and $S_2$ are then combined to collect the constraints, and are returned with the let body’s type $\tau_2$.
 
 \subsection{Algorithm \texorpdfstring{\W}{W}'}
 
-Algorithm \W’ is a slightly altered variant of Algorithm \W, only changing rule (3) for function application to avoid left-to-right bias.
+Algorithm \W’ is a variant of Algorithm \W, only changing rule (3) for function application to avoid left-to-right bias. Its type signature and other rules are otherwise identical, except for recursively calling \W' instead of \W.
+
+It can be written formally in the same way as \W:
 
 $$
 \mathcal{W}\textrm{'}: (\mathrm{Context},\ \mathrm{Expression}) \rightarrow (\mathrm{Substitution},\ \mathrm{Monotype})
@@ -564,10 +605,8 @@ $$$$
 \end{array}
 $$
 
-Algorithm \W' performs substitution unification, $\mathit{unify_S}$, introduced in the same paper as \W'. Like type unification, substitution unification attempts to find a unifying substitution to unify two values. Unlike type unification, substitution unification attempts to make two substitutions, not types, equal. It returns a unifying substitution, which when combined with either substitution gives the same result:
+Algorithm \W' performs substitution unification, $\mathit{unify_S}$, introduced in the same paper as \W'. Like type unification, substitution unification attempts to find a unifying substitution to unify two values, and may fail if no such substitution exists. Unlike type unification, substitution unification attempts to make two substitutions, not types, equal. It returns a unifying substitution, which when combined with either substitution gives the same result:
 $$\mathit{combine}(\mathit{unify_S}(S_1,\ S_2),\ S_1) = \mathit{combine}(\mathit{unify_S}(S_1,\ S_2),\ S_2)$$
-
-Both type and substitution unification is commutative and associative, and may fail if no such substitution exists.
 
 If substitutions share no type variables, finding a unifying substitution can be done by simply combining the substitutions. For example:
 \begin{align*}
@@ -575,7 +614,7 @@ If substitutions share no type variables, finding a unifying substitution can be
                                                                  & = \{ t_0 \mapsto Int,\ t_1 \mapsto Bool \}
 \end{align*}
 
-However, substitution unification generally is not the same as substitution combination. Combination only simulates the effect of applying consecutive substitutions, so is not concerned with unifying types or maintaining type constraints. For example:
+However, substitution unification and combination are generally not the same. Combination only simulates the effect of applying consecutive substitutions, so is not concerned with unifying types or maintaining type constraints. This difference is most easily illustrated with an example:
 \begin{align*}
   \mathrm{given}\ S_1                        & = \{ t_0 \mapsto t_1 \rightarrow Bool \}\\
   \mathrm{and}\ S_2                          & = \{ t_0 \mapsto Int \rightarrow t_2 \}\\[0.25cm]
@@ -585,15 +624,15 @@ However, substitution unification generally is not the same as substitution comb
                                              & = \{ t_0 \mapsto Int \rightarrow Bool, t_1 \mapsto Int, t_2 \mapsto Bool \}
 \end{align*}
 
-Note the resultant unifying substitution may have a domain disjoint from both the given substitutions, as in this example.
+Note the resultant unifying substitution may have a domain disjoint from both the given substitutions.
 
 Having defined substitution unification, case (3) in \W' is fairly straightforward. It independently infers the two subexpressions $e_1$ and $e_2$, rather than applying $e_1$'s substitution $S_1$ to the context before inferring $e_2$ as in \W. The substitutions are then unified and applied, ensuring all constraints are applied to both types. The function type and the argument to the new type $t_0$ can then be unified in the same way as \W.
 
 \subsection{Algorithm \texorpdfstring{\M}{M}}
 
-Algorithm \M\ is a top-down approach to type inference. Implemented as part of an early ML compiler by \cite{ref32}, it was known as a `folklore' algorithm until \cite{ref27} formalised it as the algorithm laid out below.
+Algorithm \M\ is a top-down approach to type inference. Implemented as part of an ML compiler by \cite{ref32}, it was known as a `folklore' algorithm until \cite{ref27} formalised it as the algorithm described here.
 
-Given a context, expression and monotype \M\ returns a substitution. When compared to \W's signature, this effectively moves the type from the output of \W\ to the input of \M. The input type now represents an expected type for the expression, to be checked and then refined by returning a substitution. Types are refined as they progress down the tree (hence top-down), and if they are found to be incompatible at any point a type error is raised. In some cases this can lead to more specific error messages as type errors are generally raised lower down the tree, rather than at potentially more complex function application expressions as in \W. More specific error messages are more useful for developers to identify where the bugs are in their programs.
+Given a context, an expression and a monotype, algorithm \M\ returns just a substitution. When compared to \W's signature, this effectively moves the type from the output of \W\ to the input of \M. The input type now represents an expected type for the expression, to be checked and then refined by the returned substitution. Types are refined as they progress down the tree (hence top-down), and if they are found to be incompatible at any point a type error is raised. In some cases this can lead to more specific error messages as type errors are generally raised lower down the tree, rather than at potentially more complex function application expressions as in \W. More specific errors are more useful for developers to identify where the bugs are in their programs.
 
 \M\ starts at the root node with a new type, i.e. $S = \mathcal{M}(\Gamma,\ e,\ t_0),\ \mathrm{new}\ t_0$. The root node's final type can be determined by applying the returned substitution $S$ to $t_0$. In this way \W, \W' and \M\ can all be wrapped to have the signature $(\mathrm{Context},\ \mathrm{Expression}) \rightarrow \mathrm{Type}$ which would be naturally expected from type inference algorithms.
 
@@ -656,17 +695,19 @@ Additionally, despite not being required in all languages, explicit type annotat
 
 \chapter{Design}\label{id:h.7ggvdxb04tzm}
 
-The design of the teaching tool is split into two parts, working backwards from the end product in mind: designing the user interface and experience, and designing the architecture to support that.
+The design of the teaching tool is split into three parts, working backwards from the end product in mind: examining the strengths and weaknesses of existing resources, designing the user interface based on these insights, and structuring the architecture to power the interface.
 
-\section{User interface and experience}\label{id:h.dr046u473e01}
+\section{Review of existing resources}\label{id:h.dr046u473e01}
 
-Before designing the new teaching tool, we explore the existing available resources to see what works well, and what is missing. The current resources for learning about type inference can be generally categorised into three categories: programming language documentation, formal resources and informal resources. These resources were found by examining the pages returned by the first 5 pages of Google search on the query `type inference'. The following is a summary of what was found from reading these resources with the aim of determining their strengths and weaknesses.
+Before designing the new teaching tool, we explore the existing available resources to see what works well, and what is missing. The current resources for learning about type inference can be generally categorised into three categories: programming language documentation, formal resources and informal resources. The following is a summary of what was found from reading these resources with the aim of determining their strengths and weaknesses.
 
 Programming language documentation are pages written to explain how type inference works in a specific language, as part of that language’s official documentation. For example, TypeScript, Java and Golang all have official websites where they discuss how type inference works in their language.
 
 Formal resources include university lecture notes, papers on type inference or encyclopedias. The first two are often in PDF format or on archiving websites. Wikipedia and WikiWikiWeb are examples of the latter (while encyclopedias summarise the subject they are generally written formally, with a lot of mathematical notation hence fall in this category).
 
 Informal resources include personal blog posts and online talk recordings. These are generally written by developers interested in programming language design or compiler development.
+
+\subsection{Content}
 
 Each category of resource covers different aspects of type inference.
 
@@ -676,12 +717,14 @@ Programming language documentation covers type inference in the context of a spe
 
 Informal resources generally discuss personal reflections on what the author has learnt about type inference or they heavily focus on type inference's application within a specific language the author is familiar with. These are generally the least widely-applicable, and often only cover a small part of a single programming language, however do so in great detail and often giving practical advice about work related to their subject matter.
 
+\subsection{Accessibility}
+
 Resources also differ in accessibility: how easy it is for a user to read, understand and apply their content.
 
 \begin{figure}[h!]
   \centering
   \includegraphics[width=\linewidth]{images/image8.png}
-  \caption{The TypeScript playground, with an example from the type inferece documentation showing how class types work with the inference engine.}
+  \caption{The TypeScript playground, with an example from the type inference page showing how class types work with the inference engine.}
 \end{figure}
 
 Programming language documentation and informal resources both are generally aimed at a more clearly targeted audience, usually programmers using a specific language. They are written in simpler language and use significantly less notation than formal resources which makes them easier reading. Their use of examples makes concepts clearer, and many of them have a level of interactivity which allows readers to try things for themselves, allowing readers to test their own knowledge or verify something that isn’t clear to them from the documentation alone. For example TypeScript's documentation allows users to hover over code samples to inspect the types as well as open it up in an online coding environment, while Golang and Rust's respective documentation sites have example programs which users are encouraged to edit and run online. Blog posts often have code snippets or GitHub gists for users to run, and in talks presenters may give live coding demos, which serve similar purposes.
@@ -700,6 +743,8 @@ Programming language documentation and informal resources both are generally aim
 
 Formal resources are usually aimed at a more mathematically-inclined audience, with less specific focus on any language or technology. They often use mathematical terms and notation to convey ideas, which some readers may find difficult to understand. In particular, papers are often written in a very precise and succinct way with few examples, which can make them hard to interpret. This is likely due to the length constraints put in place by academic journals which incentives authors to cut more detailed explanations and examples from their work. Few papers and lecture notes would be immediately accessible to the general computer scientist, as papers often assume the reader has a strong grounding in the field already and lecture nodes are meant to be read in order, expecting the reader to have read the previous 20 lectures worth of notes. However, they do usually give clear and useful references for background and further reading which is useful for in-depth research on the topic, if not for an introduction. The implementation of a type inference algorithm and how it is applied to a specific language is rarely discussed. Where it is discussed the only languages used were Haskell, ML and OCaml. According to the StackOverflow Developers Survey\footnote{\underline{\href{https://insights.stackoverflow.com/survey/2020\#technology-programming-scripting-and-markup-languages}{https://insights.stackoverflow.com/survey/2020}}} Haskell is used by 1.8\% of professional developers, while ML and OCaml are very rarely used in practice. These examples may therefore be of limited use to explain to developers how type inference is used in languages they are familiar with.
 
+\subsection{Correctness}
+
 Finally, the different nature of resources means some are harder to correct or update with new information.
 
 Informal resources generally seem to have the most errors, likely because they have little review process and may be written by anyone. Sometimes through comments other readers can provide corrections or clarifications, but these are not always incorporated into the material. Moreover, commenting is not always available and also given the specific nature of some content few people are likely to view and suggest corrections to the content. Additionally, as informal resources are usually published as one-off talks or blog posts, it is rare for the document to be maintained and kept updated which can lead to inaccuracies if the underlying technology they are discussing has made breaking changes to its implementation.
@@ -708,7 +753,10 @@ Programming language documentation on type inference is generally accurate and w
 
 Formal resources generally have few errors. For academic papers, this is likely a result of the peer-review process. Lecture notes are generally written by academics with relevant qualifications and educational backgrounds, who are likely to be knowledgeable on the subject. However, academic papers and lecture notes are unlikely to be updated, which means any inaccuracies in them are harder to correct. Exploring the literature we found some papers on type inference with errors which make understanding them fully more difficult. Finally, online encyclopedias can be reviewed and edited by many people, whose combined expertise generally results in accurate articles although they are prone to errors being introduced by even just a single contributor if they lack a review process. Formal resources are less likely to become outdated with time compared to informal resources. This is because formal resources focus on the more general underlying concepts over discussion on a specific implementation.
 
-This exploration into existing teaching resources is summarised in the table:
+\subsection{Summary}
+
+The properties of existing resources are summarised in the following table:
+\newline
 
 \begin{adjustbox}{center}\begin{tabularx}{1.2\textwidth}{ |p{2cm}|X|X|X| }
   \hline
@@ -722,36 +770,38 @@ This exploration into existing teaching resources is summarised in the table:
   \hline
 \end{tabularx}\end{adjustbox}\\
 
-This research into existing resources identifies strengths and weaknesses of different approaches. Given that this project is a one-off piece of work and the end product may not be maintained indefinitely, research into the content, correctness and longevity of resources suggests that the focus should be on the more general type inference concepts rather than specific programming language features. The tool should support error cases, not just correctly-typed expressions. It should be reviewed by my project supervisor tested with users to identify errors that can be resolved before project completion. To aid accessibility text should be written in plain language, the tool should offer several insightful examples and the output should avoid overuse of complex notation.
+Studying existing resources helps identify the strengths and weaknesses of different approaches. Given that this project is a one-off piece of work and the end product may not be maintained indefinitely, research into the content, correctness and longevity of resources suggests that the focus should be on the more general type inference concepts rather than specific programming language features. OTTIE should support error cases, not just correctly-typed expressions. It should be reviewed by my project supervisor tested with users to identify errors that can be resolved before project completion. To aid accessibility text should be written in plain language, OTTIE should offer several insightful examples and the output should avoid overuse of complex notation.
 
-As a tool that displays the output of type inference algorithms, to further determine the user interface for the output of the tool the presentation of type inference proofs is examined. My supervisor initially gave some examples of worked proofs for type inference, which also matched the format of proofs found in papers and in online resources. These proofs are broken down into steps, which each look at a particular subexpression and apply a certain typing rule. Depending on the type of proof (whether it is based purely on the typing rules or is more procedural and similar to an algorithm), this may also result in explicit unification resulting in a substitution to be applied.
+\section{User interface design}
 
-Based on this, the tool is designed to show the result of type inference on an expression broken into steps. Given that the tool will be automated, the steps must be generated based on some deterministic procedure and so the steps will correspond to those of the type inference algorithms. This means the steps will need to show the unification operations performed and the resultant substitutions to fully explain how the types are being inferred.
+As a tool that displays the output of type inference algorithms, to further determine the user interface for OTTIE's output the presentation of type inference proofs is examined. My supervisor initially gave some examples of worked proofs for type inference, which also matched the format of proofs found in papers and in online resources. These proofs are broken down into steps, which each look at a particular subexpression and apply a certain typing rule. Depending on the type of proof (whether it is based purely on the typing rules or is more procedural and similar to an algorithm), this may also result in explicit unification resulting in a substitution to be applied.
 
-A basic UI mockup is shown below that takes an input expression and displays the inference algorithm steps beneath it. While simple, it is fundamentally similar to the final design of the application. It was also at this design that it was decided to show the type derivation feedback instantly on the same page, based on the limitations of previous related work and the strength of interactive playgrounds in programming language documentation. On top of this design, the final application adds a choice of algorithms, several samples to choose from and a display of the final type. In addition, the final application shows and explains the steps of the type inference algorithm when type errors are present.
+Based on this, OTTIE is designed to show the result of type inference on an expression broken into steps. Given that this process is automated, the steps must be generated based on some deterministic procedure and so they correspond to those of the type inference algorithms. This means the steps need to show the unification operations performed and the resultant substitutions to fully explain how the types are being inferred.
+
+A basic UI mockup is shown that takes an input expression and displays the inference algorithm steps beneath it. The type derivation feedback is displayed instantly on the same page. This design overcomes issues faced by TypeTool relating to the delay between input and output, and inherits the strengths of interactive playgrounds that accept custom user input and provide instant feedback in programming language documentation. On top of this design, the final application adds a choice of algorithms, several samples to choose from and a display of the final type. In addition, the final application shows and explains the steps of the type inference algorithm when type errors are present.
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.756\linewidth]{images/image21.png}
-  \caption{Recreation of an initial sketch of the UI for the teaching tool.}
+  \includegraphics[width=0.9\linewidth]{images/image21.png}
+  \caption{A sketch of the UI for the teaching tool.}
 \end{figure} \par}
 
-A step in the UI generally corresponds to a rule of the type inference algorithm. As the type inference algorithms are recursive, some rules may call the type inference algorithms again on a subexpression. In these cases it may be necessary to split rules of the type inference algorithm up into two parts, before and after a recursive call. This helps ensure the ordering of the steps makes logical sense.
+A step in the UI generally corresponds to a rule of the type inference algorithm. As the type inference algorithms are recursive, some rules call the inference algorithms again on a subexpression. In these cases it may be necessary to split rules of the type inference algorithm up into two parts: before and after a recursive call. This helps ensure the ordering of the steps makes logical sense.
 
-For example, this happens with function abstraction in algorithm W: the before step shows assigning a new type variable as the parameter’s type, steps between show the results of the recursive call to the body, while the after step details the final type of the function abstraction expression.
+For example, this happens with function abstraction in algorithm \W: the before step shows assigning a new type variable as the parameter’s type, steps between show the results of the recursive call to the body, while the after step details the final type of the function abstraction expression.
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.945\linewidth]{images/image15.png}
-  \caption{Function abstraction in algorithm W requires two UI steps to represent one rule of the algorithm}
+  \includegraphics[width=0.9\linewidth]{images/image15.png}
+  \caption{Function abstraction in algorithm \W\ requires two UI steps to represent one rule of the algorithm, one for binding the parameter before the body, and one for giving the final return type of the parameter type to the body expression type}
 \end{figure} \par}
 
-In addition to the rule steps, algorithm M requires an extra beginning and end step. These are required as algorithm M requires an input type and does not return a type respectively. The first step is to create an initial new type $t_0$ for the root node, and the final step is added to apply the final substitution to type $t_0$ (effectively the value of $t_0$ from the substitution).
+In addition to the rule steps, algorithm \M\ requires an extra beginning and end step. These are required as algorithm \M\ requires an input type and does not return a type respectively. The first step is to create an initial new type $t_0$ for the root node, and the final step is added to apply the final substitution to type $t_0$ (effectively the value of $t_0$ from the substitution).
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.960\linewidth]{images/image10.png}
-  \caption{Algorithm M requires an initial and final step.}
+  \includegraphics[width=0.9\linewidth]{images/image10.png}
+  \caption{Algorithm \M\ requires an initial and final step}
 \end{figure} \par}
 
 To make it clear what part of the expression each step relates to, a representation of the expression as an AST with the relevant parts highlighted is shown at each step. The visualisation is computer generated and must fit in a fixed width space, and as such a vertical design was chosen to represent it. In this design, each box represents a tree node and the boxes are ordered in a vertical list. Nodes may have children, which they are attached to with edges to the left of the children.
@@ -762,7 +812,7 @@ To make it clear what part of the expression each step relates to, a representat
   \caption{The expression \mintinline{text}{let x = 3 in odd x} may be represented by this vertical AST.}
 \end{figure} \par}
 
-This vertical design was chosen over a horizontal design due to the space constraints of the tool page, and the difficulty in implementing a consistent and well functioning horizontal tree visualisation algorithm.
+This vertical design was chosen over a horizontal design due to the space constraints of the page, and the difficulty in implementing a consistent and well functioning horizontal tree visualisation algorithm.
 
 {\centering \begin{figure}[h!]
   \centering
@@ -774,13 +824,13 @@ Showing ASTs is preferable to just showing the relevant subexpression as it make
 
 {\centering \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.884\linewidth]{images/image26.png}
+  \includegraphics[width=0.75\linewidth]{images/image26.png}
   \caption{Hovering over the 'function application' node highlights the corresponding subexpression in the entered program.}
 \end{figure} \par}
 
 To help relate the ASTs to the entered expression, when a user hovers over a part of the AST the matching part of the entered expression that corresponds to the hovered AST node is highlighted. For consistency and to help users understand larger subexpressions too this also works for non-leaf nodes of the tree.
 
-A web interface was chosen over a desktop program to maximise compatibility across devices, so the resource was accessible to as many students as possible. This allows the resource to work on platforms including Windows, Mac, Linux, iOS and Android. In addition, a web interface makes the tool easier to share and setup, as users simply need to navigate to the site rather than install a native application. It is also easier to copy and is more likely to be compatible with future platforms, increasing the tool's longevity, a characteristic highlighted as important earlier in this section.
+A web interface was chosen over a desktop program to maximise compatibility across devices, so the resource was accessible to as many students as possible. This allows the resource to work on platforms including Windows, Mac, Linux, iOS and Android. In addition, a web interface makes OTTIE easier to share and setup, as users simply need to navigate to the site rather than install a native application. It is also easier to copy and is more likely to be compatible with future platforms, increasing OTTIE's longevity, a characteristic highlighted as important earlier in this section.
 
 While access to certain APIs is more limited in a web application compared to native applications, this did not limit any of the application's proposed features so was not a concern.
 
@@ -788,29 +838,29 @@ A native application would be likely to have better performance (in terms of com
 
 \section{Architecture}\label{id:h.l33hnjbawceh}
 
-The software is designed as interchangeable, loosely-coupled modules to make it easy to adapt and extend. This gives the project freedom to change over time in response to feedback, without having to redevelop common functionality.
+The software is designed to be composed of interchangeable, loosely-coupled packages to make it easy to adapt and extend. These packages (also known as libraries in some languages) are independently built and tested collections of code which expose a defined interface. This gives the project freedom to change over time in response to feedback, without having to redevelop common functionality.
 
 {\centering \begin{figure}[h!]
   \centering
   \includegraphics[width=0.6\linewidth]{images/module_structure.pdf}
-  \caption{The module structure, showing dependents on top of dependencies}
+  \caption{The package structure, showing dependents on top of dependencies}
 \end{figure} \par}
 
-The alternative module structure considered was to have the type inference modules standalone, to avoid depending on the language core. They would then be parameterized with methods to extract the necessary data from any AST model, promoting flexibility. However, this would introduce significant complexity and performance overhead for little gain as the language core is fairly lightweight. In addition, it would have meant utility functions, types and models could not be shared in the language core between type inference modules, meaning they would need to either have another separate module for shared utilities or have a large amount of code duplication.
+The alternative package structure considered was to have the type inference packages standalone, to avoid depending on the language core. They would then be parameterized with methods to extract the necessary data from any AST model, promoting flexibility. However, this would introduce significant complexity and performance overhead for little gain as the language core is fairly lightweight. In addition, it would have meant utility functions, types and models could not be shared in the language core between type inference algorithms, meaning they would need to either have another separate package for shared utilities or have a large amount of code duplication.
 
 {\centering \begin{figure}[h!]
   \centering
   \includegraphics[width=0.65\linewidth]{images/module_structure_alt.pdf}
-  \caption{An alternative module structure, which makes the type inference algorithms independent of the language core}
+  \caption{An alternative package structure, which makes the type inference algorithms independent of the language core}
 \end{figure} \par}
 
-The downside to splitting the project up into several modules is the tooling is a little more complex. Modules must be built separately and in the correct order which is slightly slower than compiling one larger app, and IDEs have to be set up to understand how to navigate between the modules. However, this is outweighed by the maintainability and extensibility benefits of keeping functionality in separate modules.
+The downside to splitting the project up into several packages is the tooling is a little more complex. Packages must be built separately and in the correct order which is slightly slower than compiling one larger app, and IDEs have to be set up to understand how to navigate between the packages. However, this is outweighed by the maintainability and extensibility benefits of keeping functionality in separate packages.
 
 \subsection{Choice of programming language}\label{id:h.dj2rwwqr30vu}
 
-The modules are all written in the same language, so that they are compatible and easy to get working together. Additionally, using one typed language allows for type-checking across modules to ensure API calls are valid and their results are used correctly. To write a modern web application, a JavaScript-compatible language is the obvious choice as it is supported and promoted by all major browsers. TypeScript was chosen for this for several reasons.
+The packages are all written in the same language, so that they are compatible and easy to get working together. Additionally, using one typed language allows for type-checking across package interfaces to ensure API calls are valid and their results are used correctly. To write a modern web application, a JavaScript-compatible language is the obvious choice as it is supported and promoted by all major browsers. TypeScript was chosen for this for several reasons.
 
-TypeScript is a statically-typed language which transcompiles to JavaScript that can be run in the browser. As a typed language, it provides the benefits of types listed earlier, which is important when dealing with a codebase with several modules. TypeScript was therefore chosen over plain JavaScript, which lacks compile-time typechecking.
+TypeScript is a statically-typed language which transcompiles to JavaScript that can be run in the browser. As a typed language, it provides the benefits of types listed earlier, which is important when dealing with a codebase with several packages. TypeScript was therefore chosen over plain JavaScript, which lacks compile-time typechecking.
 
 Elm, CoffeeScript, PureScript and Dart are other languages that compile to JavaScript, however they lack as rich package systems which can provide useful utilities and dependencies. Furthermore, Dart and Elm are largely focused on the presentation of data, so while it would be possible to write reusable independent libraries for type inference in them, it would not be easy.
 
@@ -820,11 +870,11 @@ Lastly, my previous experiences with both TypeScript and the other languages inf
 
 \subsection{Language core}\label{id:h.hggmfighusoc}
 
-The base module, which all other modules depend on is the language core.
+The base package, which all other packages depend on is the language core.
 
-The language core contains key models, which are used throughout the rest of the software. These models represent AST nodes, types, contexts, substitutions and other results from type inference algorithms. It also defines the interfaces for modules containing type inference algorithms.
+The language core contains key models, which are used throughout the rest of the software. These models represent AST nodes, types, contexts, substitutions and other results from type inference algorithms. It also defines the interfaces for packages containing type inference algorithms.
 
-In addition to these models, it contains a default context with types for many common functions. This context is based on Haskell's Prelude, which makes it easy for learners familiar with Haskell or similar functional programming languages to use the tool.
+In addition to these models, it contains a default context with types for many common functions. This context is based on Haskell's Prelude, which makes it easy for learners familiar with Haskell or similar functional programming languages to use OTTIE.
 
 The language core also holds key helper functions such as utilities to create types. For example, callers can construct an instance of a type with:
 
@@ -836,21 +886,21 @@ instead of
 \begin{minted}[breaklines]{typescript}
 new TypeFuncApp(',', new TypeFuncApp('Char'), new TypeFuncApp('Bool'))
 \end{minted}
-There are also helper functions to combine and apply substitutions, as well as to perform unification. These helper functions can be tested independently, verifying the correctness before using them in dependent modules. Testing is discussed in more detail in the implementation chapter.
+There are also helper functions to combine and apply substitutions, as well as to perform unification. These helper functions can be tested independently, verifying the correctness before using them in dependent packages. Testing is discussed in more detail in the implementation chapter.
 
 Lastly, the language core contains a lexer and parser. Together, these take an input program as a string and return an AST, or report that the program is syntactically invalid. The lexer splits the input string into tokens, while the parser operates on this stream of tokens to recognise higher-level program constructs and construct the AST nodes.
 
 A parser combinator library is used to perform the lexing and parsing. A parser combinator library was chosen over a recursive descent parser or an LL, LR or LALR parser generator as it was recommended by my supervisor and several online sources discussing implementing functional language parsers. In addition the software needs to be compatible with running in the browser which most LL, LR and LALR generators do not support. In addition, none of these types of generators provides output that is easy to implement for the browser or debug manually, whereas parser combinators are relatively easier to implement by hand.
 
-The library chosen for lexing and parsing is Masala, one of the few parser combinator libraries implemented in JavaScript. Masala is based on Haskell’s Parsec library, is tested for the browser and is well-maintained. In addition, it has strong TypeScript definitions which support its integration into the typed language module. Other libraries including Parjs, Parsimmon and Chevrotrain have weaker documentation, and Parsimmon lacks complete TypeScript type definitions. Some other libraries like Jison and Nearley cannot easily output the custom AST node classes, while Masala can. This feature also helps extract the location of nodes in the source program to support being able to highlight where in the input expression an AST node has come from.
+The library chosen for lexing and parsing is Masala, one of the few parser combinator libraries implemented in JavaScript. Masala is based on Haskell’s Parsec library, is tested for the browser and is well-maintained. In addition, it has strong TypeScript definitions which support its integration into the typed language package. Other libraries including Parjs, Parsimmon and Chevrotrain have weaker documentation, and Parsimmon lacks complete TypeScript type definitions. Some other libraries like Jison and Nearley cannot easily output the custom AST node classes, while Masala can. This feature also helps extract the location of nodes in the source program to support being able to highlight where in the input expression an AST node has come from.
 
 \subsection{Type inference algorithms}\label{id:h.75leuokwbltp}
 
 On top of this language core are type inference algorithms \W, \W' and \M. Given an AST representing an expression, they return either a type or an error explaining why they were not able to infer the type. Along with these, they can also optionally return a sequence of steps taken as part of the algorithm. Each step includes a message and AST to be displayed, with appropriate parts of the AST highlighted.
 
-Each type inference algorithm shares the same interface, allowing them to be used interchangeably. This means new algorithms conforming to this interface can be added to tools using the type inference algorithms, such as the web application, by simply changing the type inference library installed. Sharing the same interface also means that high-level module tests that call only the common function signature and assert on the final type can be shared across all the inference algorithms as they should all return the same type result, even if they take different steps to get there. This makes the development of tests easier so more can be written, and asserting the final types are the same across a number of varied cases improves confidence that the algorithms are implemented correctly.
+Each type inference algorithm shares the same interface, allowing them to be used interchangeably. This means new algorithms conforming to this interface can be added to tools using the type inference algorithms, such as the web application, by simply changing the type inference library installed. Sharing the same interface also means that high-level tests that call only the common function signature and assert on the final type can be shared across all the inference algorithms as they should all return the same type result, even if they take different steps to get there. This makes the development of tests easier so more can be written, and asserting the final types are the same across a number of varied cases improves confidence that the algorithms are implemented correctly.
 
-Publishing the type inference algorithms separately helps keep the code clean and maintainable, and allows developers to only install the algorithms they need. While this does result in some code duplication, particularly between algorithm \W\ and \W', the benefits from keeping the modules small and easier to maintain individually make this trade-off worthwhile. Most of the common helper functions are already in the language core, which means the code duplication in the type inference modules is not excessive.
+Publishing the type inference algorithms separately helps keep the code clean and maintainable, and allows developers to only install the algorithms they need. While this does result in some code duplication, particularly between algorithm \W\ and \W', the benefits from keeping the packages small and easier to maintain individually make this trade-off worthwhile. Most of the common helper functions are already in the language core, which means the code duplication in the type inference packages is not excessive.
 
 \subsection{Web interface}\label{id:h.q67ivlz7h61r}
 
@@ -861,17 +911,17 @@ Finally, depending on both the language core and the type inference algorithms i
   \includegraphics[width=\linewidth]{images/pipeline.pdf}
   \caption{Data flow diagram showing how requests are processed}
 \end{figure} \par}
-The web application uses the React framework. Using a framework improves the structure of the code, as the application can be broken down into separate, independent components. These components can be reused to minimise code duplication, and can be individually unit tested with many testing libraries developed specifically for different frameworks. As well as this, using a framework in combination with a module bundler such as webpack makes importing and depending on other modules (such as the language core and type inference algorithms) simple. And in combination with a transcompiler that converts modern JavaScript to be backwards compatible, such as Babel, the application can be made to work for users with older browsers.
+The web application uses the React framework. Using a framework improves the structure of the code, as the application can be broken down into separate, independent components. These components can be reused to minimise code duplication, and can be individually unit tested with many testing libraries developed specifically for different frameworks. As well as this, using a framework in combination with a module bundler such as webpack makes importing and depending on other packages (such as the language core and type inference algorithms) simple. And in combination with a transcompiler that converts modern JavaScript to be backwards compatible, such as Babel, the application can be made to work for users with older browsers.
 
 React was chosen over the alternative web frameworks Vue, Angular and Svelte. Vue and Angular are other popular frameworks, however for a single page application they are overly complex. In particular, Angular's component and dependency injection system, while useful in very large projects, would add significant unnecessary overhead to developing the system. The Svelte framework is different to React, Vue and Angular in that it avoids complex internal models, but instead compiles directly to simple JavaScript. This gives it better performance, but makes it harder to integrate with existing libraries and tooling. In addition, while Svelte supports TypeScript, this support was only added recently (July 2020) and is much weaker than React’s TypeScript support. Vue, Angular and Svelte are all significantly less popular than React (which is the most popular JavaScript framework). This means they have fewer available compatible packages and less community-developed documentation such as tutorials, guides or forums. In particular, Svelte is a new and much less widely-used framework, with less than 2,000 questions on StackOverflow compared to React’s nearly 300,000.
 
 Create React App sets up the initial structure of the web application. Its starter template includes the required dependencies to build a React application, a variant of which also has TypeScript support. Using Create React App rather than starting from scratch allows the project to focus on developing the novel type inference teaching tool, rather than being too concerned with the setup of the tooling. However, using Create React App does limit how the build can be configured without choosing to ``eject'' (an irreversible process that makes the implicit build tooling explicit, but results in more maintenance). For example, while it installs Webpack and Babel to bundle resources and transcompile to JavaScript compatible with older browsers respectively, their corresponding configurations cannot be edited without an ``eject''.
 
-The web application imports the type inference algorithms and the language core, and bundles them as part of the client application to be run entirely in the user’s web browser. A static site doing the processing fully client-side was chosen over a client-server architecture to reduce latency, minimise running costs and maximise the resource’s longevity. It also simplifies communication between modules, which otherwise would either need a manually specified or complex networking layer, such as using the proxy pattern with dependency injection. In addition, potentially complex models representing the AST would need to be reliably serialized and deserialized which is non-trivial when as classes they have member functions.
+The web application imports the type inference algorithms and the language core, and bundles them as part of the client application to be run entirely in the user’s web browser. A static site doing the processing fully client-side was chosen over a client-server architecture to reduce latency, minimise running costs and maximise the resource’s longevity. It also simplifies communication between packages, which otherwise would either need a manually specified or complex networking layer, such as using the proxy pattern with dependency injection. In addition, potentially complex models representing the AST would need to be reliably serialized and deserialized which is non-trivial when as classes they have member functions.
 
 Performing calculations client side reduces latency as users do not need to wait on the network to transport data back and forth. Parsing and inferring the type of expressions in the browser takes tens of milliseconds, compared to hundreds of milliseconds that would be expected from a RESTful API. However, for particularly complex expressions where users have weak hardware (such as older smartphones), doing calculations client-side may be slightly slower than a client-server architecture. These cases will be rare, but happen when the networking-related overheads are outweighed by the difference in processing speeds between the server and client devices.
 
-Avoiding dynamic calculations on the server means free static hosting sites such as GitHub pages can be used to serve the website. This significantly reduces running costs when compared to running a custom server to respond to requests, increasing the tools longevity.
+Avoiding dynamic calculations on the server means free static hosting sites such as GitHub pages can be used to serve the website. This significantly reduces running costs when compared to running a custom server to respond to requests, increasing OTTIE's longevity.
 
 The teaching tool’s longevity is further increased by serving a static artifact, as opposed to having dynamic server and client parts as a static website can easily be copied and archived. TypeTool, a related work that also aimed to explain type inference, was client-server based. However, the server has since been taken down and so is no longer accessible. As the lexing, parsing and type inference process was done server-side, archive websites like the Internet Archive’s Wayback Machine are unable to keep a copy of it, as they only store the static website content.
 
@@ -879,13 +929,15 @@ The teaching tool’s longevity is further increased by serving a static artifac
 
 To help evaluate the teaching tool and understand user behaviour, a system to collect and store behavioural analytics data is required. This tool should respect user privacy settings, minimize personal data collected (ideally data collected should be anonymous) and be able to view a single event stream to understand how a user is using the application.
 
+\subsection{Existing solutions}
+
 Several popular existing analytics solutions were explored, including Google Analytics, Matomo, W3Counter, Simple Analytics, Angelfish, AWStats and Open Web Analytics.
 
 The ``Do not track'' (DNT) browser setting is the simplest and most widely-supported way to indicate a user does not want to be tracked. However, Google Analytics, Angelfish, W3Counter, Open Web Analytics and AWStats do not respect DNT browser settings by default, and while possible in some cases to set up so that they do, this is difficult.
 
 IP addresses are classified as personal data under the General Data Protection Regulations (GDPR). Some analytics tools such as Angelfish, AWStats, Open Web Analytics and W3Counter collect and analyse IP addresses as well as other personal data. This presents a problem for using these analytics tools within the EU, as users must be informed as to how their personal data is collected and processed, and users have several rights relating to personal data such as the right to be forgotten, the right to object or the right to access. In addition, many of these tools use cookies and similar on-device storage technologies to track users, which require consent under the UK’s Privacy and Electronic Communications Regulations (PECR). This would add significant unwanted overhead to the website for what is actually necessary.
 
-To understand user behaviour, a single event stream that shows the different steps they took would be most useful. For example, seeing in what order they try out type inference examples and whether they view the more in depth documentation is much more useful data for evaluating and improving the tool than aggregate data about user demographics. Many platforms such as AWStats focus on the latter, and do not offer event stream (also known as `clickstream' or `clickpath') analytics. Some platforms like Google Analytics meet in the middle, offering event tracking but cannot present these in individual user streams. Angelfish offers event stream analytics, but does not support custom events, such as choosing a type inference example.
+To understand user behaviour, a single event stream that shows the different steps they took would be most useful. For example, seeing in what order they try out type inference examples and whether they view the more in depth documentation is much more useful data for evaluating and improving OTTIE than aggregate data about user demographics. Many platforms such as AWStats focus on the latter, and do not offer event stream (also known as `clickstream' or `clickpath') analytics. Some platforms like Google Analytics meet in the middle, offering event tracking but cannot present these in individual user streams. Angelfish offers event stream analytics, but does not support custom events, such as choosing a type inference example.
 
 Finally the most practical concern is their running cost. Google Analytics and W3Counter are the only options with free plans, while other managed services such as Matomo Cloud and Simple Analytics are generally fairly expensive (both more than £275 per year for their cheapest plan). The cheapest available Angelfish license costs over £1,000 a year, and along with `free' options AWStats and Open Web Analytics needs to be hosted on a server which would incur server running and maintenance costs.
 
@@ -915,7 +967,11 @@ These factors can be summarised in a comparison table:
 
 From this, we see that self-hosted Matomo is the only affordable option that meets all the criteria, considering the budget for a 3rd year project. However, Matomo's set up is complicated and managing and maintaining a server is time-consuming. In particular, ensuring data is held securely would require running a potentially-expensive private server, as the departmental machines such as Joshua do not guarantee confidentiality, integrity or availability. The departmental machines also limit the installation of applications which require root permissions, and many applications are not supported as the packages on departmental machines are outdated. Frequent restarts combined with limited powers to automatically run applications (through systemd units or similar) on departmental machines means Matomo would have to be frequently restarted manually and may miss some user events.
 
-As such, we design a custom analytics platform to meet the three main criteria while having a very low running and maintenance cost.
+As such, a custom analytics platform that meets these criteria is necessary.
+
+\subsection{Architecture}
+
+An analytics platform is designed to collect anonymised custom event streams in a way that obey's user privacy settings.
 
 This platform offers an API to record custom events. The web application is then augmented to call the API to log certain user behaviours such as opening the help section or viewing a type inference example. An anonymised stream identifier is created for each new visit, which allows events to be collected and later viewed in anonymised custom event streams.
 
@@ -924,21 +980,19 @@ The data collected is the anonymised identifier, a timestamp, and any payload sp
 \begin{minted}[breaklines]{json}
 { "name": "help", "value": "show" }
 \end{minted}
-
 Or, in the case where an button to set up the code example \mintinline{text}{map not []} the web application may send the payload: 
 
 \begin{minted}[breaklines]{json}
 { "name": "codeButtonSet", "value": "map not []" }
 \end{minted}
-
-The analytics API records this data, and stores it securely for 90 days before deleting it. While there are no legal requirements or responsibilities under PECR or GDPR to hold this data securely and minimize data retention as it is not personal data, doing so follows best ethical practices and reducing the volume of data held reduces running costs.
+The analytics API records this data, and stores it securely for 90 days before deleting it. While there are no legal requirements or responsibilities under PECR or GDPR to hold this data securely and minimize data retention as it is not personal data, doing so follows best practices and reducing the volume of data held reduces running costs.
 
 Running costs generally are kept low (<£1 per year) by using serverless cloud products. These products offer compute and storage on-demand, rather than requiring the rental of a permanent server. Serverless products also allow the analytics platform to easily scale to handle spikes in traffic, while costing nothing when the site is not in use.
 
 \begin{figure}[h!]
   \centering
   \includegraphics[width=1.000\linewidth]{images/image16.png}
-  \caption{The analytics viewer, showing an example stream from the web application.}
+  \caption{The analytics viewer showing an example event stream}
 \end{figure}
 
 The custom event streams stored by the analytics platform can be viewed in an analytics viewer. To keep the implementation consistent between the main project and the analytics sub-project, it is written as a TypeScript application initialized with Create React App. Using a different framework would have resulted in less knowledge sharing between the two, and introduced additional unwanted complexity. Also, for similar reasons to the main project React was a well-suited framework for the viewer.
@@ -947,7 +1001,7 @@ The viewer shows analytics events by stream, which can be navigated using the le
 
 \chapter{Implementation}\label{id:h.igepudpadp49}
 
-The application is broken into several loosely-coupled TypeScript modules, as laid out in the design chapter. This chapter details their implementation, examining specific features of the code at a lower level.
+The application is broken into several loosely-coupled TypeScript packages, as laid out in the design chapter. This chapter details their implementation, examining specific features of the code at a lower level.
 
 \section{Language core}\label{id:h.o3ngfa303saw}
 
@@ -1252,9 +1306,9 @@ Results in adding a step with the corresponding message. In the message, backtic
 
 The logger's implementation is somewhat similar to the fresh type generator's implementation. Rather than initializing just a counter, we initialize an empty array. Each time the logger is called, it applies the notes to a clone of the AST and pushes a step into the array. At the end of the type inference process, the steps array is extracted and returned as part of the result to the caller of the \mintinline{text}{infer} method.
 
-In the internal \mintinline{text}{_infer} method, generally we are given an AST node which we can match against the different classes. Each different class of AST node has its corresponding rule in the algorithm implemented using the helper functions from the language core. For example, for function abstraction in algorithm \W\ the rule:
+In the internal \mintinline{text}{_infer} method, generally we are given an AST node which we can match against the different classes. For each node class, a corresponding rule in the algorithm is implemented using the helper functions from the language core. For example, the function abstraction rule in algorithm \W:
 \begin{align*}
-\mathcal{W}(\Gamma,\ \lambda x.\ e  ) =\ & \textrm{let}\ (S_1,\ \tau_1) = \mathcal{W}(\Gamma + x : t_0, e),\ \textrm{new}\ t_0\\
+\hspace{1.4cm}\mathcal{W}(\Gamma,\ \lambda x.\ e  ) =\ & \textrm{let}\ (S_1,\ \tau_1) = \mathcal{W}(\Gamma + x : t_0, e),\ \textrm{new}\ t_0\\
 & \textrm{in}\ (S_1,\ S_1(t_0 \rightarrow \tau_1))
 \end{align*}
 
@@ -1315,7 +1369,7 @@ The \mintinline{text}{|ASTView|} takes a callback function, which is triggered w
   \caption{The second function application node is hovered here, highlighting the \mintinline{text}{map not} part of the expression}
 \end{figure} \par}
 
-To improve the performance of the web application, the \mintinline{text}{Main} component memoises renders of \mintinline{text}{ResultView}. This means that on future renders of the \mintinline{text}{Main} component, the \mintinline{text}{ResultView} is only re-rendered (and thus the parser and type inference algorithms are only re-run) if the input expression or the selected algorithm changes. This avoids unnecessary computation when other state in the \mintinline{text}{Main} component changes, for example when the user opens the help window, this updates the \mintinline{text}{Main} component's state but does not cause the \mintinline{text}{ResultView} to re-render.
+To improve the performance of the web application, the \mintinline{text}{Main} component memoises renders of \mintinline{text}{ResultView}, using the React helper function \mintinline{text}{useMemo}. This means that on future renders of the \mintinline{text}{Main} component, the \mintinline{text}{ResultView} is only re-rendered (and thus the parser and type inference algorithms are only re-run) if the input expression or the selected algorithm changes. This avoids unnecessary computation when other state in the \mintinline{text}{Main} component changes, for example when the user opens the help window, this updates the \mintinline{text}{Main} component's state but does not cause the \mintinline{text}{ResultView} to re-render.
 
 {\centering \begin{figure}[h!]
   \centering
@@ -1331,7 +1385,7 @@ The help window explains the language's type constructors and lists the availabl
   \caption{The language reference in the help window of the web application}
 \end{figure} \par}
 
-The web application also uses the Jest framework for testing. In addition, it uses the React Testing Library to simulate browser events, such as clicking buttons and entering text into the input box. Some of these tests are effectively end-to-end tests as they simulate a certain user journey. Some may also be considered integration tests, as assertions are made on the behaviour of the web application in combination with the language core and type inference algorithms, ensuring all the modules work correctly together.
+The web application also uses the Jest framework for testing. In addition, it uses the React Testing Library to simulate browser events, such as clicking buttons and entering text into the input box. Some of these tests are effectively end-to-end tests as they simulate a certain user journey. Some may also be considered integration tests, as assertions are made on the behaviour of the web application in combination with the language core and type inference algorithms, ensuring all the packages work correctly together.
 
 \section{Analytics}\label{id:h.39bhrrv1fi5p}
 
@@ -1347,22 +1401,38 @@ These cloud products are all considered `serverless', in that they do not requir
 
 \chapter{Evaluation}\label{id:h.e6letww4nhn0}
 
-User testing aims to evaluate whether the teaching tool works and is effective in its current form. These aims can be summarised by:
+User testing aims to evaluate whether the OTTIE works and is effective in its current form. These aims can be summarised by:
 \begin{enumerate}
-  \item the tool is accessible and users can enter input
-  \item the tool's outputs can be understood
-  \item the tool improves students' understanding of types and type inference
+  \item it is accessible and users can enter input
+  \item its outputs can be understood
+  \item it improves students' understanding of types and type inference
 \end{enumerate}
 
-From 1 to 3, these increase in scope and in how difficult they are to measure. However, the key aim is 3, as if the tool meets the first two aims but does not improve student understanding it is still not helpful as a teaching resource.
+From 1 to 3, these increase in scope and in how difficult they are to measure. However, the key aim is 3, as if the resource meets the first two aims but does not improve student understanding it is still not helpful as a teaching resource.
 
-To verify whether the project meets these aims, a questionnaire was distributed to students and analytics data from the web application was reviewed.
+To verify whether the project meets these aims, an online questionnaire was distributed to students and analytics data from the web application was reviewed. The questionnaire asks direct questions to assess usability, as well as tests students before and after using OTTIE to statistically measure its effect on understanding. Analytics data shows how users behave and what features of the application they use.
+
+Several other evaluation methodologies were considered, including usability inspection, usability benchmarking, A/B testing, user interviews and trialling OTTIE in a real teaching environment.
+
+Usability inspection methods such as cognitive walkthroughs and heuristic evaluations are unable to determine whether real students actually do understand type inference better after using the tool. \cite{ref37}, the developers of heuristic evaluation, recommend usability inspections be performed by several expert evaluators who were not involved in the original design themselves. Therefore, reviewing my own work as a non-expert is far from this best practice and would be unlikely to yield robust results.
+
+Usability benchmarking, where two applications are compared on the time or effort taken to complete a task, is difficult for OTTIE as there is no similar software to compare it against. Additionally, measuring the time required to reach a certain point in the application does not directly indicate how useful a teaching tool it is, particularly as most of the time spent on OTTIE is digesting the information presented rather than performing active UI actions. Rather than time to complete actions, the standard for benchmarking, a more useful measure would be that of time taken to reach a certain level of understanding. However, measuring this effectively is very challenging.
+
+A/B testing is used to compare two alternate software versions, for example given two websites with roughly equal traffic, recording which makes the most sales. It requires an easily measurable outcome and while analytics data may help with this, it is still hard to find a reliably measurable quantity. It is most effective with a very large numbers of users, otherwise errors or noise in the data can mask subtle effects or produce false positive results. However, before my evaluation it was unclear how many users would use the tool so this was risky. Finally, A/B testing gives results comparing two versions of the site, e.g. different ways of presenting the data. However, this would not meet the aims of the evaluation which tries to evaluate OTTIE as a whole.
+
+Structured and unstructured interviews can both offer detailed feedback from users. Group interviews can allow participants to build on each others points, while individual interviews can dig deeper into the behaviour of a specific user. Walkthroughs of the software with users can give insight into what they find confusing or most useful, and surface problems that might not have been considered before. However, interviews with few users may be unrepresentative, and interviews with many users would be time-consuming and difficult to arrange, especially under COVID restrictions. Presenting and analysing the results of interviews also is difficult, especially for unstructured interviews.
+
+Using OTTIE directly with students during a lab session would target the correct audience for it and could generate a significant amount of useful feedback. However, its results are again hard to analyse. Additionally, with COVID restrictions in place labs were done remotely, which makes judging user reactions and engaging with users more difficult.
+
+Questionnaires are flexible, and are well-suited to the remote format imposed by COVID. They allow directing users to complete certain tasks and explain their behaviour, as well as asking general open-ended questions. This is similar to structured user interviews, but takes significantly less time for both parties as there is less administrative overhead for users (such as finding a timeslots and arranging a call), and an investigator does not need to be present. In addition, carefully designed questionnaires can output quantative results, as is done with the before and after tests in this evaluation. While questionnaires offer slightly less freedom than unstructured interviews, their benefits outweigh this drawback in this case.
+
+Using analytics data is similarly flexible, as any user interaction with the UI can be recorded. Reconstructing these into an event stream can easily show a user's journey, which can be reviewed to gain an understand of the user's thought process, like a walkthrough. Additionally, analytics measure real user behaviour without being affected by more artifical contexts such as in a formal interview. It requires no extra effort on behalf of the user beyond using OTTIE as they would normally, unlike having to respond to questionnaire questions or talk with an interviewer.
 
 \section{Questionnaire}\label{id:h.yqiowsgjmohq}
 
-The questionnaire was composed of three parts: a short test on types and type inference before using the application, introducing users to the application and asking usage questions, then a final test to see if student’s performance improves after using the tool.
+The questionnaire was composed of three parts: a short test on types and type inference before using the application, introducing users to the application and asking usage questions, then a final test to see if student's performance improves after using OTTIE.
 
-This addresses and allows for measurement against all three aims. The tool’s performance on aims 1 and 2 are measured in the middle part, where users are asked to access the tool, enter input and interpret the results. Aim 3 is measured by looking at the relative difference in test results from before and after using the tool.
+This addresses and allows for measurement against all three aims. OTTIE's performance on aims 1 and 2 are measured in the middle part, where users are asked to access the tool, enter input and interpret the results. Aim 3 is measured by looking at the relative difference in test results from before and after interacting with OTTIE.
 
 The questionnaire was distributed in several student-organised group chats and online communication platforms relating to computer science. In addition, my supervisor encouraged students on his CS141 Functional Programming module to complete the questionnaire, highlighting it in lectures and several seminar sessions.
 
@@ -1377,8 +1447,10 @@ To incentivise students to fill out the questionnaire with detailed and accurate
 In addition to the WAAT achievement, vouchers were given to four random respondents and to two respondents who gave detailed constructive feedback on the tool. Finally, students were also reminded that learning about types and type inference would improve their functional programming skills, which could help them with the CS141 assessments. While students were encouraged to complete the questionnaire, it was made clear that it was optional, it would have no direct effect on any of their assessments and that they could choose to stop taking the questionnaire at any time.
 
 The questionnaire had 48 unique responses, of which 46 were valid (where the respondent had fully completed all questions, and answered the quality control check question correctly). Percentages given here are with respect to the number of valid responses.
+
 \subsection{Direct questions}\label{id:h.abykou9pzwwh}
-The second part of the questionnaire asks direct questions about the tool. There are two types of questions in this part. The first type asks users to try accessing the tool, inputting results and interpreting the results. These questions are:
+
+The second part of the questionnaire asks direct questions about using OTTIE. There are two types of questions in this part. The first type asks users to try accessing the tool, inputting results and interpreting the results. These questions are:
 \begin{itemize}
   \item Try entering: \mintinline{text}{map odd []}. Try to understand the steps. What is the unifying substitution performed in step 3?
   \item Try entering: \mintinline{text}{not 3}. Try to understand the steps. What is the problem found?
@@ -1387,63 +1459,109 @@ Both of these questions offer 7 multiple choice options, of which only one is co
 
 The first of these questions had 42 (91\%) respondents select the correct answer. 2 respondents chose a type closely related to the substitution but not the substitution itself, and 1 respondent manually entered a different substitution. 1 respondent did not understand the output enough.
 
-The second had all respondents select the correct answer.
+The second question had all respondents select the correct answer.
 
-In both questions, no respondents selected that they could not access or use the software, and the high correct response rate for both questions provides evidence the tool meets aims 1 and 2.
+In both questions, no respondents selected that they could not access or use the software, and the high correct response rate for both questions provides evidence OTTIE meets aims 1 and 2.
 
-The second type of question in the second part of the questionnaire seeks feedback on what the tool does well, and how it might be improved upon. These are long-answer text questions with open prompts. This encourages users to be candid in their answers and allows them to comment freely about their experiences with the tool. The questions are:
+The second type of question in the second part of the questionnaire seeks feedback on what OTTIE does well, and how it might be improved upon. These are long-answer text questions with open prompts. This encourages users to be candid in their answers and allows them to comment freely about their experiences with OTTIE. The questions are:
 \begin{itemize}
   \item What is really helpful about this tool?
   \item What could be improved in this tool?
 \end{itemize}
 
-These questions give better insight into what helps students understand type inference, so the tool can be improved. Determining what is most helpful about the tool can confirm which parts are working well already, while asking what could be improved highlights areas to be changed.
+These questions give better insight into what helps students understand type inference, so OTTIE can be improved. Determining what is most helpful about OTTIE can confirm which parts are working well already, while asking what could be improved highlights areas to be changed.
 
 42 respondents answered the first question. Several of these responses were very thorough, and many themes were mentioned by multiple respondents. These common themes are summarised below:
-\begin{itemize}
-  \item 23 said the steps are clear / easy-to-understand
-  \item 15 said the steps are well-presented / well-visualised
-  \item 13 found it helpful for understanding unification
-  \item 11 found it helpful for understanding type inference
-  \item 9 liked the visual design and colour scheme
-  \item 8 liked that the tool explains why invalid expressions are invalid
-  \item 8 stated showing substitutions helps explain unification
-  \item 4 said the tool helped them better understand Haskell
-  \item 2 said function application is explained well
-  \item 2 said the tool helps explain curried functions
-  \item 1 learnt how let syntax worked
-  \item 1 said the tool is most helpful for complex examples
-  \item 1 said the application is very fast
-\end{itemize}
 
-In addition to these themes, several quotes highlight the positive experiences users had with the tool. One user states the importance of type inference, and the necessity of having a teaching tool for it: “Type inference is hard, and tools to make it easier for people to understand are both helpful and necessary. Thank you!”, and another suggests an interactive tool may be more effective than traditional learning materials: “I think that this type of learning (trial and error) is much more effective than just learning some rules from slides/books.” Students found that “all the steps are shown clearly”, with one saying “I love the level of detail the tool goes to to suggest why type errors may have occurred”.
+\vspace{0.2cm}
+\begin{adjustbox}{center}
+\begin{tabularx}{\textwidth}{ |X|p{1.5cm}| }
+  \hline
+  \textbf{Comment} & \textbf{Count} \\
+  \hline
+  The steps are clear / easy-to-understand & 23 \\
+  \hline
+  The steps are well-presented / well-visualised & 15 \\
+  \hline
+  The tool is helpful for understanding unification & 13 \\
+  \hline
+  The tool is helpful for understanding type inference & 11 \\
+  \hline
+  The visual design / color scheme is nice & 9 \\
+  \hline
+  It is useful that invalid expressions are explained & 8 \\
+  \hline
+  Showing substitutions helps explain unification & 8 \\
+  \hline
+  The tool is helpful for understanding Haskell & 4 \\
+  \hline
+  Function application is explained well & 2 \\
+  \hline
+  The tool helps explain curried functions & 2 \\
+  \hline
+  The tool explains let statement syntax & 1 \\
+  \hline
+  The tool is most helpful for complex examples & 1 \\
+  \hline
+  The tool is very fast & 1 \\
+  \hline
+\end{tabularx}
+\end{adjustbox}\\
+
+In addition to these themes, several quotes highlight the positive experiences users had with OTTIE. One user states the importance of type inference, and the necessity of having a teaching tool for it: “Type inference is hard, and tools to make it easier for people to understand are both helpful and necessary. Thank you!”, and another suggests an interactive tool may be more effective than traditional learning materials: “I think that this type of learning (trial and error) is much more effective than just learning some rules from slides/books.” Students found that “all the steps are shown clearly”, with one saying “I love the level of detail the tool goes to to suggest why type errors may have occurred”.
 
 As well as feedback supporting the explicit aims of the user testing, some responses validated design decisions made in presenting the type inference results. For example on the AST visualisation and highlighting, a user remarks “The tree-type structure that shows how certain steps result from other steps makes it really clear how the process of type checking works, and the colour highlighting makes then shows what step of the process it being worked on at a time.” Another user similarly mentions the AST view, writing “The diagram at the start of each step showing the sort of "graph" of the function inputted helps me visualise the order in which parts of the function need to be "broken down" to get a simpler type overall.” The presentation of unification in the steps of the type inference algorithms was also commented on, with a user stating “Explicitly showing the concept of "unifiable" was very nice, I didn't get that when I did CS141. I understood the concept of "these types kinda fit together" but not exactly why.”
 
-38 respondents answered the second question. Generally respondents were very positive about the tool, and several used this question to continue discussing its benefits. However, the more negative themes and constructive criticisms were:
-\begin{itemize}
-  \item 5 wanted more general information on the HM type system and the HM algorithm
-  \item 4 suggested using arrows to navigate through steps rather than scrolling
-  \item 3 suggested improving the wording of the function application step
-  \item 2 wanted support for declaring a custom global context
-  \item 2 wanted it made clearer that the expression box was a text input
-  \item 2 spotted a typo ‘instatiate’ instead of ‘instantiate’
-  \item 2 wanted additional information on the homepage
-  \item 2 suggested adding animations
-  \item 1 wanted the order of the AST and text in a step swapped
-  \item 1 wanted contact details on the website could to report bugs and feedback
-  \item 1 wanted automatically suggested typo corrections e.g. ‘Fals’ to ‘False’
-  \item 1 said that on mobile changing the expression caused the screen to move
-  \item 1 requested functor and applicative support
-  \item 1 requested support for list comprehensions
-  \item 1 suggested adding a quiz mode
-  \item 1 wanted their expression to be visible when scrolled down the page
-  \item 1 said they disliked colour scheme
-  \item 1 wanted more use of mathematical notation
-  \item 1 wanted a dark theme
-\end{itemize}
+38 respondents answered the second question. Generally respondents were very positive about OTTIE, and several used this question to continue discussing its benefits. However, the negative themes and constructive criticisms were:
 
-Users want more general information on Hindley-Milner and type inference. While they found the tool useful for specific examples, a basic introduction or tutorial could be added to help explain type inference for those completely new to it. For example, a user explains “it would be a good idea to add a section that describes the general process of how it works and then go on to the specific examples”. Another user says the existing information is sufficient, but could be made more prominent with a tutorial page: “The explanation of the tool is robust but could be made more obvious as its [sic] easy to miss. This could be incorporated in the form of a tutorial page perhaps?”
+\vspace{0.2cm}
+\begin{adjustbox}{center}
+  \begin{tabularx}{\textwidth}{ |X|p{1.5cm}| }
+    \hline
+    \textbf{Comment} & \textbf{Count} \\
+    \hline
+    More general information on the HM type system and type inference algorithms could be added & 5 \\
+    \hline
+    Using buttons to navigate steps would be easier than scrolling & 4 \\
+    \hline
+    The wording of the function application step could be improved & 3 \\
+    \hline
+    It should be clearer the expression box is an input & 2 \\
+    \hline
+    There is a typo `instatiate' instead of `instantiate' & 2 \\
+    \hline
+    Animations could be added & 2 \\
+    \hline
+\end{tabularx}
+\end{adjustbox}\\
+
+\begin{adjustbox}{center}
+\begin{tabularx}{\textwidth}{ |X|p{1.5cm}| }
+    \hline
+    The ordering of text and AST within steps could be swapped & 1 \\
+    \hline
+    The website should have contact details to report bugs & 1 \\
+    \hline
+    Typos could automatically be corrected e.g. `Fals' to `False' & 1 \\
+    \hline
+    On mobile, changing the expression sometimes moves the screen & 1 \\
+    \hline
+    Functor, applicative and list comprehensions could be supported & 1 \\
+    \hline
+    A quiz-mode could be added & 1 \\
+    \hline
+    The expression should be visible when scrolled down the page & 1 \\
+    \hline
+    The tool should use more mathematical notation & 1 \\
+    \hline
+    The tool's colour scheme could be changed & 1 \\
+    \hline
+    The tool could add a dark mode theme & 1 \\
+    \hline
+  \end{tabularx}
+\end{adjustbox}\\
+
+Users want more general information on Hindley-Milner and type inference. While they found OTTIE useful for specific examples, a basic introduction or tutorial could be added to help explain type inference for those completely new to it. For example, a user explains “it would be a good idea to add a section that describes the general process of how it works and then go on to the specific examples”. Another user says the existing information is sufficient, but could be made more prominent with a tutorial page: “The explanation of the tool is robust but could be made more obvious as its [sic] easy to miss. This could be incorporated in the form of a tutorial page perhaps?”
 
 Several users mentioned that they would prefer to click through the steps, rather than scroll through all the output. While similar interactive teaching tools such as WolframAlpha Step-By-Step, Cymath and Khanacademy show steps sequentially for scrolling, these services’ steps are generally shorter so perhaps this pattern is applied differently there. For example, a respondent comments “Output generated is very long and requires a lot of scrolling. If the explanation was layed [sic] out side-by-side with the diagram I feel that would make it easier for someone to parse and a "move to next step" button might save some scroll time.”, and that “Maybe it could be a good idea to have arrows to move between different steps instead of having to scroll down, especially for expressions that have large visualisations”.
 
@@ -1453,17 +1571,7 @@ Some less commonly raised feedback, for example making it clearer that the expre
 
 \subsection{Test performance}\label{id:h.cn0p90nrqrmi}
 
-The first and third parts of the questionnaire were tests on types and type inference. While the two tests were not identical to avoid commitment bias and choosing the same answers in the tests without revaluating the questions, they were very similar and of equal difficulty. The intention of these tests is to evaluate the tool against aim 3, measured by the difference in performance before and after using the tool. To make the tests easy to fill out and mark without bias, all questions were multiple-choice.
-
-{\centering \begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.9\linewidth]{images/image11.png}
-  \caption{An example multiple-choice test question asking about the type of an expression}
-\end{figure} \par}
-
-Average test scores improved from 54\% to 69\% after using the tool. This is a statistically significant change at the p < 0.001 level.
-
-Statistical significance is determined using a paired two-sample t-test, a technique where each respondent's before and after test scores are paired up and used to determine how likely the before and after set are drawn from the same population (i.e., that using the tool had no change on their ability). A low p value indicates it is very unlikely they are from the same distribution, so using the teaching tool has had an effect on their ability to choose correct answers to questions on types and type inference. Typically p-values less than 0.05 are considered significant, with lower p-values showing higher significance. t-tests are commonly used in medical and evidence-based education trials to determine whether an intervention makes a difference, where randomised controlled trials are not practical. While a randomised controlled trial may have been preferable (where some users would be given a control of a different, non type-inference related website to view) this would have halved the effective sample size. Given that when producing the questionnaire it was unknown how many participants would answer, it was less risky to run a t-test evaluation.
+The first and third parts of the questionnaire were tests on types and type inference. While the two tests were not identical to avoid commitment bias and choosing the same answers in the tests without revaluating the questions, they were very similar and of equal difficulty. The intention of these tests is to evaluate OTTIE against aim 3, measured by the difference in performance before and after using it. To make the tests easy to fill out and mark without bias, all questions were multiple-choice.
 
 {\centering \begin{figure}[h!]
   \centering
@@ -1471,7 +1579,9 @@ Statistical significance is determined using a paired two-sample t-test, a techn
   \label{figure:evaluation_testperformanceimproves}
 \end{figure} \par}
 
-In addition to performance improving in general, we can also examine how useful the tool is to users of different abilities. Students with a wide range of abilities answered the questionnaire, as can be seen by the distribution of test scores. This suggests an academically diverse set of students responded to the survey, improving the quality of the results as the responses represent more students than just the current top-performers.
+Average test scores improved from 54\% to 69\% after using OTTIE. This is a statistically significant change at the p < 0.001 level.
+
+Statistical significance is determined using a paired two-sample t-test, a technique where each respondent's before and after test scores are paired up and used to determine how likely the before and after set are drawn from the same population (i.e., that using the tool had no change on their ability). A low p value indicates it is very unlikely they are from the same distribution, so using the teaching tool has had an effect on their ability to choose correct answers to questions on types and type inference. Typically p-values less than 0.05 are considered significant, with lower p-values showing higher significance. t-tests are commonly used in medical and evidence-based education trials to determine whether an intervention makes a difference, where randomised controlled trials are not practical. While a randomised controlled trial may have been preferable (where some users would be given a control of a different, non type-inference related website to view) this would have halved the effective sample size. Given that when producing the questionnaire it was unknown how many participants would answer, it was less risky to run a t-test evaluation.
 
 {\centering \begin{figure}[h!]
   \centering
@@ -1479,7 +1589,9 @@ In addition to performance improving in general, we can also examine how useful 
   \label{figure:evaluation_testperformancedistribution}
 \end{figure} \par}
 
-We first explore how different quartiles of students perform before and after using the tool. These quartiles are drawn from the student's performance in the `before' test, i.e. Quartile 1 is the bottom 25\% of respondents based on `before' test answers. We see that performance consistently improves for all quartiles, in fact with each quartile's `after' score beating the next quartile's `before' score. This performance improvement is statistically significant for all quartiles. Average performance increases most in quartile 1, as might be expected as these students have the greatest possible improvement possible.
+In addition to performance improving in general, we can also examine how useful OTTIE is to users of different abilities. Students with a wide range of abilities answered the questionnaire, as can be seen by the distribution of test scores. This suggests an academically diverse set of students responded to the questionnaire, improving the quality of the results as the responses represent more students than just the current top-performers.
+
+We first explore how different quartiles of students perform before and after using OTTIE. These quartiles are drawn from the student's performance in the `before' test, i.e. Quartile 1 is the bottom 25\% of respondents based on `before' test answers. We see that performance consistently improves for all quartiles, in fact with each quartile's `after' score beating the next quartile's `before' score. This performance improvement is statistically significant for all quartiles. Average performance increases most in quartile 1, as might be expected as these students have the greatest possible improvement possible.
 
 {\centering \begin{figure}[h!]
   \centering
@@ -1499,7 +1611,7 @@ We can also show how performance improves based on these groups. These self-repo
 
 \section{Analytics}\label{id:h.67g05flyfv0z}
 
-Anonymised usage data is collected by the web application. Events recorded include page visits, opening and closing the help section and code expressions entered. To avoid recording testing of the site, my own visits are excluded from the analysis. This data directly verifies aim 1, and provides evidence for the tool achieving aims 2 and 3.
+Anonymised usage data is collected by the web application. Events recorded include page visits, opening and closing the help section and code expressions entered. To avoid recording testing of the site, my own visits are excluded from the analysis. This data directly verifies aim 1, and provides evidence for OTTIE achieving aims 2 and 3.
 
 The data shows users are able to access the site and can use the examples and enter in their own expressions, supporting aim 1. This was particularly useful in giving confidence that the site was working correctly while waiting for questionnaire responses to be returned.
 
@@ -1527,15 +1639,17 @@ All types of analytics events were fired, which suggests all features of the app
 
 \section{Ethics}\label{id:h.q5st3bb4afm1}
 
-Participants safety and privacy was carefully considered during the evaluation of the tool through the questionnaire and analytics data.
+Participants safety and privacy was carefully considered during the OTTIE's evaluation.
 
-The questionnaire was completely entirely online, requiring no face-to-face contact which eliminates the risk of COVID transmission. A questionnaire online also reduces the time investment respondents have to put in and reduces the social commitment of completing it so that participants are less pressured to complete it without feeling fully comfortable. Users were informed that participation was entirely voluntary and that they could discontinue at any time.
+The questionnaire was completely online, requiring no face-to-face contact which eliminates the risk of COVID transmission. An online questionnaire also reduces the time investment respondents have to put in and reduces the social commitment of completing it so that participants are less pressured to complete it without feeling fully comfortable. Users were informed that participation was entirely voluntary and that they could discontinue at any time.
 
-The questionnaire minimised personal data captured. Email addresses were the only explicitly personal data requested, and only if the user wanted to receive an achievement and be entered to win a voucher. A support email address was made available in case respondents had questions or concerns, or wished to exercise any of their data rights. No questions or concerns were raised through this.
+The questionnaire minimised personal data captured. Email addresses were the only explicitly personal data requested, and only if the user wanted to receive an achievement and be entered to win a voucher.
 
-In addition, as the questionnaire was promoted through the CS141 module, to prevent unintentional undue pressures to complete the survey it was made clear that the questionnaire had no impact on students’ marks, and that before or after test performance would not be shared, and would not be analysed alongside any personal data.
+A support email address was made available in case respondents had questions or concerns, or wished to exercise any of their data rights. No questions or concerns were raised through this.
 
-Analytics data is only collected on the type inference tool website. As with completing the questionnaire, use of the website is entirely voluntary. The data collected is anonymised and as such under PECR and GDPR no disclaimer is necessary as the data is not considered ‘personal’. However, to follow best practice the website does have a disclaimer, informing users “Usage data such as button clicks and evaluated expressions may be collected to evaluate and improve the tool.” In addition, the analytics tool follows best practice, obeying the “Do not track” user settings in browsers and collecting only minimal usage data to understand user behaviour and nothing more. Data is automatically deleted after 90 days, and is stored securely. The analytics tool was specifically built with privacy in mind, to overcome the limitations of existing platforms as discussed in the design chapter.
+In addition, as the questionnaire was promoted through the CS141 module, to prevent unintentional undue pressures to complete the questionnaire it was made clear that the questionnaire had no impact on students’ marks, and that before or after test performance would not be shared, and would not be analysed alongside any personal data.
+
+Analytics data is only collected on the type inference tool website. As with completing the questionnaire, use of the website is entirely voluntary. The data collected is anonymised and as such under PECR and GDPR no disclaimer is necessary as the data is not considered ‘personal’. However, to follow best practice the website does have a disclaimer, informing users “Usage data such as button clicks and evaluated expressions may be collected to evaluate and improve the tool.” In addition, the analytics tool follows best practice, obeying the “Do not track” user settings in browsers and collecting only minimal usage data to understand user behaviour and nothing more. Data is automatically deleted after 90 days, and is stored securely. The analytics tool was specifically built to overcome the limitations of existing platforms regarding user privacy.
 
 \chapter{Project Management}\label{id:h.3j8xp631ygy}
 
@@ -1557,14 +1671,16 @@ The approach provided working software early and new versions frequently, as for
 
 As the project is an individual one, no coordination between developers is necessary. This reduces the need to precisely plan and document how the components will integrate with each other, and the order components need to be delivered in. Therefore, waterfall or other heavily plan-based methods would not have been beneficial over agile methods.
 
-Automated unit, component and integration tests were written to cover each module. Good tests not only catch bugs, but allow for significant refactors as they ensure the software still functions correctly. This supports change, key to the flexible agile software development approach. Tests can also act as proof that software requirements have been met, useful for my project supervisor to see progress made and for verifying the functionalities of the libraries.
+Automated unit, component and integration tests were written to cover each package. Good tests not only catch bugs, but allow for significant refactors as they ensure the software still functions correctly. This supports change, key to the flexible agile software development approach. Tests can also act as proof that software requirements have been met, useful for my project supervisor to see progress made and for verifying the functionalities of the libraries. For example, an automated test for the web application, which ensures the front-end integrates with the inference algorithm to display the correct result, is written:
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=1.000\linewidth]{images/image18.png}
-  \caption{An automated test for the web application, which ensures the front-end integrates with the inference algorithm to display the correct result.}
-\end{figure}
-
+\begin{minted}[breaklines]{typescript}
+test('updates after clicking odd 5 sample', () => {
+  const screen = render(<Main />);
+  expect(screen.queryByText('Bool')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByText('odd 5'));
+  expect(screen.queryByText('Bool')).toBeInTheDocument();
+});
+\end{minted}
 Git was used for version control, as it is robust, well-used and familiar to me. Version control allows rolling back to previous working versions of the software if necessary, and acts as a change log of how the project has evolved. While this was not used, being able to do so allowed making potentially drastic changes with confidence, which could not have been done without version control. Git also makes diffing versions of the code and reports easy, so my supervisor could easily determine what has changed since last view.
 
 GitHub was used for git hosting, which allowed me to easily sync changes between machines, and allowed sharing the code with my supervisor easily. GitHub also acted as an external backup of the code. This ensures my work would not be lost if my personal computer was. However, a bad force push could theoretically cause data loss, so at major milestones I stored snapshots of the code on Google Cloud Platform (avoiding AWS and Azure to maximise resiliency, as GitHub runs on a combination of the two).
@@ -1585,24 +1701,34 @@ Weekly supervisor meetings during term-time and the Easter holidays kept my supe
 
 \chapter{Conclusions}\label{id:h.90axtam6qk9n}
 
-Static typing eliminates runtime type errors, acts as a form of documentation, and supports IDEs in increasing developer productivity. Specifying types manually is time-consuming, so many languages implement type inference which allows types to be determined automatically. Understanding this type inference can help programmers debug their code and use types more effectively in their programs.
+The project is a success. We presented OTTIE, a teaching tool for type inference that visualises the steps of common Hindley-Milner type inference algorithms \W, \W’ and \M\ on user-entered expressions. Its design overcomes issues found in existing type inference resources, ensuring OTTIE is an effective teaching resource. This effectiveness is proven in its evaluation, which analyses responses to a questionnaire and analytics data. The questionnaire's open-ended responses show users think that ``the step by step breakdown is really well explained'', and before and after tests show that using the tool improves students' understanding of type and type inference, no matter the students' previous experience. Analytics data confirms users are able to use the tool, and suggests users are able to interpret its results to debug type-errors.
 
-In this project we present a teaching tool for type inference, that visualises the steps common type inference algorithms \W, \W’ and \M\ take on the Hindley-Milner system. Its design strives to overcome issues found in exploring existing type inference resources, ensuring the tool is a useful and long-lasting teaching resource.
+As well as OTTIE, the project has resulted in several TypeScript libraries for type inference relevant to future work. These offer an implementation of key type inference concepts and algorithms consistent with their formal definitions. Extensive testing ensures the correctness of critical library functions, which allowed for the several significant refactorings that took place to reach the final code's structure.
 
-The tool is composed of several TypeScript modules that support a React web application running entirely in the browser. The type inference algorithms are implemented following their formal definitions, using helper functions from a language core. Each module is extensively tested to ensure correctness, which allowed for the several significant refactorings that took place to reach the final code's structure.
+In addition to its impressive evaluation results and useful output artifacts, the project was also successful in achieving all of its objectives and completing all suggested extensions set out in the original specification. However, it could still be taken further with significant potential for future work.
 
-The project's success as a teaching tool is evaluated by examining responses to a questionnaire and exploring analytics data. This questionnaire’s open-ended responses show users think that “the step by step breakdown is really well explained”, and the before and after tests show that using the tool improves students' understanding of type and type inference, no matter the students' previous experience. Analytics data confirms users are able to use the tool, and suggests users are able to interpret its results to debug type-errors.
+\section{Future work}
 
-The project was also successful in achieving all of its objectives and completing all potential extensions set out in the original specification. However, it could be extended further to add the additional features requested by users through the questionnaire. These include supporting performing inference in custom contexts, and introducing a tutorial page which explains the Hinldey-Milner type system to users more gradually. In addition to these suggestions, as the libraries work independently of the tool's web application, completely different applications could be built relating to type inference allowing for different perspectives with perhaps a more quiz-like gamified experience.
+Future projects could increase the scope of the material covered by the teaching tool, or use the foundational libraries to create entirely different applications. Some possible use cases are given as suggestions.
+
+One possible extension would be to support the syntax and type system of a common programming language. This would improve its usefulness for university modules targeting the chosen language, and for developers using the language. For Haskell, this would need to cover the extensions it makes to Hindley-Milner such as adding type classes like functors, applicatives and monads. Alternative type inference algorithms, such as OutsideIn(X), are likely to be necessary to support such a system.
+
+In a similar vein, substantially different theoretical infernece algorithms with different type systems could be interesting to implement and explain. For example, bidirectional type inference by \cite{ref38} or local type inference by \cite{ref39} work on languages and type systems similar to HM. This would allow users to compare alternative approaches to programming language design and type inference, making this research more accessible to more general computer scientists.
+
+Finally, the libraries could be used to create an entirely different application. This could introduce $\lambda$-calculus to a more general audience in stages, similar to CodeCademy\footnote{\href{https://www.codecademy.com/}{https://www.codecademy.com/}} or FreeCodeCamp\footnote{\href{https://www.freecodecamp.org/learn/}{https://www.freecodecamp.org/learn/}}, and build up to type inference and more advanced concepts. Alternatively, this could be a gamified experience based around, similar in style to CSS Diner\footnote{\href{https://flukeout.github.io/}{https://flukeout.github.io/}} but for types or type inference.
 
 \chapter*{Acknowledgements}\label{id:h.xqaef57orpsv}
+\addcontentsline{toc}{chapter}{Acknowledgements}
 
 This project would not have been possible without the support of my supervisor, Michael Gale. His feedback on drafts and answers to my many questions on type inference have been invaluable throughout.
 
-The detailed evaluation of the tool is a result of the many kind volunteers who offered to try the application and complete the questionnaire. Thanks are due to all those who used the tool, and in particular to any who provided feedback on how it could be improved.
+OTTIE's detailed evaluation of is a result of the many kind volunteers who offered to try the application and complete the questionnaire. Thanks are due to all those who used the tool, and in particular to any who provided feedback on how it could be improved.
 
 This document was typeset using a derivative of the CS310 starter pack\footnote{\href{https://github.com/mbg/cs310}{https://github.com/mbg/cs310}} by Michael Gale, licensed under CC BY 4.0. Parts of the introduction and project management sections of this report are adapted from my project specification and progress report.
 
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
 \bibliographystyle{./plainnat}
 \bibliography{./index}
 
