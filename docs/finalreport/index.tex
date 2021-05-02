@@ -192,30 +192,34 @@ NiMo \citep{ref8} is a graphical programming language related to functional data
 
 \section{Objectives}
 
-The goal of this project is to develop a system to visualise the type inference process that improves undergraduate students' knowledge of it. This system is named OTTIE, the \textit{Online Teaching Type Inference Environment}.
+The goal of this project is to develop a system to visualise the type inference process, in order to improve undergraduate students' knowledge of it.
 
-To achieve this, we create and evaluate a teaching resource that explains how type inference algorithms work for functional languages based on the Hindley-Milner type system. An interactive web application allows students to enter custom expressions and view the results of a type inference algorithm, along with step-by-step explanations of how the algorithm determined that result. This is particularly useful in the context of modules teaching functional languages such as Haskell which perform similar type inference.
+To achieve this, we create and evaluate OTTIE, the \textit{Online Teaching Type Inference Environment}. OTTIE is an interactive web application that explains how type inference algorithms work for functional languages based on the Hindley-Milner type system. It allows students to enter custom expressions and view the results of a type inference algorithm, along with step-by-step explanations of how the algorithm determined that result. This is particularly useful in the context of modules teaching functional languages such as Haskell which perform similar type inference.
 
-This is broken down into three main objectives: to understand type inference research and implement key algorithms, to build a web application that allows users to enter expressions and view the results of a type inference algorithm, and to evaluate the effectivness of this web application as a teaching tool.
+The project is broken down into three main objectives: to understand type inference research and implement key algorithms, to build a web application, OTTIE, that allows users to enter expressions and view the results of a type inference algorithm, and to evaluate the effectivness of it as a teaching tool.
 
-The first objective, to understand the research into type inference and implement key type inference algorithms, requires a good grasp on the basics of types and type systems, as well as related mathematical background. We focus primarily on type inference in the Hindley-Milner type system as it is a simple starting point in the world of type systems that acts as the basis for languages like ML and Haskell, and has a large amount of literature explaining and analysing it.
+The first objective, to understand the research into type inference and implement key type inference algorithms, requires a good grasp on the basics of types and type systems, as well as related mathematical background. We focus primarily on type inference in the Hindley-Milner type system as it is a simple starting point in the world of type systems that acts as the basis for languages like ML and Haskell, and has a large amount of literature explaining and analysing it. Hindley-Milner type inference is discussed in \cref{id:h.admfqf7bhkct} and its implementation is detailed in \cref{id:h.flyu66glh76t}.
 
-The second objective, requires the design, implementation and testing of a web application and its associated depedencies. The web application must solve issues with the existing related work identified as well as other resources explaining type inference. Its key features can be specified as requirements, listed with their corresponding MoSCoW priorities:
+The second objective requires the design, implementation and testing of a web application and its associated depedencies. Its design and implementation are explained in chapters \ref{id:h.7ggvdxb04tzm} and \ref{id:h.igepudpadp49} respectively. The web application must solve issues with the existing related work identified as well as other resources explaining type inference. Its key features can be specified as requirements, listed with their corresponding MoSCoW priorities:
 
 \begin{enumerate}
-  \item It is accessible from a web-browser and is compatible with common browsers (must have)
-  \item It is fast and easy-to-use (should have)
-  \item It works without internet access (could have)
-  \item It accepts an expression language that supports all key constructs from the Hinldey-Milner type system (must have)
+  \item It accepts an expression language that supports all key constructs from the Hindley-Milner type system (must have)
   \item It displays the corresponding type to the user when a correctly-typed expression is entered (must have)
-  \item It explains of how a type was inferred when a user enters a:
+  \item It explains how a type was inferred with step-by-step instructions when a user enters a:
     \subitem correctly-typed expression (must have)
     \subitem incorrectly-typed expression (should have)
+  \item It provides instructions on how to use the tool (should have)
+  \item It offers a number of examples for users to try (should have)
+  \item It visualises a parsed representation of the users expression (should have)
+  \item It offers a choice of type inference algorithms (could have)
+  \item It is accessible from and compatible with most web-browsers (must have)
+  \item It works without internet access (could have)
+  \item It returns results in under a second for most queries (should have)
 \end{enumerate}
 
-Automated tests verify that functional requirements have been met, however cannot ensure users find the application useful or that OTTIE is effective in improving students' understanding of type inference.
+Automated tests verify that functional requirements have been met. However, these cannot ensure users find the OTTIE useful or that it is effective in improving students' understanding of type inference.
 
-This brings us onto the third and final objective, evaluating the effectiveness of OTTIE as a teaching resource. To prove it is effective, we construct an evaluation methodology to determine what effect using the tool has on students' understanding of type inference.
+This therefore brings us onto the third and final objective, evaluating the effectiveness of OTTIE as a teaching resource. To determine whether it is effective, we construct an evaluation methodology to measure what effect using the tool has on students' understanding of type inference. This involves a before and after test on type inference as well as open-ended questions on how users find the tool. In addition, we evaluate OTTIE using analytics data that shows how users interact with the tool. The results of this evaluation are given in chapter \ref{id:h.e6letww4nhn0}.
 
 \chapter{Background}\label{id:h.ebjyqi73zdyo}
 
@@ -310,7 +314,7 @@ $$
 $$
 \vspace{0cm} % I don't know why this works but it does
 
-For a type to be valid all functions must be fully applied, unlike expressions where the final expression may be a function. As with expressions, we can again assume a global context that binds variables like $Bool$ and $Int$. In Hindley’s original paper only $\rightarrow$ was considered as a type function (i.e. $F = \{ \rightarrow \}$), however here we explore several type functions that have been found useful in practice.
+For a type to be valid all functions must be fully applied, unlike expressions where the final expression may be a function. As with expressions, we can again assume a global context that binds variables like $Bool$ and $Int$. In Hindley’s original paper only $\rightarrow$ was considered as a type function (i.e. $F = \{ \rightarrow \}$). Here we explore several type functions that have been found useful in practice.
 
 The type function we've already been using is $\rightarrow$ (the \textit{function} type function). It takes two types as arguments and represents a function from the first type to the second. A function from $Int$ to $Bool$ is represented by $(\rightarrow)\ Bool\ Int$ in prefix notation, although would more commonly be written infix as $Bool \rightarrow Int$.
 
@@ -354,7 +358,7 @@ The difference generalisation makes can be seen by comparing similar \texttt{let
 
 Hindley-Milner is the basis for the type system of Standard ML \citep{ref15}, which OCaml and F\# are related to, and was the basis of the type system in Haskell \citep{ref16}. It has influenced the development of Rust and Swift, and more generally type inference is present in many more languages including Java, JavaScript and C++.
 
-Haskell's type system has since been extended with type-class constraints \citep{ref17}, functional dependencies \citep{ref18}, and generalised algebraic data types (GADTs) \citep{ref19}. Haskell’s inference engine was moved onto a new engine, OutsideIn(X), when GHC 7.2 was released November 2011 after \cite{ref20} proposed a solution to the issues with Hindley-Milner’s poor performance on large programs and difficulty inferring expressions without principal types that arise with type-class constraints and GADTs. This stopped Haskell automatically generalising variables bound by \texttt{let} expressions after \cite{ref21} argued that generalisation is hard in type inference engines other than HM and the feature was rarely used in practice, with the change only affecting 0.13\% lines of the GHC core libraries. This change does however take it further away from performing HM-like type inference.
+Haskell's type system has since been extended with type-class constraints \citep{ref17}, functional dependencies \citep{ref18}, and generalised algebraic data types (GADTs) \citep{ref19}. Haskell’s inference engine was moved onto a new engine, OutsideIn(X), when GHC 7.2 was released November 2011 after \cite{ref20} proposed a solution to the issues with Hindley-Milner’s poor performance on large programs and difficulty inferring expressions without principal types that arise with type-class constraints and GADTs. This stopped Haskell automatically generalising variables bound by \texttt{let} expressions after \cite{ref21} argued that generalisation is hard in type inference engines other than HM and the feature was rarely used in practice, with the change only affecting 0.13\% lines of the GHC core libraries. This change separates Haskell's type system more from Hindley-Milner.
 
 Rust’s compiler, rustc, previously used a variant of HM for type inference. However, \cite{ref22} proposed a new scheme which was later implemented to simplify how the compiler reasoned about types. Similarly to Haskell’s move to OutsideIn(X), the new type inference reduces flexibility in some edge cases, although practically this is rare. Both rustc and Rust’s core libraries compiled under the new type inference scheme without changes. Later on, \cite{ref23} developed chalk, a library designed for use in rustc to help implement Rust’s generics. This library makes heavy use of unification, a key component of many HM type inference algorithms.
 
@@ -430,7 +434,7 @@ Any number of substitutions may be applied to a type. For example, given two sub
 Substitutions may be combined to have the same effect as applying them in order to an type $\rho$. For example, with substitutions $S_1 = \{ t0 \mapsto t2,\ t1 \mapsto t3 \}$ and $S_2 = \{ t0 \mapsto t1 \}$ again, we have:
 $$\mathit{combine}(S_1,\ S_2)(\rho) = S_1(S_2(\rho)) = \{ t0 \mapsto t3,\ t1 \mapsto t3 \}(\rho)$$
 
-As application is not commutative, the order substitutions are combined in matters, i.e. $\mathit{combine}(S_1,\ S_2)$ does not necessarily equal $\mathit{combine}(S_2,\ S_1)$. Combining substitutions is however associative, as:
+As application is not commutative, the order substitutions are combined in matters, i.e. $\mathit{combine}(S_1,\ S_2)$ does not necessarily equal $\mathit{combine}(S_2,\ S_1)$. Combining substitutions is associative, as:
 \begin{align*}
   \mathit{combine}(S_1,\ \mathit{combine}(S_2,\ S_3))(\rho) & = S_1(S_2(S_3(\rho)))\\& = \mathit{combine}(\mathit{combine}(S_1,\ S_2),\ S_3)(\rho)
 \end{align*}
@@ -660,7 +664,7 @@ $$$$
 \end{array}
 $$
 
-\M\ has some similarities to \W, however where \W\ applies unification in function application, \M\ instead pushes this down the tree and performs unification in the leaf nodes and function abstraction.
+\M\ has some structural similarities to \W. However, where \W\ applies unification in function application, \M\ instead pushes this down the tree and performs unification in the leaf nodes and function abstraction.
 
 In rules (1) and (2) for constant and variable expressions, we are given an expected type $\tau_e$ and are verifying it can unify with the literal constant’s type or the type from the context respectively. Unifying in this way returns the type in the substitution, for example with a \texttt{con} expression:
 
@@ -687,7 +691,7 @@ Finally, let expressions (5) infer the type of their parameter $e_1$ with a new 
 
 \subsection{Limitations}
 
-These type inference algorithms do have limitations. They all sometimes produce poor type error messages; \W\ often detects errors late, highlighting too large of a subexpression to be useful and \M\ often detects too specific of a term without context as to what original definition it violates. Algorithm \W\ has the left-to-right bias which \W' attempts to correct for, however \W' can sometimes exacerbate the problem by highlighting large subexpressions. Both overly-specific and overly-vague error messages make it difficult for the programmer to understand how to fix type errors.
+These type inference algorithms do have limitations. They all sometimes produce poor type error messages; \W\ often detects errors late, highlighting too large of a subexpression to be useful and \M\ often detects too specific of a term without context as to what original definition it violates. Algorithm \W\ has the left-to-right bias which \W' attempts to correct for, but in doing so can sometimes exacerbate the problem by highlighting large subexpressions. Both overly-specific and overly-vague error messages make it difficult for the programmer to understand how to fix type errors.
 
 To improve error messaging, hybrid or constraint-based algorithms along with heuristics are often used in practice to provide more informative error messages. Reducing the size of the amount inferred at once can help make errors more precise. For example, Apple’s Swift uses a bi-directional type inference algorithm on single statements \citep{ref24}.
 
@@ -715,7 +719,7 @@ Formal resources generally cover the most generic and widely-applicable concepts
 
 Programming language documentation covers type inference in the context of a specific language, with all examples found giving code examples along with text explaining what the code is doing. Generally this documentation explains the features of type inference present in the language, rather than the wider concepts, although does so in a directly-applicable way. Some languages also explain language-specific concepts in detail, such as how type inference works with Java’s generics or TypeScript’s functions. They are also tailored to how languages are used, with Java’s documentation exploring how type inference is applied in object-oriented programming and TypeScript giving examples of type inference with web APIs. They often do not discuss how the type inference algorithms determine the types, but rather just what the types are and roughly the rules of the type system. However, they do usually give sufficient examples to understand the type system, with languages such as TypeScript, Java and Scala including error cases and explanations on how to fix the type errors. These error examples are particularly helpful as they show how a programmer might go about debugging and fixing type errors found in their program.
 
-Informal resources generally discuss personal reflections on what the author has learnt about type inference or they heavily focus on type inference's application within a specific language the author is familiar with. These are generally the least widely-applicable, and often only cover a small part of a single programming language, however do so in great detail and often giving practical advice about work related to their subject matter.
+Informal resources generally discuss personal reflections on what the author has learnt about type inference or they heavily focus on type inference's application within a specific language the author is familiar with. These are generally the least widely-applicable, and often only cover a small part of a single programming language, but do so in great detail and often give practical advice about work related to their subject matter.
 
 \subsection{Accessibility}
 
@@ -766,7 +770,7 @@ The properties of existing resources are summarised in the following table:
   \hline
   \textbf{Formal\newline resources} & Explains how type inference works at a general level. & Uses complex notation and requires significant background reading, and is sometimes brief at the expense of clarity. & Few errors, although errors that do exist can be hard to correct. Usually relevant for a long time. \\
   \hline
-  \textbf{Informal resources} & Contains practical tips, however usually very specific and irrelevant to many programmers. & Written in plain language with many code samples. & Inaccuracies are common, and often go undetected or unresolved. Can become outdated quickly. \\
+  \textbf{Informal resources} & Contains practical tips, but often very specific and irrelevant to many programmers. & Written in plain language with many code samples. & Inaccuracies are common, and often go undetected or unresolved. Can become outdated quickly. \\
   \hline
 \end{tabularx}\end{adjustbox}\\
 
@@ -834,7 +838,7 @@ A web interface was chosen over a desktop program to maximise compatibility acro
 
 While access to certain APIs is more limited in a web application compared to native applications, this did not limit any of the application's proposed features so was not a concern.
 
-A native application would be likely to have better performance (in terms of computation time), however it was believed that the web application would not encounter serious performance problems on reasonable inputs. In later performance testing few concerns were raised about the applications performance, and those that were could be mitigated (as detailed in the implementation chapter). Feedback from user testing supports this, with one respondent commenting that the application felt ``very fast''.
+While a native application would be likely to have better performance (in terms of computation time), it was believed that the web application would not encounter serious performance problems on reasonable inputs. In later performance testing few concerns were raised about the applications performance, and those that were could be mitigated (as detailed in the implementation chapter). Feedback from user testing supports this, with one respondent commenting that the application felt ``very fast''.
 
 \section{Architecture}\label{id:h.l33hnjbawceh}
 
@@ -862,7 +866,7 @@ The packages are all written in the same language, so that they are compatible a
 
 TypeScript is a statically-typed language which transcompiles to JavaScript that can be run in the browser. As a typed language, it provides the benefits of types listed earlier, which is important when dealing with a codebase with several packages. TypeScript was therefore chosen over plain JavaScript, which lacks compile-time typechecking.
 
-Elm, CoffeeScript, PureScript and Dart are other languages that compile to JavaScript, however they lack as rich package systems which can provide useful utilities and dependencies. Furthermore, Dart and Elm are largely focused on the presentation of data, so while it would be possible to write reusable independent libraries for type inference in them, it would not be easy.
+Elm, CoffeeScript, PureScript and Dart are other languages that compile to JavaScript. However, they lack as rich package systems which can provide useful utilities and dependencies. Furthermore, Dart and Elm are largely focused on the presentation of data, so while it would be possible to write reusable independent libraries for type inference in them, it would not be easy.
 
 Of the browser-compatible languages, TypeScript is the second most used after JavaScript itself (according to the StackOverflow developers survey\footnote{\underline{\href{https://insights.stackoverflow.com/survey/2020\#technology-programming-scripting-and-markup-languages}{https://insights.stackoverflow.com/survey/2020}}}) and so developing and publishing packages in TypeScript may be useful for a wider audience.
 
@@ -913,7 +917,7 @@ Finally, depending on both the language core and the type inference algorithms i
 \end{figure} \par}
 The web application uses the React framework. Using a framework improves the structure of the code, as the application can be broken down into separate, independent components. These components can be reused to minimise code duplication, and can be individually unit tested with many testing libraries developed specifically for different frameworks. As well as this, using a framework in combination with a module bundler such as webpack makes importing and depending on other packages (such as the language core and type inference algorithms) simple. And in combination with a transcompiler that converts modern JavaScript to be backwards compatible, such as Babel, the application can be made to work for users with older browsers.
 
-React was chosen over the alternative web frameworks Vue, Angular and Svelte. Vue and Angular are other popular frameworks, however for a single page application they are overly complex. In particular, Angular's component and dependency injection system, while useful in very large projects, would add significant unnecessary overhead to developing the system. The Svelte framework is different to React, Vue and Angular in that it avoids complex internal models, but instead compiles directly to simple JavaScript. This gives it better performance, but makes it harder to integrate with existing libraries and tooling. In addition, while Svelte supports TypeScript, this support was only added recently (July 2020) and is much weaker than React’s TypeScript support. Vue, Angular and Svelte are all significantly less popular than React (which is the most popular JavaScript framework). This means they have fewer available compatible packages and less community-developed documentation such as tutorials, guides or forums. In particular, Svelte is a new and much less widely-used framework, with less than 2,000 questions on StackOverflow compared to React’s nearly 300,000.
+React was chosen over the alternative web frameworks Vue, Angular and Svelte. Vue and Angular are other popular frameworks, although for a single page application they are overly complex. In particular, Angular's component and dependency injection system, while useful in very large projects, would add significant unnecessary overhead to developing the system. The Svelte framework is different to React, Vue and Angular in that it avoids complex internal models, but instead compiles directly to simple JavaScript. This gives it better performance, but makes it harder to integrate with existing libraries and tooling. In addition, while Svelte supports TypeScript, this support was only added recently (July 2020) and is much weaker than React’s TypeScript support. Vue, Angular and Svelte are all significantly less popular than React (which is the most popular JavaScript framework). This means they have fewer available compatible packages and less community-developed documentation such as tutorials, guides or forums. In particular, Svelte is a new and much less widely-used framework, with less than 2,000 questions on StackOverflow compared to React’s nearly 300,000.
 
 Create React App sets up the initial structure of the web application. Its starter template includes the required dependencies to build a React application, a variant of which also has TypeScript support. Using Create React App rather than starting from scratch allows the project to focus on developing the novel type inference teaching tool, rather than being too concerned with the setup of the tooling. However, using Create React App does limit how the build can be configured without choosing to ``eject'' (an irreversible process that makes the implicit build tooling explicit, but results in more maintenance). For example, while it installs Webpack and Babel to bundle resources and transcompile to JavaScript compatible with older browsers respectively, their corresponding configurations cannot be edited without an ``eject''.
 
@@ -1066,7 +1070,7 @@ Once constructed, properties should be immutable. Immutability prevents properti
 {\centering \begin{figure}[h!]
   \centering
   \includegraphics[width=\linewidth]{images/immutability.pdf}
-  \caption{To `change' property 1 on Object A, we create a new Object B, however can reuse the reference for property 2 as we know it will not change and so is safe to be shared}
+  \caption{To `change' property 1 on Object A, we create a new Object B. Note we can reuse the reference for property 2 as we know it will not change and so is safe to be shared.}
 \end{figure} \par}
 
 Finally, immutability can improve performance when using front-end frameworks like React, which is used to implement the web application. With immutability, front-end frameworks can be sure objects have not changed on subsequent renders if they have referential equality (they point to the same object). Without immutability, objects may have changed between render calls so the front-end framework must re-render the page or perform deep value equality comparisons which require traversing the entire object. These are both potentially costly operations, so avoiding them through immutability brings performance benefits.
@@ -1149,9 +1153,9 @@ class PolyType {
   /* constructor and toString methods */
 }
 \end{minted}
-\mintinline{text}{PolyType}'s \mintinline{text}{quantifiedVars} property could be modelled with \mintinline{text}{TypeVar[]}, however for simplicity \mintinline{text}{string[]} was chosen as the methods on these type variables are never called.
+\mintinline{text}{PolyType}'s \mintinline{text}{quantifiedVars} property could be modelled with \mintinline{text}{TypeVar[]}. However, for simplicity \mintinline{text}{string[]} was chosen as the methods on these type variables are never called.
 
-The constructors are all trivial, and simply set the corresponding properties in the object. The \mintinline{text}{toString} methods are fairly simple for \mintinline{text}{TypeVar} and \mintinline{text}{PolyType}, however \mintinline{text}{TypeFuncApp} has additional logic to pretty-format some types. For example it outputs types like $[(Bool,\ Int)] \rightarrow Int$, rather than $\rightarrow ([]\ (,\ (Bool)\ (Int)))\ (Int)$ which would be the result if it treated all type functions equivalently in prefix notation with explicit bracketing.
+The constructors are all trivial, and simply set the corresponding properties in the object. The \mintinline{text}{toString} methods are fairly simple for \mintinline{text}{TypeVar} and \mintinline{text}{PolyType}, while \mintinline{text}{TypeFuncApp} has additional logic to pretty-format some types. For example it outputs types like $[(Bool,\ Int)] \rightarrow Int$, rather than $\rightarrow ([]\ (,\ (Bool)\ (Int)))\ (Int)$ which would be the result if it treated all type functions equivalently in prefix notation with explicit bracketing.
 
 \subsubsection{Contexts and substitutions}\label{id:h.ux3btyb2wvh8}
 
@@ -1327,7 +1331,7 @@ This implementation of the type inference algorithms as standalone functions to 
 
 An initial implementation extended the AST node classes with type metadata, helper functions and inference methods. The inference algorithms then would map ASTs to these extended models and call the inference method on the root node. However, this strategy resulted in a lot of code duplication (especially in helper methods) and was difficult to test. In addition, debugging problems was difficult as it was tougher to follow the call stack in the class methods. Finally, the significant difference between a class-based implementation and the way the algorithms are commonly presented made spotting deviations from the algorithms specifications difficult.
 
-A later implementation moved closer to the current implementation but inlined many of the simpler helper functions. This was slightly more performant than the final implementation, however, inlined functions reduced code readability and removed the ability to unit test helper functions on their own. While closer to the formal algorithm specifications, it did make detecting differences between the implementation and the specification harder.
+A later implementation moved closer to the current implementation but inlined many of the simpler helper functions. This was slightly more performant than the final implementation, but the inlined functions reduced code readability and removed the ability to unit test helper functions on their own. While closer to the formal algorithm specifications, it did make detecting differences between the implementation and the specification harder.
 
 As the inference algorithms implement the same interface they can share high level tests, as we expect the same result from each of them. A comprehensive test suite is packaged alongside the implementation, covering a range of expressions and edge cases, including incorrectly-typed expressions. To help with this, custom assertion matchers were added to the testing framework.
 
@@ -1703,9 +1707,9 @@ Weekly supervisor meetings during term-time and the Easter holidays kept my supe
 
 The project is a success. We presented OTTIE, a teaching tool for type inference that visualises the steps of common Hindley-Milner type inference algorithms \W, \W’ and \M\ on user-entered expressions. Its design overcomes issues found in existing type inference resources, ensuring OTTIE is an effective teaching resource. This effectiveness is proven in its evaluation, which analyses responses to a questionnaire and analytics data. The questionnaire's open-ended responses show users think that ``the step by step breakdown is really well explained'', and before and after tests show that using the tool improves students' understanding of type and type inference, no matter the students' previous experience. Analytics data confirms users are able to use the tool, and suggests users are able to interpret its results to debug type-errors.
 
-As well as OTTIE, the project has resulted in several TypeScript libraries for type inference relevant to future work. These offer an implementation of key type inference concepts and algorithms consistent with their formal definitions. Extensive testing ensures the correctness of critical library functions, which allowed for the several significant refactorings that took place to reach the final code's structure.
+As well as OTTIE itself, the project has resulted in several TypeScript libraries that can be reused independently of OTTIE in future work. These offer an implementation of key type inference concepts and algorithms consistent with their formal definitions. Extensive testing ensures the correctness of critical library functions, which allowed for the several significant refactorings that took place to reach the final code's structure.
 
-In addition to its impressive evaluation results and useful output artifacts, the project was also successful in achieving all of its objectives and completing all suggested extensions set out in the original specification. However, it could still be taken further with significant potential for future work.
+In addition to its positive evaluation results and useful output artifacts, the project achieves all of its objectives and completes all of its suggested extensions set out in the original specification. However, it could still be taken further with significant potential for future work.
 
 \section{Future work}
 
