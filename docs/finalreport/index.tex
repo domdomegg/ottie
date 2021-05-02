@@ -196,11 +196,11 @@ The goal of this project is to develop a system to visualise the type inference 
 
 To achieve this, we create and evaluate OTTIE, the \textit{Online Teaching Type Inference Environment}. OTTIE is an interactive web application that explains how type inference algorithms work for functional languages based on the Hindley-Milner type system. It allows students to enter custom expressions and view the results of a type inference algorithm, along with step-by-step explanations of how the algorithm determined that result. This is particularly useful in the context of modules teaching functional languages such as Haskell which perform similar type inference.
 
-The project is broken down into three main objectives: to understand type inference research and implement key algorithms, to build a web application, OTTIE, that allows users to enter expressions and view the results of a type inference algorithm, and to evaluate the effectivness of it as a teaching tool.
+The project is broken down into three main objectives: to understand type inference research and implement key algorithms, to build a web application, OTTIE, that allows users to enter expressions and view the results of a type inference algorithm, and to evaluate the effectiveness of it as a teaching tool.
 
 The first objective, to understand the research into type inference and implement key type inference algorithms, requires a good grasp on the basics of types and type systems, as well as related mathematical background. We focus primarily on type inference in the Hindley-Milner type system as it is a simple starting point in the world of type systems that acts as the basis for languages like ML and Haskell, and has a large amount of literature explaining and analysing it. Hindley-Milner type inference is discussed in \cref{id:h.admfqf7bhkct} and its implementation is detailed in \cref{id:h.flyu66glh76t}.
 
-The second objective requires the design, implementation and testing of a web application and its associated depedencies. Its design and implementation are explained in chapters \ref{id:h.7ggvdxb04tzm} and \ref{id:h.igepudpadp49} respectively. The web application must solve issues with the existing related work identified as well as other resources explaining type inference. Its key features can be specified as requirements, listed with their corresponding MoSCoW priorities:
+The second objective requires the design, implementation and testing of a web application and its associated dependencies. Its design and implementation are explained in chapters \ref{id:h.7ggvdxb04tzm} and \ref{id:h.igepudpadp49} respectively. The web application must solve issues with the existing related work identified as well as other resources explaining type inference. Its key features can be specified as requirements, listed with their corresponding MoSCoW priorities:
 
 \begin{enumerate}
   \item It accepts an expression language that supports all key constructs from the Hindley-Milner type system (must have)
@@ -324,7 +324,7 @@ The list type function is also very common, which given one type argument repres
 
 $Maybe$ is another type function commonly used in functional languages like Haskell. A $Maybe$ represents the optional presence of something, similar to Java’s \mintinline{java}{|Optional|} and C++’s \mintinline{c++}{|std::optional|}. Applied to a $Bool$ this may be written $Maybe\ Bool$, representing a wrapper around nothing or a boolean. In Java this would be represented with a generic as \mintinline{java}{|Optional<Boolean>|} and in C++ as \mintinline{c++}{|std::optional<bool>|}.
 
-A similar common type function is $Either$, which takes two type arguments and represents a wrapper around either one of the types. For example, an either for a boolean or integer is written $Either\ Bool\ Int$. This is particularly helpful for functions that may fail, as they might return a result or error. For example, a function that returns a integer result or an error message may have the return type $Either\ Int\ [Char]$.
+A similar common type function is $Either$, which takes two type arguments and represents a wrapper around either one of the types. For example, an either for a boolean or integer is written $Either\ Bool\ Int$. This is particularly helpful for functions that may fail, as they might return a result or error. For example, a function that returns an integer result or an error message may have the return type $Either\ Int\ [Char]$.
 
 Finally, tuples represent a fixed-length sequence of elements of specific types. Tuple constructors are a set of type functions representing a cross product of their type arguments, named $(,)$ for 2-tuples, $(,,)$ for 3-tuples, $(,,,)$ for 4-tuples and so on for different element lengths. A 3-tuple holding a boolean, integer and integer can be written in prefix notation as $(,,)\ Bool\ Int\ Int$. However instead tuples usually borrow mathematical syntax with parentheses and commas and would be written as $(Bool,\ Int,\ Int)$.
 
@@ -366,7 +366,7 @@ Apple's Swift language heavily uses type inference. It is implemented using a ``
 
 Microsoft's TypeScript is a statically typed language that uses type inference to improve readability and developer productivity (\cite{ref36}). Its type inference engine is configurable, allowing users to choose how strict the compiler should be. As TypeScript aims to maintain compatibility with JavaScript, a non-statically typed language. This results in certain trade-offs which sometimes allow runtime type errors to occur.
 
-For example, as accessing an array past a valid index returns \mintinline{text}{undefined} in JavaScript, so does in TypeScript. However, as typing all array accesses as potentially undefined would make handling these cases tedious TypeScript does not do this. In this undefined case, a runtime type error may be raised when using the undefined value.
+For example, as accessing an array past a valid index returns \mintinline{text}{undefined} in JavaScript, the same happens in TypeScript. However, as typing all array accesses as potentially undefined would make handling these cases tedious TypeScript does not do this. In this undefined case, a runtime type error may be raised when using the undefined value.
 
 \begin{minted}[breaklines]{typescript}
 const arr = [1, 2, 3];
@@ -425,7 +425,7 @@ Various type inference algorithms are available for the Hindley-Milner type syst
 
 Substitutions are a key concept from logic used by all three algorithms. These are maps from variables to terms. When applied to a value, the variables are substituted by their corresponding terms. In type inference, the variables are type variables, the terms are monotypes and values are types.
 
-Substitutions are represented with curly braces, with each entry separated by a comma and the variables and terms separated with an arrow. For example, the susbtitution $\{ t_0 \mapsto t_1,\ t_2 \mapsto (Int, Bool) \}$ would replace $t_0$ with $t_1$, and replace $t_2$ with $(Int, Bool)$. Applying it to the type $t_0 \rightarrow t_1 \rightarrow t_2$ would result in $t_1 \rightarrow t_1 \rightarrow (Int, Bool)$.
+Substitutions are represented with curly braces, with each entry separated by a comma and the variables and terms separated with an arrow. For example, the substitution $\{ t_0 \mapsto t_1,\ t_2 \mapsto (Int, Bool) \}$ would replace $t_0$ with $t_1$, and replace $t_2$ with $(Int, Bool)$. Applying it to the type $t_0 \rightarrow t_1 \rightarrow t_2$ would result in $t_1 \rightarrow t_1 \rightarrow (Int, Bool)$.
 
 When applying substitutions replacements are performed simultaneously, so each variable in the type may be mapped at most once. For example the substitution $S = \{ t_0 \mapsto t_1,\ t_1 \mapsto t_2 \}$ applied once to the type $t_0$, as $S(t_0)$ results in $t_1$, not $t_2$. Applying the substitution twice, $S(S(t_0))$ results in $t_2$.
 
@@ -774,7 +774,7 @@ The properties of existing resources are summarised in the following table:
   \hline
 \end{tabularx}\end{adjustbox}\\
 
-Studying existing resources helps identify the strengths and weaknesses of different approaches. Given that this project is a one-off piece of work and the end product may not be maintained indefinitely, research into the content, correctness and longevity of resources suggests that the focus should be on the more general type inference concepts rather than specific programming language features. OTTIE should support error cases, not just correctly-typed expressions. It should be reviewed by my project supervisor tested with users to identify errors that can be resolved before project completion. To aid accessibility text should be written in plain language, OTTIE should offer several insightful examples and the output should avoid overuse of complex notation.
+Studying existing resources helps identify the strengths and weaknesses of different approaches. Given that this project is a one-off piece of work and the end product may not be maintained indefinitely, research into the content, correctness and longevity of resources suggests that the focus should be on the more general type inference concepts rather than specific programming language features. OTTIE should support error cases, not just correctly-typed expressions. It should be reviewed by my project supervisor tested with users to identify errors that can be resolved before project completion. To aid accessibility, text should be written in plain language, OTTIE should offer several insightful examples and the output should avoid overuse of complex notation.
 
 \section{User interface design}
 
@@ -864,7 +864,7 @@ The downside to splitting the project up into several packages is the tooling is
 
 The packages are all written in the same language, so that they are compatible and easy to get working together. Additionally, using one typed language allows for type-checking across package interfaces to ensure API calls are valid and their results are used correctly. To write a modern web application, a JavaScript-compatible language is the obvious choice as it is supported and promoted by all major browsers. TypeScript was chosen for this for several reasons.
 
-TypeScript is a statically-typed language which transcompiles to JavaScript that can be run in the browser. As a typed language, it provides the benefits of types listed earlier, which is important when dealing with a codebase with several packages. TypeScript was therefore chosen over plain JavaScript, which lacks compile-time typechecking.
+TypeScript is a statically-typed language which transcompiles to JavaScript that can be run in the browser. As a typed language, it provides the benefits of types listed earlier, which is important when dealing with a codebase with several packages. TypeScript was therefore chosen over plain JavaScript, which lacks compile-time type checking.
 
 Elm, CoffeeScript, PureScript and Dart are other languages that compile to JavaScript. However, they lack as rich package systems which can provide useful utilities and dependencies. Furthermore, Dart and Elm are largely focused on the presentation of data, so while it would be possible to write reusable independent libraries for type inference in them, it would not be easy.
 
@@ -874,7 +874,7 @@ Lastly, my previous experiences with both TypeScript and the other languages inf
 
 \subsection{Language core}\label{id:h.hggmfighusoc}
 
-The base package, which all other packages depend on is the language core.
+The base package, which all other packages depend on, is the language core.
 
 The language core contains key models, which are used throughout the rest of the software. These models represent AST nodes, types, contexts, substitutions and other results from type inference algorithms. It also defines the interfaces for packages containing type inference algorithms.
 
@@ -904,7 +904,7 @@ On top of this language core are type inference algorithms \W, \W' and \M. Given
 
 Each type inference algorithm shares the same interface, allowing them to be used interchangeably. This means new algorithms conforming to this interface can be added to tools using the type inference algorithms, such as the web application, by simply changing the type inference library installed. Sharing the same interface also means that high-level tests that call only the common function signature and assert on the final type can be shared across all the inference algorithms as they should all return the same type result, even if they take different steps to get there. This makes the development of tests easier so more can be written, and asserting the final types are the same across a number of varied cases improves confidence that the algorithms are implemented correctly.
 
-Publishing the type inference algorithms separately helps keep the code clean and maintainable, and allows developers to only install the algorithms they need. While this does result in some code duplication, particularly between algorithm \W\ and \W', the benefits from keeping the packages small and easier to maintain individually make this trade-off worthwhile. Most of the common helper functions are already in the language core, which means the code duplication in the type inference packages is not excessive.
+Publishing the type inference algorithms separately helps keep the code clean and maintainable, and allows developers to only install the algorithms they need. While this does result in some code duplication, particularly between algorithms \W\ and \W', the benefits from keeping the packages small and easier to maintain individually make this trade-off worthwhile. Most of the common helper functions are already in the language core, which means the code duplication in the type inference packages is not excessive.
 
 \subsection{Web interface}\label{id:h.q67ivlz7h61r}
 
@@ -1422,19 +1422,19 @@ Usability inspection methods such as cognitive walkthroughs and heuristic evalua
 
 Usability benchmarking, where two applications are compared on the time or effort taken to complete a task, is difficult for OTTIE as there is no similar software to compare it against. Additionally, measuring the time required to reach a certain point in the application does not directly indicate how useful a teaching tool it is, particularly as most of the time spent on OTTIE is digesting the information presented rather than performing active UI actions. Rather than time to complete actions, the standard for benchmarking, a more useful measure would be that of time taken to reach a certain level of understanding. However, measuring this effectively is very challenging.
 
-A/B testing is used to compare two alternate software versions, for example given two websites with roughly equal traffic, recording which makes the most sales. It requires an easily measurable outcome and while analytics data may help with this, it is still hard to find a reliably measurable quantity. It is most effective with a very large numbers of users, otherwise errors or noise in the data can mask subtle effects or produce false positive results. However, before my evaluation it was unclear how many users would use the tool so this was risky. Finally, A/B testing gives results comparing two versions of the site, e.g. different ways of presenting the data. However, this would not meet the aims of the evaluation which tries to evaluate OTTIE as a whole.
+A/B testing is used to compare two alternate software versions, for example given two websites with roughly equal traffic, recording which makes the most sales. It requires an easily measurable outcome and while analytics data may help with this, it is still hard to find a reliably measurable quantity. It is most effective with a very large number of users, otherwise errors or noise in the data can mask subtle effects or produce false positive results. However, before my evaluation it was unclear how many users would use the tool so this was risky. Finally, A/B testing gives results comparing two versions of the site, e.g. different ways of presenting the data. However, this would not meet the aims of the evaluation which tries to evaluate OTTIE as a whole.
 
-Structured and unstructured interviews can both offer detailed feedback from users. Group interviews can allow participants to build on each others points, while individual interviews can dig deeper into the behaviour of a specific user. Walkthroughs of the software with users can give insight into what they find confusing or most useful, and surface problems that might not have been considered before. However, interviews with few users may be unrepresentative, and interviews with many users would be time-consuming and difficult to arrange, especially under COVID restrictions. Presenting and analysing the results of interviews also is difficult, especially for unstructured interviews.
+Structured and unstructured interviews can both offer detailed feedback from users. Group interviews can allow participants to build on each other's points, while individual interviews can dig deeper into the behaviour of a specific user. Walkthroughs of the software with users can give insight into what they find confusing or most useful, and surface problems that might not have been considered before. However, interviews with few users may be unrepresentative, and interviews with many users would be time-consuming and difficult to arrange, especially under COVID restrictions. Presenting and analysing the results of interviews also is difficult, especially for unstructured interviews.
 
 Using OTTIE directly with students during a lab session would target the correct audience for it and could generate a significant amount of useful feedback. However, its results are again hard to analyse. Additionally, with COVID restrictions in place labs were done remotely, which makes judging user reactions and engaging with users more difficult.
 
-Questionnaires are flexible, and are well-suited to the remote format imposed by COVID. They allow directing users to complete certain tasks and explain their behaviour, as well as asking general open-ended questions. This is similar to structured user interviews, but takes significantly less time for both parties as there is less administrative overhead for users (such as finding a timeslots and arranging a call), and an investigator does not need to be present. In addition, carefully designed questionnaires can output quantative results, as is done with the before and after tests in this evaluation. While questionnaires offer slightly less freedom than unstructured interviews, their benefits outweigh this drawback in this case.
+Questionnaires are flexible, and are well-suited to the remote format imposed by COVID. They allow directing users to complete certain tasks and explain their behaviour, as well as asking general open-ended questions. This is similar to structured user interviews, but takes significantly less time for both parties as there is less administrative overhead for users (such as finding a timeslots and arranging a call), and an investigator does not need to be present. In addition, carefully designed questionnaires can output quantitative results, as is done with the before and after tests in this evaluation. While questionnaires offer slightly less freedom than unstructured interviews, their benefits outweigh this drawback in this case.
 
-Using analytics data is similarly flexible, as any user interaction with the UI can be recorded. Reconstructing these into an event stream can easily show a user's journey, which can be reviewed to gain an understand of the user's thought process, like a walkthrough. Additionally, analytics measure real user behaviour without being affected by more artifical contexts such as in a formal interview. It requires no extra effort on behalf of the user beyond using OTTIE as they would normally, unlike having to respond to questionnaire questions or talk with an interviewer.
+Using analytics data is similarly flexible, as any user interaction with the UI can be recorded. Reconstructing these into an event stream can easily show a user's journey, which can be reviewed to gain an understanding of the user's thought process, like a walkthrough. Additionally, analytics measure real user behaviour without being affected by more artificial contexts such as in a formal interview. It requires no extra effort on behalf of the user beyond using OTTIE as they would normally, unlike having to respond to questionnaire questions or talk with an interviewer.
 
 \section{Questionnaire}\label{id:h.yqiowsgjmohq}
 
-The questionnaire was composed of three parts: a short test on types and type inference before using the application, introducing users to the application and asking usage questions, then a final test to see if student's performance improves after using OTTIE.
+The questionnaire was composed of three parts: a short test on types and type inference before using the application, introducing users to the application and asking usage questions, then a final test to see if a student's performance improves after using OTTIE.
 
 This addresses and allows for measurement against all three aims. OTTIE's performance on aims 1 and 2 are measured in the middle part, where users are asked to access the tool, enter input and interpret the results. Aim 3 is measured by looking at the relative difference in test results from before and after interacting with OTTIE.
 
@@ -1575,7 +1575,7 @@ Some less commonly raised feedback, for example making it clearer that the expre
 
 \subsection{Test performance}\label{id:h.cn0p90nrqrmi}
 
-The first and third parts of the questionnaire were tests on types and type inference. While the two tests were not identical to avoid commitment bias and choosing the same answers in the tests without revaluating the questions, they were very similar and of equal difficulty. The intention of these tests is to evaluate OTTIE against aim 3, measured by the difference in performance before and after using it. To make the tests easy to fill out and mark without bias, all questions were multiple-choice.
+The first and third parts of the questionnaire were tests on types and type inference. While the two tests were not identical to avoid commitment bias and choosing the same answers in the tests without reevaluating the questions, they were very similar and of equal difficulty. The intention of these tests is to evaluate OTTIE against aim 3, measured by the difference in performance before and after using it. To make the tests easy to fill out and mark without bias, all questions were multiple-choice.
 
 {\centering \begin{figure}[h!]
   \centering
@@ -1619,7 +1619,7 @@ Anonymised usage data is collected by the web application. Events recorded inclu
 
 The data shows users are able to access the site and can use the examples and enter in their own expressions, supporting aim 1. This was particularly useful in giving confidence that the site was working correctly while waiting for questionnaire responses to be returned.
 
-Several event streams provide evidence that user understand the results of the type inference algorithms, and can debug their code appropriately to fix errors. This supports aims 2 and 3. This can be seen in an extract from an event stream:
+Several event streams provide evidence that users understand the results of the type inference algorithms, and can debug their code appropriately to fix errors. This supports aims 2 and 3. This can be seen in an extract from an event stream:
 \begin{enumerate}
   \item the user loads the page
   \item the user enters \mintinline{text}{|map od []|} as an expression, which displays a type error as \mintinline{text}{|od|} is not defined
@@ -1643,7 +1643,7 @@ All types of analytics events were fired, which suggests all features of the app
 
 \section{Ethics}\label{id:h.q5st3bb4afm1}
 
-Participants safety and privacy was carefully considered during the OTTIE's evaluation.
+Participants' safety and privacy was carefully considered during the OTTIE's evaluation.
 
 The questionnaire was completely online, requiring no face-to-face contact which eliminates the risk of COVID transmission. An online questionnaire also reduces the time investment respondents have to put in and reduces the social commitment of completing it so that participants are less pressured to complete it without feeling fully comfortable. Users were informed that participation was entirely voluntary and that they could discontinue at any time.
 
@@ -1669,7 +1669,7 @@ In addition to my own independent research, insights and recommendations from my
 
 Development took an agile approach, for three reasons: flexibility, early and frequent delivery and the individual nature of the project.
 
-The approach had to be flexible as research into the area and user testing informed future development, the results of which were not known at the begining of the project. One of CS310's goals is to be innovative and creative and so allowing for change over time provides the freedom to achieve this.
+The approach had to be flexible as research into the area and user testing informed future development, the results of which were not known at the beginning of the project. One of CS310's goals is to be innovative and creative and so allowing for change over time provides the freedom to achieve this.
 
 The approach provided working software early and new versions frequently, as for evaluation purposes it was better to have a functioning prototype lacking certain features over just incomplete parts. This supported getting feedback early, which combined with being flexible meant the project was able to be adjusted to better serve user needs. Lastly, it was easier for my supervisor to see the state of the software when fully functioning as a web application, and therefore be able to advise me on the project.
 
@@ -1717,7 +1717,7 @@ Future projects could increase the scope of the material covered by the teaching
 
 One possible extension would be to support the syntax and type system of a common programming language. This would improve its usefulness for university modules targeting the chosen language, and for developers using the language. For Haskell, this would need to cover the extensions it makes to Hindley-Milner such as adding type classes like functors, applicatives and monads. Alternative type inference algorithms, such as OutsideIn(X), are likely to be necessary to support such a system.
 
-In a similar vein, substantially different theoretical infernece algorithms with different type systems could be interesting to implement and explain. For example, bidirectional type inference by \cite{ref38} or local type inference by \cite{ref39} work on languages and type systems similar to HM. This would allow users to compare alternative approaches to programming language design and type inference, making this research more accessible to more general computer scientists.
+In a similar vein, substantially different theoretical inference algorithms with different type systems could be interesting to implement and explain. For example, bidirectional type inference by \cite{ref38} or local type inference by \cite{ref39} work on languages and type systems similar to HM. This would allow users to compare alternative approaches to programming language design and type inference, making this research more accessible to more general computer scientists.
 
 Finally, the libraries could be used to create an entirely different application. This could introduce $\lambda$-calculus to a more general audience in stages, similar to CodeCademy\footnote{\href{https://www.codecademy.com/}{https://www.codecademy.com/}} or FreeCodeCamp\footnote{\href{https://www.freecodecamp.org/learn/}{https://www.freecodecamp.org/learn/}}, and build up to type inference and more advanced concepts. Alternatively, this could be a gamified experience based around, similar in style to CSS Diner\footnote{\href{https://flukeout.github.io/}{https://flukeout.github.io/}} but for types or type inference.
 
@@ -1726,7 +1726,7 @@ Finally, the libraries could be used to create an entirely different application
 
 This project would not have been possible without the support of my supervisor, Michael Gale. His feedback on drafts and answers to my many questions on type inference have been invaluable throughout.
 
-OTTIE's detailed evaluation of is a result of the many kind volunteers who offered to try the application and complete the questionnaire. Thanks are due to all those who used the tool, and in particular to any who provided feedback on how it could be improved.
+OTTIE's detailed evaluation is a result of the many kind volunteers who offered to try the application and complete the questionnaire. Thanks are due to all those who used the tool, and in particular to any who provided feedback on how it could be improved.
 
 This document was typeset using a derivative of the CS310 starter pack\footnote{\href{https://github.com/mbg/cs310}{https://github.com/mbg/cs310}} by Michael Gale, licensed under CC BY 4.0. Parts of the introduction and project management sections of this report are adapted from my project specification and progress report.
 
