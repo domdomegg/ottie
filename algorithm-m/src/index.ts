@@ -96,7 +96,7 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
         }
         const instantiatedType = inst(varType, freshTypeName);
 
-        const firstPartOfLogMessage = 'We expect this variable to unify with `' + type.toString() + '`\nWe look up the variable `' + expr.toString() + '` and find it has type `' + varType.toString() + '`' + (varType.quantifiedVars.length ? '\nWe instatiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : '');
+        const firstPartOfLogMessage = 'We expect this variable to unify with `' + type.toString() + '`\nWe look up the variable `' + expr.toString() + '` and find it has type `' + varType.toString() + '`' + (varType.quantifiedVars.length ? '\nWe instantiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : '');
         try {
             const substitution = unify(type, instantiatedType);
             logger(firstPartOfLogMessage + '\nThese unify, giving the substitution `' + str(substitution) + '`', highlight(expr));

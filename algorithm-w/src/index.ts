@@ -72,7 +72,7 @@ function _infer(expr: Expr, ctx: Context, freshTypeName: () => string, logger: (
         }
         const instantiatedType = inst(type, freshTypeName);
 
-        logger('We can look up the variable `' + expr.toString() + '` and find it has type `' + type.toString() + '`' + (type.quantifiedVars.length ? '\nWe instatiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : ''), highlight(expr));
+        logger('We can look up the variable `' + expr.toString() + '` and find it has type `' + type.toString() + '`' + (type.quantifiedVars.length ? '\nWe instantiate this type with fresh type variables to get `' + instantiatedType.toString() + '`' : ''), highlight(expr));
         
         return [instantiatedType, {}];
     }

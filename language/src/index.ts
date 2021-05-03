@@ -347,7 +347,7 @@ function contains(type: MonoType | PolyType, other: TypeVar): boolean {
     throw new Error('Internal error, this should never happen');
 }
 
-/** Instatiates a type with fresh type variables */
+/** Instantiates a type with fresh type variables */
 function inst(type: PolyType, freshTypeName: () => string): MonoType;
 function inst(type: MonoType, freshTypeName: () => string, from: string[], to: string[]): MonoType;
 function inst(type: MonoType | PolyType, freshTypeName: () => string, from: string[] = [], to: string[] = []): MonoType {
@@ -516,27 +516,7 @@ interface TypeResult {
     steps: { message: string, ast: Expr }[]; // An array of steps showing the derivation
 }
 
-/* Parser */
-
-// expr ::= identifier # var
-//        | ( \ identifier -> expr ) # abs
-//        | ( expr )
-//        | expr expr # app
-//        | ( let identifier = expr in expr ) # let
-
-// expr ::= identifier expr' # var
-//        | ( \ identifier -> expr ) expr' # abs
-//        | ( expr ) expr'
-//        | ( let identifier = expr in expr ) expr' # let
-
-// expr' ::= expr A' | eps # app
-
-class ParseError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "ParseError";
-    }
-}
+/* Lexer */
 
 const genlex = new GenLex();
 const identifier = genlex.tokenize(C.charIn('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-/%<>^:_|&!\'').rep().map(t => t.join()), 'identifier');
@@ -544,7 +524,6 @@ const letTok = genlex.tokenize(C.string('let '), 'let');
 const inTok = genlex.tokenize(C.string('in '), 'in');
 const charLiteral = genlex.tokenize(C.charLiteral(), 'char');
 const stringLiteral = genlex.tokenize(C.stringLiteral(), 'string');
-// const numberLiteral = genlex.tokenize(N.number(), 'number');
 const numberLiteral = genlex.tokenize(N.integer(), 'number');
 const lbracket = genlex.tokenize(C.char('['), 'lbracket');
 const rbracket = genlex.tokenize(C.char(']'), 'rbracket');
@@ -554,6 +533,8 @@ const lparen = genlex.tokenize(C.char('('), 'lparen');
 const rparen = genlex.tokenize(C.char(')'), 'rparen');
 const equal = genlex.tokenize(C.char('='), 'equal');
 const comma = genlex.tokenize(C.char(','), 'comma');
+
+/* Parser */
 
 const expression = (): SingleParser<Expr> =>
         F.try(LIT_NUM())
@@ -576,11 +557,13 @@ const TUPLE = (): SingleParser<Expr> => lparen.map((v, r) => r.location() - 1).t
 const LIST = (): SingleParser<Expr> => lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).optrep())).opt()).then(rbracket.map((s, r) => getPos(r).end)).map(toList);
 const VAR = (): SingleParser<Var> => identifier.map((value, r) => new Var(value, getPos(r)));
 const ABS = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
-const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single().map(expandPos)
+const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single().map(expandPosToParentheses)
 const LET = (): SingleParser<Let> => letTok.map((v, r) => getPos(r).start).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).map((tuple, r) => new Let(tuple.at(1), tuple.at(2), tuple.at(3), { start: tuple.at(0), end: r.location() }))
 
+// Given a list of expressions, return left-nested function applications e.g. [a, b, c, d] -> (((a b) c) d)
 const nestLeft = (v: Expr[]) => v.reduce((prev, cur) => new App(prev, cur, { start: prev.pos.start, end: cur.pos.end }));
 
+// Given a string, return an equivalent list of chars constructed with cons
 const toCharList = (string: string, r: MasalaResponse<string>) => {
     const chars = string.split('');
     const pos = getPos(r);
@@ -594,6 +577,7 @@ const toCharList = (string: string, r: MasalaResponse<string>) => {
     return expr;
 }
 
+// Given several matched expressions, return a list of all of them
 const toList = (tuple: Tuple<number | Option<Tuple<Expr>>>): Expr => {
     const start = tuple.first() as number;
     const end = tuple.last() as number;
@@ -609,6 +593,7 @@ const toList = (tuple: Tuple<number | Option<Tuple<Expr>>>): Expr => {
     return expr;
 }
 
+// Given several matched expressions, return a tuple of all of them
 const toTuple = (tuple: Tuple<number | Expr[]>): Expr => {
     const start = tuple.first() as number;
     const end = tuple.last() as number;
@@ -620,6 +605,7 @@ const toTuple = (tuple: Tuple<number | Expr[]>): Expr => {
     return result;
 }
 
+// Extract the position of a matched token given the MasalaResponse
 const getPos = <T>(r: MasalaResponse<T>): Position => {
     const offset = (r as any).getOffset() - 1;
     const start = (r as any).input.location(offset);
@@ -631,13 +617,15 @@ const getPos = <T>(r: MasalaResponse<T>): Position => {
     return { start, end }
 }
 
-const expandPos = <T extends Expr>(v: T, r: MasalaResponse<T>): T => {
+// Expand a position to the next pair of surrounding parentheses
+const expandPosToParentheses = <T extends Expr>(v: T, r: MasalaResponse<T>): T => {
     const rawString = ((r as any).input.source.input.source as string);
     v.pos.end += rawString.slice(v.pos.end).indexOf(')') + 1
     v.pos.start = rawString.slice(0, v.pos.start).lastIndexOf('(')
     return v;
 }
 
+// Handle a couple special cases that the parsers construction can't handle due to keyword/identifier confusion
 const specialCases = (code: string): undefined | Rejected<undefined> => {
     if (code == 'let' || code.endsWith(' let')) {
         return {
@@ -652,6 +640,14 @@ const specialCases = (code: string): undefined | Rejected<undefined> => {
             issuePosition: { start: code.length - 2, end: code.length },
             message: 'Failed to parse'
         };
+    }
+}
+
+// Error class for parse errors
+class ParseError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "ParseError";
     }
 }
 

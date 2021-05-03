@@ -1,19 +1,23 @@
-# web
+# 🌐 web
 
-Holds web application which visualises the type inference algorithm.
+The web application itself. Allows users to enter an expression and view the resulting type and step-by-step type derivation. Visualises the expression's equivalent AST, highlighting relevant parts being acted upon in the step-by-step instructions. Behind the scenes, the expression is lexed and parsed by the language core, and type inference is done by one of the type inference algorithms. Created with [Create React App's TypeScript preset](https://create-react-app.dev/docs/getting-started/#creating-a-typescript-app). Sends analytics events to an [analytics lambda](https://github.com/domdomegg/analytics-lambda).
 
 ## Setup
 
+Setup and build [language](../language), [algorithm-w](../algorithm-w), [algorithm-w](../algorithm-w-prime) and [algorithm-m](../algorithm-m), then run:
+
 ```
-cd ../algorithm-w
-npm link
-cd ../web
 npm install
-npm link algorithm-w
 ```
 
 ## Start
 
 ```
 npm start
+```
+
+## Test
+
+```
+npm test
 ```
