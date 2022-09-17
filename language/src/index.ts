@@ -238,6 +238,8 @@ const standardCtx: Context = {
     // Example variables
     'myNumber': pt(number),
     'myBoolean': pt(boolean),
+    'age': pt(number),
+    'hungry': pt(boolean),
 
     // Lists
     '[]': new PolyType(['a'], list(a)),

@@ -7,7 +7,7 @@ const dev = {
 
 const prod = {
     analytics: {
-        enabled: true,
+        enabled: false,
         url: 'https://5lpondcp9g.execute-api.eu-west-1.amazonaws.com/'
     }
 };

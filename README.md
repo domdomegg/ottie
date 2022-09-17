@@ -1,6 +1,6 @@
-# cs310 [(try live)](https://domdomegg.github.io/cs310/)
+# ottie [(try live)](https://domdomegg.github.io/ottie/)
 
-Monorepo containing the resources for my CS310 Final Year Individual Project, OTTIE (_Online Teaching Type Inference Environment_).
+Monorepo containing the resources for OTTIE, the _Online Teaching Type Inference Environment_.
 
 <p align="center"><img src="./docs/finalreport/images/ottie.png" alt="Screenshot of OTTIE's web interface" width="612" height="466.5" /></p>
 
