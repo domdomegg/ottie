@@ -1,4 +1,4 @@
-# ottie [(try live)](https://domdomegg.github.io/ottie/)
+# ottie [(try live)](https://adamjones.me/ottie/)
 
 Monorepo containing the resources for OTTIE, the _Online Teaching Type Inference Environment_.
 
