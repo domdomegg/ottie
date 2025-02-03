@@ -227,6 +227,11 @@ const standardCtx: Context = {
     'signum': pt(f(number, number)),
     'even': pt(f(number, boolean)),
     'odd': pt(f(number, boolean)),
+    'gt': pt(f(number, number, boolean)),
+    'gte': pt(f(number, number, boolean)),
+    'lt': pt(f(number, number, boolean)),
+    'lte': pt(f(number, number, boolean)),
+    'eq': pt(f(number, number, boolean)),
 
     // Booleans
     'not': pt(f(boolean, boolean)),
