@@ -67,7 +67,7 @@ function Main() {
         <SetButton type='code' value=': 23 [1]' current={code} setter={setCode} />
       </h2>
       <div className='code-container'>
-        <input placeholder="Enter code..." value={code} onChange={e => { setCode(e.target.value); b({ name: 'codeChange', value: e.target.value }); }} />
+        <input placeholder="Enter code..." value={code} onChange={e => { setCode(e.target.value); b({ name: 'codeChange', value: e.target.value }); }} autoFocus />
         {code && highlights.map((h, i) => <p key={i}>{code.slice(0, h.start)}<span className={h.className}>{code.slice(h.start, h.end)}</span>{code.slice(h.end)}</p>)}
       </div>
       {resultview}
