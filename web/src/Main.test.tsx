@@ -1,9 +1,15 @@
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react'
+import { afterEach, test, expect, vi } from 'vitest'
+import { cleanup, render, fireEvent } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import Main from './Main'
 import { a, b } from './analytics'
 
-jest.mock('./analytics')
+vi.mock('./analytics');
+
+afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+});
 
 test('has a title', () => {
   const screen = render(<Main />);

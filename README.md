@@ -48,6 +48,8 @@ In addition to W, there are other algorithms that perform type inference on the 
 
 <img align="right" src="./docs/finalreport/images/module_structure.png" alt="The language core is at the bottom, which W, W' and M depend on. The web application sits on top, depending on everything else." width="271" height="112" />
 
+> Quick start: clone the repo, install [Node.js](https://nodejs.org/), run `npm install`, then `npm start`.
+
 OTTIE is composed of five loosely-coupled TypeScript packages. These include a language core, which contains shared models and functions for handling a simple expression language (with similar syntax to Haskell) and its type system. On top of this 3 type inference algorithms are implemented: Algorithm W, W' and M (computer scientists do not come up with creative names!). The web application consumes all these libraries and provides an interface to users shows step-by-step type inference derivations for custom user input expressions.
 
 - [`language`](./language): The language core contains shared models such as AST nodes for representing input expressions, contexts to represent bound variables and substitutions useful for type inference algorithms. The language core also includes a lexer and paser (using the [Masala](https://github.com/masala/masala-parser) parser combinator library) for the basic expression language, along with utility functions for manipulating its models.

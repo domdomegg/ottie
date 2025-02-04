@@ -1,0 +1,17 @@
+{
+  "name": "ottie",
+  "private": true,
+  "workspaces": [
+    "language",
+    "algorithm-w",
+    "algorithm-w-prime",
+    "algorithm-m",
+    "type-test-helpers",
+    "web"
+  ],
+  "scripts": {
+    "start": "npm run build && npm run start --workspace=web",
+    "build": "npm run build --workspace=language && npm run build --workspace=type-test-helpers && npm run build --workspace=algorithm-m --workspace=algorithm-w --workspace=algorithm-w-prime && npm run build --workspace=web",
+    "test": "npm run test --workspaces --if-present"
+  }
+}

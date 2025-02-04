@@ -1,7 +1,10 @@
-import './jest.setup'
+import { test, expect } from 'vitest';
+import extendWithInfer from 'type-test-helpers';
 import { Var, Abs, Let, CharLiteral, NumberLiteral, typeUtils, parse, App } from 'language'
 import { infer } from '../src/index';
 const { number, char, boolean, f, list, tuple, maybe, either, a, b } = typeUtils;
+
+extendWithInfer(infer);
 
 test('arithmetic expressions', () => {
     expect(parse('myNumber')).toHaveType(number);

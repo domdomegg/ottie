@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { TypeVar, TypeFuncApp, Var, App, Abs, typeUtils } from '../src/index';
 const { number, boolean, f, list, tuple, maybe, either, a, b, c, d } = typeUtils;
 
