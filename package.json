@@ -12,6 +12,11 @@
   "scripts": {
     "start": "npm run build && npm run start --workspace=web",
     "build": "npm run build --workspace=language && npm run build --workspace=type-test-helpers && npm run build --workspace=algorithm-m --workspace=algorithm-w --workspace=algorithm-w-prime && npm run build --workspace=web",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "eslint": "^9.19.0",
+    "eslint-config-domdomegg": "^2.0.7"
   }
 }
