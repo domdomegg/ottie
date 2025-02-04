@@ -1,13 +1,9 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import a from './analytics';
 import Main from './Main';
 
 a({name: 'load'});
 
-ReactDOM.render(
-	<React.StrictMode>
-		<Main />
-	</React.StrictMode>,
-	document.getElementById('root'),
-);
+const root = createRoot(document.getElementById('root')!);
+root.render(<React.StrictMode><Main /></React.StrictMode>);
