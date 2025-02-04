@@ -623,13 +623,9 @@ const toTuple = (tuple: Tuple<unknown | number | Expr[]>): Expr => {
 
 // Extract the position of a matched token given the MasalaResponse
 const getPos = <T>(r: MasalaResponse<T>): Position => {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	const offset: number = (r as any).getOffset() - 1;
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 	const start: number = (r as any).input.location(offset);
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 	const guessedEnd: number = (r as any).input.location(offset + 1);
-
 	const rawString = ((r as any).input.source.input.source as string).slice(start, guessedEnd);
 	const end = guessedEnd - (rawString.length - rawString.trimEnd().length);
 

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {test, expect} from 'vitest';
 import {
 	CharLiteral, NumberLiteral, Var, App, Abs, Let, parse, typeUtils,

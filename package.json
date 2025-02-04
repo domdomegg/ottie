@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "eslint": "^9.19.0",
-    "eslint-config-domdomegg": "^2.0.7"
+    "eslint-config-domdomegg": "^2.0.8"
   }
 }
