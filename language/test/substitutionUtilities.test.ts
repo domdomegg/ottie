@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { TypeVar, typeUtils, combine, unify, apply } from '../src'
 const { number, boolean, f, tuple, maybe } = typeUtils;
 const [t0, t1, t2, t3] = [0, 1, 2, 3].map(v => new TypeVar('t' + v.toString()))

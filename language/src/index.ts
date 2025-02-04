@@ -189,6 +189,11 @@ class TypeInferenceError extends Error {
     }
 }
 
+const isTypeInferenceError = (e: unknown): e is TypeInferenceError => e instanceof Error && e.name === "TypeInferenceError";
+const assertIsTypeInferenceError = (e: unknown): asserts e is TypeInferenceError => {
+    if (!isTypeInferenceError(e)) throw new Error('Expected TypeInferenceError but got ' + e);
+}
+
 /* Type utilities */
 
 // Utilities which make creating types easier
@@ -563,9 +568,9 @@ const LIT_STRING = (): SingleParser<Expr> => stringLiteral.map(toCharList);
 const TUPLE = (): SingleParser<Expr> => lparen.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).rep())).array()).then(rparen.map((s, r) => getPos(r).end)).map(toTuple);
 const LIST = (): SingleParser<Expr> => lbracket.map((v, r) => r.location() - 1).then((F.lazy(expression).then((comma.drop().then(F.lazy(expression))).optrep())).opt()).then(rbracket.map((s, r) => getPos(r).end)).map(toList);
 const VAR = (): SingleParser<Var> => identifier.map((value, r) => new Var(value, getPos(r)));
-const ABS = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression)).map((tuple, r) => new Abs(tuple.at(1), tuple.at(2), { start: tuple.at(0), end: r.location() }))
+const ABS = (): SingleParser<Abs> => backslash.map((v, r) => r.location() - 1).then(identifier).then(arrow.drop()).then(F.lazy(expression)).map((tuple, r) => new Abs(tuple.at(1) as string, tuple.at(2) as Expr, { start: tuple.at(0) as number, end: r.location() }))
 const PAR = (): SingleParser<Expr> => lparen.drop().then(F.lazy(expression)).then(rparen.drop()).single().map(expandPosToParentheses)
-const LET = (): SingleParser<Let> => letTok.map((v, r) => getPos(r).start).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).map((tuple, r) => new Let(tuple.at(1), tuple.at(2), tuple.at(3), { start: tuple.at(0), end: r.location() }))
+const LET = (): SingleParser<Let> => letTok.map((v, r) => getPos(r).start).then(identifier).then(equal.drop()).then(F.lazy(expression)).then(inTok.drop()).then(F.lazy(expression)).map((tuple, r) => new Let(tuple.at(1) as string, tuple.at(2) as Expr, tuple.at(3) as Expr, { start: tuple.at(0) as number, end: r.location() }))
 
 // Given a list of expressions, return left-nested function applications e.g. [a, b, c, d] -> (((a b) c) d)
 const nestLeft = (v: Expr[]) => v.reduce((prev, cur) => new App(prev, cur, { start: prev.pos.start, end: cur.pos.end }));
@@ -585,7 +590,7 @@ const toCharList = (string: string, r: MasalaResponse<string>) => {
 }
 
 // Given several matched expressions, return a list of all of them
-const toList = (tuple: Tuple<number | Option<Tuple<Expr>>>): Expr => {
+const toList = (tuple: Tuple<unknown | number | Option<Tuple<Expr>>>): Expr => {
     const start = tuple.first() as number;
     const end = tuple.last() as number;
     const elements = (tuple.at(1) as Option<Tuple<Expr>>).map(t => t.array()).orElse([]);
@@ -601,7 +606,7 @@ const toList = (tuple: Tuple<number | Option<Tuple<Expr>>>): Expr => {
 }
 
 // Given several matched expressions, return a tuple of all of them
-const toTuple = (tuple: Tuple<number | Expr[]>): Expr => {
+const toTuple = (tuple: Tuple<unknown | number | Expr[]>): Expr => {
     const start = tuple.first() as number;
     const end = tuple.last() as number;
     const elements = tuple.at(1) as Expr[];
@@ -681,7 +686,7 @@ const typeUtils = { number, char, boolean, f, list, tuple, maybe, either, a, b, 
 export {
     CharLiteral, NumberLiteral, Var, App, Abs, Let, Expr,
     MonoType, TypeVar, TypeFunc, TypeFuncApp, PolyType, Context, Substitution,
-    ParseError, TypeInferenceError,
+    ParseError, TypeInferenceError, isTypeInferenceError, assertIsTypeInferenceError,
     Response, Rejected, Accepted, TypeResult,
     typeUtils,
     parse, contains, inst, apply, combine, unify, unique, diff, freeVars, generalise

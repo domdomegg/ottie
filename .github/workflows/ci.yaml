@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ci.yaml'
+      - 'language/**'
+      - 'algorithm-w/**'
+      - 'algorithm-m/**'
+      - 'algorithm-w-prime/**'
+      - 'web/**'
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node-version: [14]
+
+    steps:
+      - name: Checkout ${{ github.sha }}
+        uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Use npm v7
+        run: npm i -g npm@7
+
+      # Install all dependencies at once using workspaces
+      - name: Install dependencies
+        run: npm ci
+
+      # Build and test packages in dependency order
+      - name: Build & Test language
+        run: |
+          npm run build --workspace=language
+          npm run lint --workspace=language --if-present
+          npm run test --workspace=language --if-present
+
+      - name: Build & Test algorithm-m
+        run: |
+          npm run build --workspace=algorithm-m
+          npm run lint --workspace=algorithm-m --if-present
+          npm run test --workspace=algorithm-m --if-present
+
+      - name: Build & Test algorithm-w
+        run: |
+          npm run build --workspace=algorithm-w
+          npm run lint --workspace=algorithm-w --if-present
+          npm run test --workspace=algorithm-w --if-present
+
+      - name: Build & Test algorithm-w-prime
+        run: |
+          npm run build --workspace=algorithm-w-prime
+          npm run lint --workspace=algorithm-w-prime --if-present
+          npm run test --workspace=algorithm-w-prime --if-present
+
+      - name: Build & Test web
+        run: |
+          npm run build --workspace=web
+          npm run lint --workspace=web --if-present
+          npm run test --workspace=web --if-present
+
+      # Deploy web app if on master branch
+      - name: Deploy web
+        if: github.ref == 'refs/heads/master'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web/build

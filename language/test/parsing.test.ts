@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { CharLiteral, NumberLiteral, Var, App, Abs, Let, parse, typeUtils } from '../src/index'
 
 test('general: syntax error', () => {

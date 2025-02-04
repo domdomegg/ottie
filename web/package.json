@@ -3,21 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.1.2",
     "@testing-library/user-event": "^12.2.2",
-    "@types/jest": "^26.0.16",
-    "@types/node": "^12.19.8",
-    "@types/react": "^16.9.56",
-    "@types/react-dom": "^16.9.9",
-    "algorithm-m": "file:../algorithm-m",
-    "algorithm-w": "file:../algorithm-w",
-    "algorithm-w-prime": "file:../algorithm-w-prime",
-    "language": "file:../language",
+    "@types/node": "^22.13.0",
+    "@types/react": "^17.0.83",
+    "@types/react-dom": "^17.0.26",
+    "@vitejs/plugin-react": "^4.3.4",
+    "algorithm-m": "*",
+    "algorithm-w": "*",
+    "algorithm-w-prime": "*",
+    "language": "*",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "^5.0.1",
-    "typescript": "^4.0.5"
+    "typescript": "^4.0.5",
+    "vitest": "^3.0.5"
   },
   "homepage": ".",
   "scripts": {
@@ -27,13 +27,12 @@
     "build:dev": "REACT_APP_STAGE=dev react-scripts build",
     "start:prod": "REACT_APP_STAGE=prod react-scripts start",
     "build:prod": "REACT_APP_STAGE=prod react-scripts build",
-    "test": "react-scripts test",
+    "test": "vitest run",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {
@@ -45,5 +44,9 @@
     "development": [
       "last 1 chrome version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@types/testing-library__jest-dom": "^5.14.9"
   }
 }

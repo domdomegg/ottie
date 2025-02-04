@@ -1,4 +1,4 @@
-import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response, TypeResult, TypeInferenceError, Substitution, inst, unify, apply, combine, generalise } from 'language'
+import { TypeVar, TypeFuncApp, MonoType, PolyType, Context, Expr, Var, App, Abs, Let, CharLiteral, NumberLiteral, typeUtils, Response, TypeResult, TypeInferenceError, isTypeInferenceError, assertIsTypeInferenceError, Substitution, inst, unify, apply, combine, generalise } from 'language'
 
 function infer(expr: Expr): MonoType;
 function infer(expr: Expr, forResponse: true, ctx?: Context): Response<TypeResult, Omit<TypeResult, 'type'>>;
@@ -34,7 +34,7 @@ function infer(expr: Expr, forResponse: boolean = false, ctx: Context = typeUtil
             value: {
                 steps
             },
-            issuePosition: (e.name == TypeInferenceError.name && e.expr) ? e.expr.pos : expr.pos,
+            issuePosition: isTypeInferenceError(e) && e.expr ? e.expr.pos : expr.pos,
             message: (e as Error).message
         }
     }
@@ -68,6 +68,7 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
             logger(firstPartOfLogMessage + '\nThese unify, giving the substitution `' + str(substitution) + '`', highlight(expr));
             return substitution;
         } catch (err) {
+            assertIsTypeInferenceError(err);
             logger(firstPartOfLogMessage + '\nHowever, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
             err.expr = expr;
             throw err;
@@ -81,6 +82,7 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
             logger(firstPartOfLogMessage + '\nThese unify, giving the substitution `' + str(substitution) + '`', highlight(expr));
             return substitution;
         } catch (err) {
+            assertIsTypeInferenceError(err);
             logger(firstPartOfLogMessage + '\nHowever, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
             err.expr = expr;
             throw err;
@@ -102,6 +104,7 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
             logger(firstPartOfLogMessage + '\nThese unify, giving the substitution `' + str(substitution) + '`', highlight(expr));
             return substitution;
         } catch (err) {
+            assertIsTypeInferenceError(err);
             logger(firstPartOfLogMessage + '\nHowever, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
             err.expr = expr;
             throw err;
@@ -130,6 +133,7 @@ function _infer(expr: Expr, ctx: Context, type: MonoType, freshTypeName: () => s
             s1 = unify(type, functionType);
             logger(firstPartOfLogMessage + '\nThese unify, giving `' + str(s1) + '`\nWe next will unify the body with `' + beta2.toString() + '`', highlight(expr));
         } catch (err) {
+            assertIsTypeInferenceError(err);
             logger(firstPartOfLogMessage + '\nHowever, these two types are not unifiable. We stop here as this is an error.\n\nMore details:\n' + err.message, highlight(expr));
             err.expr = expr;
             throw err;
