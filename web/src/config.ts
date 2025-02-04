@@ -12,5 +12,5 @@ const prod = {
 	},
 };
 
-const config = process.env.REACT_APP_STAGE === 'prod' ? prod : dev;
+const config = import.meta.env.PROD ? prod : dev;
 export default config;
