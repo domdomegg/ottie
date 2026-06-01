@@ -61,7 +61,7 @@ const extendWithInfer = (infer: (e: Expr) => MonoType) => {
 					+ `Expected: not ${this.utils.printExpected(expectedType)}\n`
 					+ `Received: ${this.utils.printReceived(actualType)}`
 				: () => {
-					const diffString = diff(expectedType, actualType, {expand: this.expand});
+					const diffString = diff(expectedType, actualType);
 					return (
 						`${this.utils.matcherHint('toHaveType', 'expr', 'type', options)
 						}\n\n${
