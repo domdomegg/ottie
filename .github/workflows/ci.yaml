@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/ci.yaml'
       - 'language/**'
+      - 'type-test-helpers/**'
       - 'algorithm-w/**'
       - 'algorithm-m/**'
       - 'algorithm-w-prime/**'
